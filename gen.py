@@ -40,8 +40,8 @@ class UiSection:
             m = re.match('([^,]+)[ ]*:[ ]*([^,]+)[ ]*,[ ]*([^,]+)(?:[ ]*,[ ]*(.*))?', line)
             if m:
                 if '_' in m.group(1):
-                    ans = input('A field name has an underscore. Is this a mistake (enter \'y\' to bail out if it\'s a mistake)? ')
-                    if ans.lower() == 'y':
+                    ans = input('A field name has an underscore. Is this ok (enter \'y\' if it is)? ')
+                    if ans.lower() != 'y':
                         return None
                 self.generate_control(m.group(1), m.group(2), m.group(3), m.group(4))
         print('******\n', file=self.output)
@@ -65,14 +65,45 @@ class ModelSection:
 
 
 class SelectDataSection:
-    def __init__(self):
-        self.lines = []
+    # class Table:
+    #     def __init__(self, name):
+    #         self.name = name
+    #         self.fields = []
 
-    def append(self, line):
-        self.lines.append(line)
+    class Field:
+        def __init__(self, name, alias):
+            self.name = name
+            self.alias = alias
+
+    def __init__(self):
+        # self.lines = []
+        self.output = io.StringIO()
+        self.tables = {}
+        self.fields = None # track the current table, Haribol
+
+    def append(self, line: str):
+        if not (line := line.strip()):
+            return
+        matched = re.match('\\*{2}[ ]*(.*?)[ ]*\\*{2}', line)
+        if matched:
+            self.fields = self.tables.setdefault(matched.group(1), [])
+        else:
+            matched = re.match('([a-z_]+)(?:[ ]+as[ ]+([a-z_]+))?', line)
+            if not matched:
+                print('NOT Matched!')
+                exit()
+            if self.fields is not None:
+                self.fields.append(self.Field(matched.group(1), matched.group(2)))
 
     def generate(self):
-        pass
+        print('*** SelectData ***', file=self.output)
+        for table in self.tables:
+            for field in self.tables[table]:
+                alias = f' as {field.alias}' if field.alias else ''
+                print(f'\'{table}.{field.name}{alias}\',', file=self.output)
+        print('******\n', file=self.output)
+        return self.output
+
 
 
 sections = []
