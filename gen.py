@@ -64,6 +64,10 @@ class ModelSection:
         self.lines.append(line)
 
 
+def camel_case(name:str):
+    return re.sub('_(.)', lambda v: v.group(1).upper(), name)
+
+
 class SelectDataSection:
     # class Table:
     #     def __init__(self, name):
@@ -75,8 +79,9 @@ class SelectDataSection:
             self.name = name
             self.alias = alias
 
-    def __init__(self):
+    def __init__(self, spec:str):
         # self.lines = []
+        self.table, self.primary_key = [s.strip() for s in spec.split(',')]
         self.output = io.StringIO()
         self.tables = {}
         self.fields = None # track the current table, Haribol
@@ -90,17 +95,26 @@ class SelectDataSection:
         else:
             matched = re.match('([a-z_]+)(?:[ ]+as[ ]+([a-z_]+))?', line)
             if not matched:
-                print('NOT Matched!')
+                print('DB field name spec is improper!')
                 exit()
             if self.fields is not None:
                 self.fields.append(self.Field(matched.group(1), matched.group(2)))
 
     def generate(self):
-        print('*** SelectData ***', file=self.output)
+        print(f'*** SelectData: {self.table}, {self.primary_key} ***', file=self.output)
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f' as {field.alias}' if field.alias else ''
                 print(f'\'{table}.{field.name}{alias}\',', file=self.output)
+        print('******\n', file=self.output)
+
+        print('*** Paginate (SelectData) ***', file=self.output)
+        for table in self.tables:
+            for field in self.tables[table]:
+                alias = field.alias if field.alias else field.name
+                print("'id'" if table == self.table and field.name == self.primary_key
+                       else f"'{camel_case(alias)}'",
+                       '=>', f"$item->{alias},", file=self.output)
         print('******\n', file=self.output)
         return self.output
 
@@ -113,12 +127,12 @@ def read_sections():
     global cur_sect
     spec = open('input.spec')
     while (line := spec.readline()):
-        matched = re.match('\\*{3}[ ]*(.*?)[ ]*\\*{3}', line)
+        matched = re.match('\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}', line)
         if matched and matched.group(1) == 'UI':
             sections.append(UiSection())
             cur_sect = sections[-1]
         elif matched and matched.group(1) == 'SelectData':
-            sections.append(SelectDataSection())
+            sections.append(SelectDataSection(matched.group(2)))
             cur_sect = sections[-1]
         elif matched:
             print('section: <', matched.group(1), '>', sep='')
