@@ -1,0 +1,44 @@
+*** UI: addForm ***
+<FormInput class="mt-4" id="name" title="Name"
+            v-model="addForm.name" :error="addForm.errors.name" />
+<FormInput type="email" class="mt-4" id="email" title="Email"
+            v-model="addForm.email" :error="addForm.errors.email" />
+<FormInput class="mt-4" id="mobile" title="Mobile"
+            v-model="addForm.mobile" :error="addForm.errors.mobile" />
+<FormInput class="mt-4" id="whatsapp" title="Whatsapp"
+            v-model="addForm.whatsapp" :error="addForm.errors.whatsapp" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+******
+
+*** UI: editForm ***
+<FormInput class="mt-4" id="name" title="Name"
+            v-model="editForm.name" :error="editForm.errors.name" />
+<FormInput type="email" class="mt-4" id="email" title="Email"
+            v-model="editForm.email" :error="editForm.errors.email" />
+<FormInput class="mt-4" id="mobile" title="Mobile"
+            v-model="editForm.mobile" :error="editForm.errors.mobile" />
+<FormInput class="mt-4" id="whatsapp" title="Whatsapp"
+            v-model="editForm.whatsapp" :error="editForm.errors.whatsapp" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+******
+
+*** SelectData: contacts, contact_id ***
+'guides.guide_id',
+'guides.name',
+'guides.email',
+'guides.mobile',
+'guides.whatsapp',
+'guides.photo_path',
+'guides.active',
+******
+
+*** Paginate (SelectData) ***
+'guideId' => $item->guide_id,
+'name' => $item->name,
+'email' => $item->email,
+'mobile' => $item->mobile,
+'whatsapp' => $item->whatsapp,
+'photoPath' => Storage::url($item->photo_path),
+'active' => $item->active,
+******
+
