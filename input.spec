@@ -13,9 +13,9 @@ PK: address_id
 
 ** guides **
 guide_id
-name: #("Name" ?^), i(text|Name|@*)
-email: #("Email" ?^), i(email|Email)
-mobile: #("Mobile" ?^), i(text|Mobile)
-whatsapp: #("Whatsapp" ?^), i(text|Whatsapp)
-photo_path: ~(file), #(ImageColumn ?^), i(file|Photo)
-active: #("Active" ActiveColumn), i(checkbox|Active)
+name: # (; Name; ?^), i (text; Name; @*)
+email: # (; Email; ?^), i (email; Email)
+mobile: # (; Mobile; ?^), i (text; Mobile)
+whatsapp: # (; Whatsapp; ?^), i (text; Whatsapp)
+photo_path: ~ (file), # (ImageColumn; ; ?^), i (file; Photo)
+active: # (ActiveColumn; Active), i (checkbox; Active)

@@ -20,7 +20,7 @@ class UiSection:
     class Field:
         def __init__(self, name:str, specs:str):
             self.name = name
-            self.specs = [s.strip() for s in (specs.split('|') if specs else specs)]
+            self.specs = [s.strip() for s in (specs.split(';') if specs else specs)]
 
     def __init__(self):
         self.lines = []
