@@ -1,6 +1,26 @@
 *** Model: fillable ***
 'PK',
 ******
+*** SelectData: contacts, contact_id ***
+'guides.guide_id',
+'guides.name',
+'guides.email',
+'guides.mobile',
+'guides.whatsapp',
+'guides.photo_path',
+'guides.active',
+******
+
+*** Paginate (SelectData) ***
+'guideId' => $item->guide_id,
+'name' => $item->name,
+'email' => $item->email,
+'mobile' => $item->mobile,
+'whatsapp' => $item->whatsapp,
+'photoPath' => Storage::url($item->photo_path),
+'active' => $item->active,
+******
+
 *** UI: addForm ***
 <FormInput class="mt-4" id="name" title="Name" setFocus required
               v-model="addForm.name" :error="addForm.errors.name" />
@@ -27,25 +47,5 @@
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
-******
-
-*** SelectData: contacts, contact_id ***
-'guides.guide_id',
-'guides.name',
-'guides.email',
-'guides.mobile',
-'guides.whatsapp',
-'guides.photo_path',
-'guides.active',
-******
-
-*** Paginate (SelectData) ***
-'guideId' => $item->guide_id,
-'name' => $item->name,
-'email' => $item->email,
-'mobile' => $item->mobile,
-'whatsapp' => $item->whatsapp,
-'photoPath' => Storage::url($item->photo_path),
-'active' => $item->active,
 ******
 
