@@ -60,7 +60,7 @@ class UserInput:
               file=self.output)
         
     def generate_autocomplete(self, field):
-        print(f'''<AutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
+        print(f'''<FormAutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
               file=self.output)
 
