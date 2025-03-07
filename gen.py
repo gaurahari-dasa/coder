@@ -9,11 +9,16 @@ colorama.init()
 def printWarning(mesg, *args):
     print(f'{colorama.Fore.RED}{mesg}', args, colorama.Style.RESET_ALL)
 
+def printError(mesg, *args):
+    print(f'{colorama.Fore.YELLOW}{mesg}', args, colorama.Style.RESET_ALL)
+
 def nullishIndex(ar:list, ix:int):
     try:
         return ar[ix]
     except IndexError:
         return None
+
+identifier = '[a-zA-Z0-9_]+'
 
 class InputSection:
 
@@ -48,34 +53,48 @@ class InputSection:
         return ' required' if field.required else ''
 
     def generate_text_input(self, field):
-        print(f'''<FormInput class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field)}{self.tackRequired(field)}
-            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
-            file=self.output)
+        print(f'''<FormInput class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
+              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
 
     def generate_email_input(self, field):
-        print(f'''<FormInput type="email" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field)}{self.tackRequired(field)}
-            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
-            file=self.output)
+        print(f'''<FormInput type="email" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
+              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
 
     def generate_select_input(self, field):
-        print(f'''<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field)}{self.tackRequired(field)}
-            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
-            file=self.output)
+        print(f'''<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
+              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
         
     def generate_checkbox_input(self, field):
         print(f'''<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_type}.{field.name}" />''',
-            file=self.output)
+              file=self.output)
+        
+    def generate_file_upload(self, field):
+        print(f'''<FormFileUpload class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
+              @pick="file => {self.form_type}.{field.name} = file" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
+        
+    def generate_autocomplete(self, field):
+        print(f'''<AutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
+              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
 
     def generate_control(self, field):
         match field.type:
             case 'text':
                 self.generate_text_input(field)
+            case 'email':
+                self.generate_email_input(field)
             case 'select':
                 self.generate_select_input(field)
             case 'checkbox':
                 self.generate_checkbox_input(field)
-            case 'email':
-                self.generate_email_input(field)
+            case 'file':
+                self.generate_file_upload(field)
+            case 'auto':
+                self.generate_autocomplete(field)
             case _:
                 printWarning('Unknown control, Haribol!', field.name, field.type)
 
@@ -99,9 +118,19 @@ class InputSection:
 class ModelSection:
     def __init__(self):
         self.lines = []
+        self.output = io.StringIO()
 
     def append(self, line):
         self.lines.append(line)
+
+    def generate(self):
+        print('*** Model: fillable ***', file=self.output)
+        for line in self.lines:
+            matched = re.match(f'[ ]*({identifier})', line)
+            if matched:
+                print(f"'{matched.group(1)}',", file=self.output)
+        print('******', file=self.output)
+        return self.output
 
 
 def camel_case(name:str):
@@ -135,7 +164,8 @@ class SelectDataSection:
             if matched:
                 match matched.group(1):
                     case 'i':
-                        self.ui.appendField(field_name, matched.group(2), matched.group(3))
+                        self.ui.appendField(camel_case(field_name),
+                                            matched.group(2), matched.group(3))
                     case '~':
                         selectSpecs = matched.group(2)
                     case _:
@@ -149,15 +179,17 @@ class SelectDataSection:
         if matched:
             self.fields = self.tables.setdefault(matched.group(1), [])
         else:
-            matched = re.match('([a-z_]+)(?:[ ]+as[ ]+([a-z_]+))?(?:[ ]*:(.*))?', line)
+            matched = re.match(f'({identifier})(?:[ ]+as[ ]+({identifier}))?(?:[ ]*:(.*))?', line)
             if not matched:
-                printWarning('DB field name spec is improper')
+                printError('DB field name spec is improper, Haribol!')
                 exit()
-            if self.fields is not None:
-                self.fields.append(self.Field(
-                    matched.group(1),
-                    matched.group(2),
-                    self.segregateSpecs(matched.group(1), matched.group(3))))
+            if self.fields is None:
+                printError('No table name in specs, Haribol!')
+                exit()
+            name = matched.group(1)
+            alias = matched.group(2)
+            self.fields.append(self.Field(name, alias,
+                self.segregateSpecs(alias if alias else name, matched.group(3))))
 
     def generateSelectData(self):
         print(f'*** SelectData: {self.subject}, {self.primary_key} ***', file=self.output)
@@ -192,7 +224,6 @@ class SelectDataSection:
         return self.output
 
 
-
 sections = []
 cur_sect = None
 
@@ -200,17 +231,22 @@ def read_sections():
     global cur_sect
     spec = open('input.spec')
     while (line := spec.readline()):
+        line = line.strip()
+        if not line or line.startswith('#'): # comment, Haribol
+            continue
         matched = re.match('\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}', line)
-        if matched and matched.group(1) == 'UI':
-            sections.append(InputSection())
+        if matched:
+            match (matched.group(1)):
+                case 'SelectData':
+                    sections.append(SelectDataSection(matched.group(2)))
+                case 'Model':
+                    sections.append(ModelSection())
+                case _:
+                    print('section: <', matched.group(1), '>', sep='')
+                    continue
             cur_sect = sections[-1]
-        elif matched and matched.group(1) == 'SelectData':
-            sections.append(SelectDataSection(matched.group(2)))
-            cur_sect = sections[-1]
-        elif matched:
-            print('section: <', matched.group(1), '>', sep='')
         elif cur_sect:
-            cur_sect.append(line.strip())
+            cur_sect.append(line)
 
 
 read_sections()

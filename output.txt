@@ -1,24 +1,31 @@
+*** Model: fillable ***
+'PK',
+******
 *** UI: addForm ***
 <FormInput class="mt-4" id="name" title="Name" setFocus required
-            v-model="addForm.name" :error="addForm.errors.name" />
+              v-model="addForm.name" :error="addForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
-            v-model="addForm.email" :error="addForm.errors.email" />
-<FormInput class="mt-4" id="mobile" title="Mobile"
-            v-model="addForm.mobile" :error="addForm.errors.mobile" />
+              v-model="addForm.email" :error="addForm.errors.email" />
+<FormInput class="mt-4" id="mobile" title="Mobile" required
+              v-model="addForm.mobile" :error="addForm.errors.mobile" />
 <FormInput class="mt-4" id="whatsapp" title="Whatsapp"
-            v-model="addForm.whatsapp" :error="addForm.errors.whatsapp" />
+              v-model="addForm.whatsapp" :error="addForm.errors.whatsapp" />
+<FormFileUpload class="mt-4" id="photoPath" title="Photo"
+              @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
 ******
 
 *** UI: editForm ***
 <FormInput class="mt-4" id="name" title="Name" setFocus required
-            v-model="editForm.name" :error="editForm.errors.name" />
+              v-model="editForm.name" :error="editForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
-            v-model="editForm.email" :error="editForm.errors.email" />
-<FormInput class="mt-4" id="mobile" title="Mobile"
-            v-model="editForm.mobile" :error="editForm.errors.mobile" />
+              v-model="editForm.email" :error="editForm.errors.email" />
+<FormInput class="mt-4" id="mobile" title="Mobile" required
+              v-model="editForm.mobile" :error="editForm.errors.mobile" />
 <FormInput class="mt-4" id="whatsapp" title="Whatsapp"
-            v-model="editForm.whatsapp" :error="editForm.errors.whatsapp" />
+              v-model="editForm.whatsapp" :error="editForm.errors.whatsapp" />
+<FormFileUpload class="mt-4" id="photoPath" title="Photo"
+              @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 ******
 
