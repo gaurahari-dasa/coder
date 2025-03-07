@@ -9,7 +9,7 @@
 PK: address_id
 
 
-*** SelectData: contacts; contact_id ***
+*** SelectData: guides; guide_id ***
 
 ** guides **
 guide_id
@@ -19,3 +19,4 @@ mobile: # (; Mobile; )?^, i (text; Mobile)*
 whatsapp: # (; Whatsapp; )?^, i (text; Whatsapp)
 photo_path: ~ (file), # (ImageColumn; ; )?^, i (file; Photo)
 active: # (ActiveColumn; Active; ), i (checkbox; Active)
+contact_id: $()

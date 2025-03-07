@@ -23,7 +23,7 @@ class SelectData:
         self.fields = None # track the current table, Haribol
         self.ui = UserInput()
 
-    def segregateSpecs(self, field_name, specs):
+    def assignSpecs(self, field_name:str, back_name:str, specs:str):
         selectSpecs = None
         specs = [s.strip() for s in (specs.split(',') if specs else [])]
         for spec in specs:
@@ -31,7 +31,7 @@ class SelectData:
             if matched:
                 match matched.group(1):
                     case 'i':
-                        self.ui.appendField(camel_case(field_name),
+                        self.ui.appendField(camel_case(field_name), back_name,
                                             matched.group(2), matched.group(3))
                     case '~':
                         selectSpecs = matched.group(2)
@@ -56,7 +56,7 @@ class SelectData:
             name = matched.group(1)
             alias = matched.group(2)
             self.fields.append(self.Field(name, alias,
-                self.segregateSpecs(alias if alias else name, matched.group(3))))
+                self.assignSpecs(alias if alias else name, name, matched.group(3))))
 
     def generateSelectData(self):
         print(f'*** SelectData: {self.subject}, {self.primary_key} ***', file=self.output)
@@ -64,6 +64,7 @@ class SelectData:
             for field in self.tables[table]:
                 alias = f' as {field.alias}' if field.alias else ''
                 print(f'\'{table}.{field.name}{alias}\',', file=self.output)
+        # TODO: in subject table if primary key hasn't been selected include it, automatically, Haribol
         print('******\n', file=self.output)
 
     def generatePagination(self):
@@ -87,5 +88,7 @@ class SelectData:
     def generate(self):
         self.generateSelectData()
         self.generatePagination()
-        self.output.write(self.ui.generate().getvalue())
+        ui_code = self.ui.generate()
+        if ui_code:
+            self.output.write(ui_code.getvalue())
         return self.output

@@ -1,16 +1,20 @@
 import re
 import io
+from collections import namedtuple
 
 from utils import *
 
 class UserInput:
 
+    ForeignKey = namedtuple('ForeignKey', ['name', 'back_name'])
+
     class Field:
         focus_symbol = '@'
         required_symbol = '*'
 
-        def __init__(self, name:str, specs:str, qualities:str):
+        def __init__(self, name:str, back_name:str, specs:str, qualities:str):
             self.name = name
+            self.back_name = back_name
             specs = [s.strip() for s in (specs.split(';') if specs else specs)]
             self.type = specs[0]
             self.title = nullishIndex(specs, 1)
@@ -19,15 +23,15 @@ class UserInput:
             self.required = self.required_symbol in qualities
 
     def __init__(self):
-        self.lines = []
         self.fields = []
+        self.foreign_key = None
         self.output = io.StringIO()
 
-    def append(self, line):
-        self.lines.append(line)
+    def appendField(self, name, back_name, specs, qualities):
+        self.fields.append(self.Field(name, back_name, specs, qualities))
 
-    def appendField(self, name, specs, qualities):
-        self.fields.append(self.Field(name, specs, qualities))
+    def assign_foreign_key(self, name, back_name):
+        self.foreign_key = self.ForeignKey(name, back_name)
 
     def tackFocus(self, field):
         return ' setFocus' if field.focus else ''
@@ -88,11 +92,22 @@ class UserInput:
             self.generate_control(field)
         print('******\n', file=self.output)
         return self.output
+    
+    def generate_store(self):
+        for field in self.fields:
+            if field.type == 'file':
+                printWarning('File type inputs require to be saved to disk, Haribol!')
+            print(f"'{field.back_name}' => $validated['{field.name}'],")
+        if self.foreign_key:
+            print(f"'{self.foreign_key.back_name}' => $validated['{self.foreign_key.name}'],")
 
     def generate(self):
         if not self.generate_form('addForm'):
             return None
             
         if not self.generate_form('editForm'):
+            return None
+        
+        if not self.generate_store():
             return None
         return self.output
