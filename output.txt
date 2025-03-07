@@ -1,5 +1,5 @@
 *** UI: addForm ***
-<FormInput class="mt-4" id="name" title="Name"
+<FormInput class="mt-4" id="name" title="Name" setFocus required
             v-model="addForm.name" :error="addForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
             v-model="addForm.email" :error="addForm.errors.email" />
@@ -11,7 +11,7 @@
 ******
 
 *** UI: editForm ***
-<FormInput class="mt-4" id="name" title="Name"
+<FormInput class="mt-4" id="name" title="Name" setFocus required
             v-model="editForm.name" :error="editForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
             v-model="editForm.email" :error="editForm.errors.email" />

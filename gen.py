@@ -15,12 +15,20 @@ def nullishIndex(ar:list, ix:int):
     except IndexError:
         return None
 
-class UiSection:
+class InputSection:
 
     class Field:
-        def __init__(self, name:str, specs:str):
+        focus_symbol = '@'
+        required_symbol = '*'
+
+        def __init__(self, name:str, specs:str, qualities:str):
             self.name = name
-            self.specs = [s.strip() for s in (specs.split(';') if specs else specs)]
+            specs = [s.strip() for s in (specs.split(';') if specs else specs)]
+            self.type = specs[0]
+            self.title = nullishIndex(specs, 1)
+            self.options = nullishIndex(specs, 2)
+            self.focus = self.focus_symbol in qualities
+            self.required = self.required_symbol in qualities
 
     def __init__(self):
         self.lines = []
@@ -30,42 +38,46 @@ class UiSection:
     def append(self, line):
         self.lines.append(line)
 
-    def appendField(self, name, specs):
-        self.fields.append(self.Field(name, specs))
+    def appendField(self, name, specs, qualities):
+        self.fields.append(self.Field(name, specs, qualities))
 
-    def generate_text_input(self, field_name, title):
-        print(f'''<FormInput class="mt-4" id="{field_name}" title="{title}"
-            v-model="{self.form_type}.{field_name}" :error="{self.form_type}.errors.{field_name}" />''',
+    def tackFocus(self, field):
+        return ' setFocus' if field.focus else ''
+
+    def tackRequired(self, field):
+        return ' required' if field.required else ''
+
+    def generate_text_input(self, field):
+        print(f'''<FormInput class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field)}{self.tackRequired(field)}
+            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
             file=self.output)
 
-    def generate_email_input(self, field_name, title):
-        print(f'''<FormInput type="email" class="mt-4" id="{field_name}" title="{title}"
-            v-model="{self.form_type}.{field_name}" :error="{self.form_type}.errors.{field_name}" />''',
+    def generate_email_input(self, field):
+        print(f'''<FormInput type="email" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field)}{self.tackRequired(field)}
+            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
             file=self.output)
 
-    def generate_select_input(self, field_name, title, options):
-        print(f'''<FormSelect class="mt-4" id="{field_name}" title="{title}" :options="{options}"
-            v-model="{self.form_type}.{field_name}" :error="{self.form_type}.errors.{field_name}" />''',
+    def generate_select_input(self, field):
+        print(f'''<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field)}{self.tackRequired(field)}
+            v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
             file=self.output)
         
-    def generate_checkbox_input(self, field_name, title):
-        print(f'''<FormCheckBox class="mt-4" id="{field_name}" title="{title}" v-model="{self.form_type}.{field_name}" />''',
+    def generate_checkbox_input(self, field):
+        print(f'''<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_type}.{field.name}" />''',
             file=self.output)
 
     def generate_control(self, field):
-        ctrl_type = field.specs[0]
-        title = nullishIndex(field.specs, 1)
-        match ctrl_type:
+        match field.type:
             case 'text':
-                self.generate_text_input(field.name, title)
+                self.generate_text_input(field)
             case 'select':
-                self.generate_select_input(field.name, title, nullishIndex(field.specs, 2))
+                self.generate_select_input(field)
             case 'checkbox':
-                self.generate_checkbox_input(field.name, title)
+                self.generate_checkbox_input(field)
             case 'email':
-                self.generate_email_input(field.name, title)
+                self.generate_email_input(field)
             case _:
-                printWarning('Unknown control, Haribol!', field.name, ctrl_type)
+                printWarning('Unknown control, Haribol!', field.name, field.type)
 
     def generate_form(self, form_type):
         print(f'*** UI: {form_type} ***', file=self.output)
@@ -109,21 +121,21 @@ class SelectDataSection:
             self.specs = specs
 
     def __init__(self, spec:str):
-        self.table, self.primary_key = [s.strip() for s in spec.split(',')]
+        self.subject, self.primary_key = [s.strip() for s in spec.split(';')]
         self.output = io.StringIO()
         self.tables = {}
         self.fields = None # track the current table, Haribol
-        self.ui = UiSection()
+        self.ui = InputSection()
 
     def segregateSpecs(self, field_name, specs):
         selectSpecs = None
         specs = [s.strip() for s in (specs.split(',') if specs else [])]
         for spec in specs:
-            matched = re.match(r'[ ]*(~|t|i)[ ]*\((.*)\)', spec)
+            matched = re.match(r'[ ]*(~|t|i)[ ]*\((.*)\)(.*)', spec)
             if matched:
                 match matched.group(1):
                     case 'i':
-                        self.ui.appendField(field_name, matched.group(2))
+                        self.ui.appendField(field_name, matched.group(2), matched.group(3))
                     case '~':
                         selectSpecs = matched.group(2)
                     case _:
@@ -148,7 +160,7 @@ class SelectDataSection:
                     self.segregateSpecs(matched.group(1), matched.group(3))))
 
     def generateSelectData(self):
-        print(f'*** SelectData: {self.table}, {self.primary_key} ***', file=self.output)
+        print(f'*** SelectData: {self.subject}, {self.primary_key} ***', file=self.output)
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f' as {field.alias}' if field.alias else ''
@@ -160,7 +172,7 @@ class SelectDataSection:
         for table in self.tables:
             for field in self.tables[table]:
                 alias = field.alias if field.alias else field.name
-                print("'id'" if table == self.table and field.name == self.primary_key
+                print("'id'" if table == self.subject and field.name == self.primary_key
                        else f"'{camel_case(alias)}'", '=>', end=' ', file=self.output)
                 match field.specs:
                     case None: print(f"$item->{alias},", file=self.output)
@@ -190,7 +202,7 @@ def read_sections():
     while (line := spec.readline()):
         matched = re.match('\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}', line)
         if matched and matched.group(1) == 'UI':
-            sections.append(UiSection())
+            sections.append(InputSection())
             cur_sect = sections[-1]
         elif matched and matched.group(1) == 'SelectData':
             sections.append(SelectDataSection(matched.group(2)))
