@@ -97,9 +97,11 @@ class UserInput:
         for field in self.fields:
             if field.type == 'file':
                 printWarning('File type inputs require to be saved to disk, Haribol!')
-            print(f"'{field.back_name}' => $validated['{field.name}'],")
+            print(f"'{field.back_name}' => $validated['{field.name}'],", file=self.output)
         if self.foreign_key:
-            print(f"'{self.foreign_key.back_name}' => $validated['{self.foreign_key.name}'],")
+            print(f"'{self.foreign_key.back_name}' => request('{self.foreign_key.name}'),",
+                   file=self.output)
+        return self.output
 
     def generate(self):
         if not self.generate_form('addForm'):

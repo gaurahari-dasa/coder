@@ -1,24 +1,32 @@
 *** Model: fillable ***
-'PK',
+'name',
+'email',
+'mobile',
+'photo_path',
+'active',
 ******
-*** SelectData: contacts, contact_id ***
+*** SelectData: guides, guide_id ***
 'guides.guide_id',
 'guides.name',
 'guides.email',
 'guides.mobile',
-'guides.whatsapp',
 'guides.photo_path',
 'guides.active',
+'guides.contact_id',
+'languages.language_id',
+'languages.name as language_name',
 ******
 
 *** Paginate (SelectData) ***
-'guideId' => $item->guide_id,
+'id' => $item->guide_id,
 'name' => $item->name,
 'email' => $item->email,
 'mobile' => $item->mobile,
-'whatsapp' => $item->whatsapp,
 'photoPath' => Storage::url($item->photo_path),
 'active' => $item->active,
+'contactId' => $item->contact_id,
+'languageId' => $item->language_id,
+'languageName' => $item->language_name,
 ******
 
 *** UI: addForm ***
@@ -28,11 +36,11 @@
               v-model="addForm.email" :error="addForm.errors.email" />
 <FormInput class="mt-4" id="mobile" title="Mobile" required
               v-model="addForm.mobile" :error="addForm.errors.mobile" />
-<FormInput class="mt-4" id="whatsapp" title="Whatsapp"
-              v-model="addForm.whatsapp" :error="addForm.errors.whatsapp" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+<FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
+              v-model="addForm.languageId" :error="addForm.errors.languageId" />
 ******
 
 *** UI: editForm ***
@@ -42,10 +50,17 @@
               v-model="editForm.email" :error="editForm.errors.email" />
 <FormInput class="mt-4" id="mobile" title="Mobile" required
               v-model="editForm.mobile" :error="editForm.errors.mobile" />
-<FormInput class="mt-4" id="whatsapp" title="Whatsapp"
-              v-model="editForm.whatsapp" :error="editForm.errors.whatsapp" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+<FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
+              v-model="editForm.languageId" :error="editForm.errors.languageId" />
 ******
 
+'name' => $validated['name'],
+'email' => $validated['email'],
+'mobile' => $validated['mobile'],
+'photo_path' => $validated['photoPath'],
+'active' => $validated['active'],
+'language_id' => $validated['languageId'],
+'contact_id' => request('contactId'),

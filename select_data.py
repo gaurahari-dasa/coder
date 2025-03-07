@@ -27,7 +27,7 @@ class SelectData:
         selectSpecs = None
         specs = [s.strip() for s in (specs.split(',') if specs else [])]
         for spec in specs:
-            matched = re.match(r'[ ]*(~|t|i)[ ]*\((.*)\)(.*)', spec)
+            matched = re.match(r'[ ]*(i|~|\$)[ ]*\((.*)\)(.*)', spec)
             if matched:
                 match matched.group(1):
                     case 'i':
@@ -35,6 +35,8 @@ class SelectData:
                                             matched.group(2), matched.group(3))
                     case '~':
                         selectSpecs = matched.group(2)
+                    case '$':
+                        self.ui.assign_foreign_key(camel_case(field_name), back_name)
                     case _:
                         printWarning('Unheard specs type, Haribol')
         return selectSpecs

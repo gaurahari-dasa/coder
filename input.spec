@@ -1,13 +1,9 @@
 *** Model: Guide ***
-'name',
-'email',
-'mobile',
-'whatsapp',
-'photo_path',
-'active',
-
-PK: address_id
-
+name
+email
+mobile
+photo_path
+active
 
 *** SelectData: guides; guide_id ***
 
@@ -16,7 +12,10 @@ guide_id
 name: # (; Name; )?^, i (text; Name; )@*
 email: # (; Email; )?^, i (email; Email)
 mobile: # (; Mobile; )?^, i (text; Mobile)*
-whatsapp: # (; Whatsapp; )?^, i (text; Whatsapp)
 photo_path: ~ (file), # (ImageColumn; ; )?^, i (file; Photo)
 active: # (ActiveColumn; Active; ), i (checkbox; Active)
 contact_id: $()
+
+** languages **
+language_id: i (select; Language; languages)
+name as language_name
