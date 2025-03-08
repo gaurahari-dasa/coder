@@ -39,19 +39,19 @@ class UserInput:
     def tackRequired(self, field):
         return ' required' if field.required else ''
     
-    def generate_input_type(self, field, type='text'):
+    def generate_typed_input(self, field, type='text'):
         print(f'''<FormInput type="{type}" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
               file=self.output)
 
     def generate_text_input(self, field):
-        self.generate_input_type(self, field)
+        self.generate_typed_input(field, type='text')
 
     def generate_email_input(self, field):
-        self.generate_input_type(self, field, type="email")
+        self.generate_typed_input(field, type="email")
         
     def generate_date_input(self, field):
-        self.generate_input_type(self, field, type="date")
+        self.generate_typed_input(field, type="date")
 
     def generate_select_input(self, field):
         print(f'''<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
@@ -102,7 +102,7 @@ class UserInput:
     def generate_store(self):
         for field in self.fields:
             if field.type == 'file':
-                warn('File type inputs require to be saved to disk, Haribol!')
+                note('File type inputs require to be saved to disk, Haribol!')
             print(f"'{field.back_name}' => $validated['{field.name}'],", file=self.output)
         if self.foreign_key:
             print(f"'{self.foreign_key.back_name}' => request('{self.foreign_key.name}'),",

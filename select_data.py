@@ -51,10 +51,10 @@ class SelectData:
             matched = re.match(f'({identifier})(?:[ ]+as[ ]+({identifier}))?(?:[ ]*:(.*))?', line)
             if not matched:
                 error('DB field name spec is improper, Haribol!')
-                exit()
+
             if self.fields is None:
                 error('No table name in specs, Haribol!')
-                exit()
+
             name = matched.group(1)
             alias = matched.group(2)
             self.fields.append(self.Field(name, alias,
@@ -83,7 +83,7 @@ class SelectData:
                                              file=self.output)
                     case 'date-time': print(f'Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),',
                                              file=self.output)
-                    case _: warn('Unknow transformation type, Haribol')
+                    case _: warn('Unknown transformation type, Haribol', field.specs)
 
         print('******\n', file=self.output)
 

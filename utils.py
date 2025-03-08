@@ -1,17 +1,23 @@
 import re
 
-#pip install colorama
-import colorama
+#pip install colorful
+import colorful as cf
 
 identifier = '[a-zA-Z0-9_]+'
 
-colorama.init()
+def note(mesg, *args):
+    colon = ':' if args else ''
+    print(f'{cf.green}{mesg}{colon}', *args, cf.reset)
 
 def warn(mesg, *args):
-    print(f'{colorama.Fore.RED}{mesg}', args, colorama.Style.RESET_ALL)
+    colon = ':' if args else ''
+    print(f'{cf.red}{mesg}{colon}', *args, cf.reset)
 
-def error(mesg, *args):
-    print(f'{colorama.Fore.YELLOW}{mesg}', args, colorama.Style.RESET_ALL)
+def error(mesg, *args, halt=True):
+    colon = ':' if args else ''
+    print(f'{cf.yellow}{mesg}{colon}', *args, cf.reset)
+    if halt:
+        exit()
 
 def nullishIndex(ar:list, ix:int):
     try:
