@@ -38,16 +38,20 @@ class UserInput:
 
     def tackRequired(self, field):
         return ' required' if field.required else ''
+    
+    def generate_input_type(self, field, type='text'):
+        print(f'''<FormInput type="{type}" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
+              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
+              file=self.output)
 
     def generate_text_input(self, field):
-        print(f'''<FormInput class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
-              file=self.output)
+        self.generate_input_type(self, field)
 
     def generate_email_input(self, field):
-        print(f'''<FormInput type="email" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />''',
-              file=self.output)
+        self.generate_input_type(self, field, type="email")
+        
+    def generate_date_input(self, field):
+        self.generate_input_type(self, field, type="date")
 
     def generate_select_input(self, field):
         print(f'''<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
@@ -74,6 +78,8 @@ class UserInput:
                 self.generate_text_input(field)
             case 'email':
                 self.generate_email_input(field)
+            case 'date':
+                self.generate_date_input(field)
             case 'select':
                 self.generate_select_input(field)
             case 'checkbox':
@@ -83,7 +89,7 @@ class UserInput:
             case 'auto':
                 self.generate_autocomplete(field)
             case _:
-                printWarning('Unknown control, Haribol!', field.name, field.type)
+                warn('Unknown control, Haribol!', field.name, field.type)
 
     def generate_form(self, form_type):
         print(f'*** UI: {form_type} ***', file=self.output)
@@ -96,7 +102,7 @@ class UserInput:
     def generate_store(self):
         for field in self.fields:
             if field.type == 'file':
-                printWarning('File type inputs require to be saved to disk, Haribol!')
+                warn('File type inputs require to be saved to disk, Haribol!')
             print(f"'{field.back_name}' => $validated['{field.name}'],", file=self.output)
         if self.foreign_key:
             print(f"'{self.foreign_key.back_name}' => request('{self.foreign_key.name}'),",

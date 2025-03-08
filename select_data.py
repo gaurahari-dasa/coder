@@ -38,7 +38,7 @@ class SelectData:
                     case '$':
                         self.ui.assign_foreign_key(camel_case(field_name), back_name)
                     case _:
-                        printWarning('Unheard specs type, Haribol')
+                        warn('Unheard specs type, Haribol')
         return selectSpecs
 
     def append(self, line: str):
@@ -50,10 +50,10 @@ class SelectData:
         else:
             matched = re.match(f'({identifier})(?:[ ]+as[ ]+({identifier}))?(?:[ ]*:(.*))?', line)
             if not matched:
-                printError('DB field name spec is improper, Haribol!')
+                error('DB field name spec is improper, Haribol!')
                 exit()
             if self.fields is None:
-                printError('No table name in specs, Haribol!')
+                error('No table name in specs, Haribol!')
                 exit()
             name = matched.group(1)
             alias = matched.group(2)
@@ -83,7 +83,7 @@ class SelectData:
                                              file=self.output)
                     case 'date-time': print(f'Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),',
                                              file=self.output)
-                    case _: printWarning('Unknow transformation type, Haribol')
+                    case _: warn('Unknow transformation type, Haribol')
 
         print('******\n', file=self.output)
 

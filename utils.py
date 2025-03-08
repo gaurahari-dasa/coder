@@ -7,10 +7,10 @@ identifier = '[a-zA-Z0-9_]+'
 
 colorama.init()
 
-def printWarning(mesg, *args):
+def warn(mesg, *args):
     print(f'{colorama.Fore.RED}{mesg}', args, colorama.Style.RESET_ALL)
 
-def printError(mesg, *args):
+def error(mesg, *args):
     print(f'{colorama.Fore.YELLOW}{mesg}', args, colorama.Style.RESET_ALL)
 
 def nullishIndex(ar:list, ix:int):
