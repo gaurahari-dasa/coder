@@ -14,7 +14,7 @@ name: # (; Name; )?^, i (text; Name; )@*
 email: # (; Email; )?^, i (email; Email)
 mobile: # (; Mobile; )?^, i (text; Mobile)*
 photo_path: ~ (file), # (ImageColumn; ; )?^, i (file; Photo)
-dob: ~ (date), i (date; DOB)
+dob: ~ (date-only), i (date; DOB)
 active: # (ActiveColumn; Active; ), i (checkbox; Active)
 contact_id: $()
 

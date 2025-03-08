@@ -3,6 +3,7 @@
 'email',
 'mobile',
 'photo_path',
+'dob',
 'active',
 ******
 *** SelectData: guides, guide_id ***
@@ -11,6 +12,7 @@
 'guides.email',
 'guides.mobile',
 'guides.photo_path',
+'guides.dob',
 'guides.active',
 'guides.contact_id',
 'languages.language_id',
@@ -23,6 +25,7 @@
 'email' => $item->email,
 'mobile' => $item->mobile,
 'photoPath' => Storage::url($item->photo_path),
+'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'contactId' => $item->contact_id,
 'languageId' => $item->language_id,
@@ -30,28 +33,32 @@
 ******
 
 *** UI: addForm ***
-<FormInput class="mt-4" id="name" title="Name" setFocus required
+<FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
               v-model="addForm.name" :error="addForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
               v-model="addForm.email" :error="addForm.errors.email" />
-<FormInput class="mt-4" id="mobile" title="Mobile" required
+<FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
               v-model="addForm.mobile" :error="addForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="addForm.dob" :error="addForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="addForm.languageId" :error="addForm.errors.languageId" />
 ******
 
 *** UI: editForm ***
-<FormInput class="mt-4" id="name" title="Name" setFocus required
+<FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
               v-model="editForm.name" :error="editForm.errors.name" />
 <FormInput type="email" class="mt-4" id="email" title="Email"
               v-model="editForm.email" :error="editForm.errors.email" />
-<FormInput class="mt-4" id="mobile" title="Mobile" required
+<FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
               v-model="editForm.mobile" :error="editForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="editForm.dob" :error="editForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="editForm.languageId" :error="editForm.errors.languageId" />
@@ -61,6 +68,7 @@
 'email' => $validated['email'],
 'mobile' => $validated['mobile'],
 'photo_path' => $validated['photoPath'],
+'dob' => $validated['dob'],
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
 'contact_id' => request('contactId'),

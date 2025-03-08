@@ -83,7 +83,9 @@ class SelectData:
                                              file=self.output)
                     case 'date-time': print(f'Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),',
                                              file=self.output)
-                    case _: warn('Unknown transformation type, Haribol', field.specs)
+                    case _:
+                        print(file=self.output)
+                        warn('Unknown transformation type, Haribol', field.specs)
 
         print('******\n', file=self.output)
 
