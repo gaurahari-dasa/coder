@@ -2,6 +2,7 @@ import re
 import io
 
 from utils import *
+from model import Model
 from user_input import UserInput
 
 class SelectData:
@@ -16,12 +17,13 @@ class SelectData:
             self.alias = alias
             self.specs = specs
 
-    def __init__(self, spec:str):
+    def __init__(self, spec:str, model: Model):
         self.subject, self.primary_key = [s.strip() for s in spec.split(';')]
         self.output = io.StringIO()
         self.tables = {}
         self.fields = None # track the current table, Haribol
-        self.ui = UserInput()
+        # self.model = model
+        self.ui = UserInput(model)
 
     def assignSpecs(self, field_name:str, back_name:str, specs:str):
         selectSpecs = None
@@ -60,7 +62,7 @@ class SelectData:
             self.fields.append(self.Field(name, alias,
                 self.assignSpecs(alias if alias else name, name, matched.group(3))))
 
-    def generateSelectData(self):
+    def generate_select_data(self):
         print(f'*** SelectData: {self.subject}, {self.primary_key} ***', file=self.output)
         for table in self.tables:
             for field in self.tables[table]:
@@ -69,7 +71,7 @@ class SelectData:
         # TODO: in subject table if primary key hasn't been selected include it, automatically, Haribol
         print('******\n', file=self.output)
 
-    def generatePagination(self):
+    def generate_pagination(self):
         print('*** Paginate (SelectData) ***', file=self.output)
         for table in self.tables:
             for field in self.tables[table]:
@@ -90,8 +92,8 @@ class SelectData:
         print('******\n', file=self.output)
 
     def generate(self):
-        self.generateSelectData()
-        self.generatePagination()
+        self.generate_select_data()
+        self.generate_pagination()
         ui_code = self.ui.generate()
         if ui_code:
             self.output.write(ui_code.getvalue())

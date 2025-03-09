@@ -8,6 +8,8 @@ from model import Model
 sections = []
 cur_sect = None
 
+model_section = None
+
 def read_sections():
     global cur_sect
     spec = open('input.spec')
@@ -19,9 +21,9 @@ def read_sections():
         if matched:
             match (matched.group(1)):
                 case 'SelectData':
-                    sections.append(SelectData(matched.group(2)))
+                    sections.append(SelectData(matched.group(2), model_section))
                 case 'Model':
-                    sections.append(Model())
+                    sections.append(model_section := Model(matched.group(2)))
                 case _:
                     print('section: <', matched.group(1), '>', sep='')
                     continue

@@ -6,6 +6,7 @@
 'dob',
 'active',
 ******
+
 *** SelectData: guides, guide_id ***
 'guides.guide_id',
 'guides.name',
@@ -64,11 +65,29 @@
               v-model="editForm.languageId" :error="editForm.errors.languageId" />
 ******
 
+*** Store data ***
+return Guide::create([
 'name' => $validated['name'],
 'email' => $validated['email'],
 'mobile' => $validated['mobile'],
 'photo_path' => $validated['photoPath'],
-'dob' => $validated['dob'],
+'dob' => Utils::parseDate($validated['dob']),
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
 'contact_id' => request('contactId'),
+]);
+******
+
+*** Update data ***
+$guide = Guide::find(request('id'));
+$guide->name = $validated['name'];
+$guide->email = $validated['email'];
+$guide->mobile = $validated['mobile'];
+$guide->photo_path = $validated['photoPath'];
+$guide->dob = Utils::parseDate($validated['dob']);
+$guide->active = $validated['active'];
+$guide->language_id = $validated['languageId'];
+$guide->contact_id = request('contactId');
+LogActivityHelper::save($guide);
+******
+

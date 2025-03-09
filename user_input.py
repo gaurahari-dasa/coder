@@ -3,18 +3,19 @@ import io
 from collections import namedtuple
 
 from utils import *
+from model import Model
 
 class UserInput:
 
-    ForeignKey = namedtuple('ForeignKey', ['name', 'back_name'])
+    ForeignKey = namedtuple('ForeignKey', ['name', 'base_name'])
 
     class Field:
         focus_symbol = '@'
         required_symbol = '*'
 
-        def __init__(self, name:str, back_name:str, specs:str, qualities:str):
+        def __init__(self, name:str, base_name:str, specs:str, qualities:str):
             self.name = name
-            self.back_name = back_name
+            self.base_name = base_name # name in database, Haribol
             specs = [s.strip() for s in (specs.split(';') if specs else specs)]
             self.type = specs[0]
             self.title = nullishIndex(specs, 1)
@@ -22,16 +23,17 @@ class UserInput:
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
 
-    def __init__(self):
+    def __init__(self, model:Model):
         self.fields = []
         self.foreign_key = None
+        self.model = model
         self.output = io.StringIO()
 
-    def appendField(self, name, back_name, specs, qualities):
-        self.fields.append(self.Field(name, back_name, specs, qualities))
+    def appendField(self, name, base_name, specs, qualities):
+        self.fields.append(self.Field(name, base_name, specs, qualities))
 
-    def assign_foreign_key(self, name, back_name):
-        self.foreign_key = self.ForeignKey(name, back_name)
+    def assign_foreign_key(self, name, base_name):
+        self.foreign_key = self.ForeignKey(name, base_name)
 
     def tackFocus(self, field):
         return ' setFocus' if field.focus else ''
@@ -100,13 +102,40 @@ class UserInput:
         return self.output
     
     def generate_store(self):
+        print(f'*** Store data ***', file=self.output)
+        print(f'return {self.model.name}::create([', file=self.output)
         for field in self.fields:
             if field.type == 'file':
                 note('File type inputs require to be saved to disk, Haribol!')
-            print(f"'{field.back_name}' => $validated['{field.name}'],", file=self.output)
+            print(f"'{field.base_name}' =>", end=' ', file=self.output)
+            if field.type == 'date':
+                print(f"Utils::parseDate($validated['{field.name}']),", file=self.output)
+            else:
+                print(f"$validated['{field.name}'],", file=self.output)
         if self.foreign_key:
-            print(f"'{self.foreign_key.back_name}' => request('{self.foreign_key.name}'),",
+            print(f"'{self.foreign_key.base_name}' => request('{self.foreign_key.name}'),",
                    file=self.output)
+        print(']);', file=self.output)
+        print('******\n', file=self.output)
+        return self.output
+    
+    def generate_update(self):
+        print(f'*** Update data ***', file=self.output)
+        varname = '$' + self.model.name.lower()
+        print(f"{varname} = {self.model.name}::find(request('id'));", file=self.output)
+        for field in self.fields:
+            if field.type == 'file':
+                note('File type inputs require to be saved to disk, Haribol!')
+            print(f'{varname}->{field.base_name} =', end=' ', file=self.output)
+            if field.type == 'date':
+                print(f"Utils::parseDate($validated['{field.name}']);", file=self.output)
+            else:
+                print(f"$validated['{field.name}'];", file=self.output)
+        if self.foreign_key:
+            print(f"{varname}->{self.foreign_key.base_name} = request('{self.foreign_key.name}');",
+                   file=self.output)
+        print(f'LogActivityHelper::save({varname});', file=self.output)
+        print('******\n', file=self.output)
         return self.output
 
     def generate(self):
@@ -117,5 +146,8 @@ class UserInput:
             return None
         
         if not self.generate_store():
+            return None
+        
+        if not self.generate_update():
             return None
         return self.output
