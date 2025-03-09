@@ -135,6 +135,7 @@ class UserInput:
             print(f"{varname}->{self.foreign_key.base_name} = request('{self.foreign_key.name}');",
                    file=self.output)
         print(f'LogActivityHelper::save({varname});', file=self.output)
+        print(f'return {varname};')
         print('******\n', file=self.output)
         return self.output
 
