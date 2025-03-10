@@ -99,3 +99,26 @@ LogActivityHelper::save($guide);
 return $guide;
 ******
 
+*** Form: addForm ***
+name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: null,
+languageId: null,
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+id: null,
+name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: null,
+languageId: null,
+contactId: props.contactId,
+******
+

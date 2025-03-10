@@ -93,11 +93,22 @@ class UserInput:
             case _:
                 warn('Unknown control, Haribol!', field.name, field.type)
 
-    def generate_form(self, form_type):
+    def generate_form_elements(self, form_type):
         print(f'*** UI: {form_type} ***', file=self.output)
         self.form_type = form_type
         for field in self.fields:
             self.generate_control(field)
+        print('******\n', file=self.output)
+        return self.output
+    
+    def generate_form(self, form_type):
+        print(f'*** Form: {form_type} ***', file=self.output)
+        if form_type == 'editForm':
+            print('id: null,', file=self.output)
+        for field in self.fields:
+            print(f'{field.name}: null,', file=self.output)
+        if self.foreign_key:
+            print(f'{self.foreign_key.name}: props.{self.foreign_key.name},', file=self.output)
         print('******\n', file=self.output)
         return self.output
     
@@ -140,15 +151,21 @@ class UserInput:
         return self.output
 
     def generate(self):
-        if not self.generate_form('addForm'):
+        if not self.generate_form_elements('addForm'):
             return None
             
-        if not self.generate_form('editForm'):
+        if not self.generate_form_elements('editForm'):
             return None
         
         if not self.generate_store():
             return None
         
         if not self.generate_update():
+            return None
+        
+        if not self.generate_form('addForm'):
+            return None
+        
+        if not self.generate_form('editForm'):
             return None
         return self.output
