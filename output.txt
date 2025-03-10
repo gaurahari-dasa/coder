@@ -127,7 +127,7 @@ editForm.name = datum.name;
 editForm.email = datum.email;
 editForm.mobile = datum.mobile;
 editForm.dob = datum.dob;
-editForm.active = datum.active;
+editForm.active = !!datum.active; // cast to boolean, Haribol
 editForm.languageId = datum.languageId;
 ******
 
