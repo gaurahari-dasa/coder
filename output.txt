@@ -33,6 +33,13 @@
 'languageName' => $item->language_name,
 ******
 
+*** Search clause (Select Data) ***
+'guides.name',
+'guides.email',
+'guides.mobile',
+'guides.photo_path',
+******
+
 *** UI: addForm ***
 <FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
               v-model="addForm.name" :error="addForm.errors.name" />

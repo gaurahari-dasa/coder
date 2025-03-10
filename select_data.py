@@ -30,7 +30,7 @@ class SelectData:
         self.subject, self.primary_key = [s.strip() for s in spec.split(';')]
         self.output = io.StringIO()
         self.tables = {}
-        self.fields = None # track the current table, Haribol
+        self.fields = None # track the fields in current table, Haribol
         # self.model = model
         self.ui = UserInput(model)
 
@@ -99,17 +99,20 @@ class SelectData:
                     case _:
                         print(file=self.output)
                         warn('Unknown transformation type, Haribol', field.specs)
-
         print('******\n', file=self.output)
 
     def generate_search_clause(self):
         print('*** Search clause (Select Data) ***', file=self.output)
-        for field in self.fields:
-            pass
+        for table in self.tables.items():
+            for field in table[1]:
+                if field.searchable:
+                    print(f"'{table[0]}.{field.name}',", file=self.output)
+        print('******\n', file=self.output)
 
     def generate(self):
         self.generate_select_data()
         self.generate_pagination()
+        self.generate_search_clause()
         ui_code = self.ui.generate()
         if ui_code:
             self.output.write(ui_code.getvalue())
