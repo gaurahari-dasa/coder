@@ -5,6 +5,10 @@ from utils import *
 from model import Model
 from user_input import UserInput
 
+def morph(specs:str):
+    matched = re.search(r'~([a-z\-]+)', specs)
+    return matched.group(1) if matched else None
+
 class SelectData:
     # class Table:
     #     def __init__(self, name):
@@ -12,10 +16,15 @@ class SelectData:
     #         self.fields = []
 
     class Field:
-        def __init__(self, name:str, alias:str, specs:str):
+        sort_symbol = '^'
+        search_symbol = '?'
+
+        def __init__(self, name:str, alias:str, specs:tuple[str,str]):
             self.name = name
             self.alias = alias
-            self.specs = specs
+            self.specs, qualities = specs
+            self.sortable = self.sort_symbol in qualities if qualities else None
+            self.searchable = self.search_symbol in qualities if qualities else None
 
     def __init__(self, spec:str, model: Model):
         self.subject, self.primary_key = [s.strip() for s in spec.split(';')]
@@ -26,22 +35,24 @@ class SelectData:
         self.ui = UserInput(model)
 
     def assignSpecs(self, field_name:str, back_name:str, specs:str):
-        selectSpecs = None
+        morph_specs = None
+        qualities = None # search / sort
         specs = [s.strip() for s in (specs.split(',') if specs else [])]
         for spec in specs:
-            matched = re.match(r'[ ]*(i|~|\$)[ ]*\((.*)\)(.*)', spec)
+            matched = re.match(r'[ ]*(i|#|\$)[ ]*\((.*)\)(.*)', spec)
             if matched:
                 match matched.group(1):
                     case 'i':
                         self.ui.appendField(camel_case(field_name), back_name,
                                             matched.group(2), matched.group(3))
-                    case '~':
-                        selectSpecs = matched.group(2)
+                    case '#':
+                        morph_specs = morph(matched.group(2))
+                        qualities = matched.group(3)
                     case '$':
                         self.ui.assign_foreign_key(camel_case(field_name), back_name)
                     case _:
                         warn('Unheard specs type, Haribol')
-        return selectSpecs
+        return (morph_specs, qualities)
 
     def append(self, line: str):
         if not (line := line.strip()):
@@ -90,6 +101,11 @@ class SelectData:
                         warn('Unknown transformation type, Haribol', field.specs)
 
         print('******\n', file=self.output)
+
+    def generate_search_clause(self):
+        print('*** Search clause (Select Data) ***', file=self.output)
+        for field in self.fields:
+            pass
 
     def generate(self):
         self.generate_select_data()
