@@ -10,22 +10,23 @@ cur_sect = None
 
 model_section = None
 
+
 def read_sections():
     global cur_sect
-    spec = open('input.spec')
-    while (line := spec.readline()):
+    spec = open("input.spec")
+    while line := spec.readline():
         line = line.strip()
-        if not line or line.startswith('#'): # comment, Haribol
+        if not line or line.startswith("#"):  # comment, Haribol
             continue
-        matched = re.match('\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}', line)
+        matched = re.match("\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}", line)
         if matched:
             match (matched.group(1)):
-                case 'SelectData':
+                case "SelectData":
                     sections.append(SelectData(matched.group(2), model_section))
-                case 'Model':
+                case "Model":
                     sections.append(model_section := Model(matched.group(2)))
                 case _:
-                    print('section: <', matched.group(1), '>', sep='')
+                    print("section: <", matched.group(1), ">", sep="")
                     continue
             cur_sect = sections[-1]
         elif cur_sect:
@@ -34,7 +35,10 @@ def read_sections():
 
 read_sections()
 
-output = open('output.txt', 'wt',)
+output = open(
+    "output.txt",
+    "wt",
+)
 for section in sections:
-    if (gen := section.generate()):
+    if gen := section.generate():
         output.write(gen.getvalue())

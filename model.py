@@ -3,8 +3,9 @@ import io
 
 from utils import *
 
+
 class Model:
-    def __init__(self, spec:str):
+    def __init__(self, spec: str):
         self.lines = []
         self.name = spec.strip()
         self.output = io.StringIO()
@@ -13,10 +14,10 @@ class Model:
         self.lines.append(line)
 
     def generate(self):
-        print('*** Model: fillable ***', file=self.output)
+        print("*** Model: fillable ***", file=self.output)
         for line in self.lines:
-            matched = re.match(f'[ ]*({identifier})', line)
+            matched = re.match(f"[ ]*({identifier})", line)
             if matched:
                 print(f"'{matched.group(1)}',", file=self.output)
-        print('******\n', file=self.output)
+        print("******\n", file=self.output)
         return self.output
