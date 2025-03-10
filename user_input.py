@@ -5,6 +5,9 @@ from collections import namedtuple
 from utils import *
 from model import Model
 
+def find(pred, elems:iter):
+    return next((elem for elem in elems if pred(elem)), None)
+
 class UserInput:
 
     ForeignKey = namedtuple('ForeignKey', ['name', 'base_name'])
@@ -112,7 +115,31 @@ class UserInput:
         print('******\n', file=self.output)
         return self.output
     
-    def generate_store(self):
+    def generate_edit_row(self):
+        print('*** editRow ***', file=self.output)
+        for field in self.fields:
+            if field.type == 'file':
+                continue # cannot edit file contents on server, Haribol
+            print(f'editForm.{field.name} = datum.{field.name};', file=self.output)
+        print('******\n', file=self.output)
+        return self.output
+    
+    # def id_field(self, field_name:str):
+    #     if field_name.endswith('Name'):
+    #         # id = next((field for field in self.fields if field.name.endswith('Id')), None)
+    #         if id := find(lambda field: field.name.endswith('Id'), self.fields):
+    #             print(f'datum.{field_name} = props.tablename_here.find(v => v.id === editForm.{id})?.name;')
+    #             continue
+
+    # def generate_edit_row_done(self):
+    #     print('*** editRow: successful ***', file=self.output)
+    #     for field in self.fields:
+    #         if field.type == 'file':
+    #             print(f'datum{field.name} = ')
+    #         print(f'editForm.{field.name} = datum.{field.name};', file=self.output)
+    #     print('******\n', file=self.output)
+    
+    def generate_store_server(self):
         print(f'*** Store data ***', file=self.output)
         print(f'return {self.model.name}::create([', file=self.output)
         for field in self.fields:
@@ -130,7 +157,7 @@ class UserInput:
         print('******\n', file=self.output)
         return self.output
     
-    def generate_update(self):
+    def generate_update_server(self):
         print(f'*** Update data ***', file=self.output)
         varname = '$' + self.model.name.lower()
         print(f"{varname} = {self.model.name}::find(request('id'));", file=self.output)
@@ -157,15 +184,18 @@ class UserInput:
         if not self.generate_form_elements('editForm'):
             return None
         
-        if not self.generate_store():
+        if not self.generate_store_server():
             return None
         
-        if not self.generate_update():
+        if not self.generate_update_server():
             return None
         
         if not self.generate_form('addForm'):
             return None
         
         if not self.generate_form('editForm'):
+            return None
+        
+        if not self.generate_edit_row():
             return None
         return self.output
