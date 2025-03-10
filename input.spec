@@ -10,12 +10,12 @@ active
 
 ** guides **
 guide_id
-name: # (; Name; )?^, i (text; Name; )@*
-email: # (; Email; )?^, i (email; Email)
-mobile: # (; Mobile; )?^, i (text; Mobile)*
-photo_path: # (%ImageColumn; ; ~file)?^, i (file; Photo)
-dob: # (~date-only), i (date; DOB)
-active: # (ActiveColumn; Active; ), i (checkbox; Active)
+name: i (text; Name; )@*, # (; Name; )?^
+email: i (email; Email), # (; Email; )?^
+mobile: i (text; Mobile)*, # (; Mobile; )?^
+photo_path: i (file; Photo), # (%ImageColumn; ; ~file)?^
+dob: i (date; DOB), # (~date-only)
+active: i (checkbox; Active), # (ActiveColumn; Active; )
 contact_id: $()
 
 ** languages **
