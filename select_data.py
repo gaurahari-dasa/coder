@@ -22,7 +22,7 @@ class SelectData:
         def __init__(self, name:str, alias:str, specs:tuple[str,str]):
             self.name = name
             self.alias = alias
-            self.specs, qualities = specs
+            self.specs, qualities = specs if specs else (None, None)
             self.sortable = self.sort_symbol in qualities if qualities else None
             self.searchable = self.search_symbol in qualities if qualities else None
 
@@ -82,8 +82,14 @@ class SelectData:
         # TODO: in subject table if primary key hasn't been selected include it, automatically, Haribol
         print('******\n', file=self.output)
 
+    def ensure_primary_key_pagination(self):
+        if not find(lambda x: x.name == self.primary_key, self.tables[self.subject]):
+            self.tables[self.subject].append(self.Field(self.primary_key, None, None))
+            print('included, Haribol!')
+
     def generate_pagination(self):
         print('*** Paginate (SelectData) ***', file=self.output)
+        self.ensure_primary_key_pagination()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = field.alias if field.alias else field.name

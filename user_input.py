@@ -5,9 +5,6 @@ from collections import namedtuple
 from utils import *
 from model import Model
 
-def find(pred, elems:iter):
-    return next((elem for elem in elems if pred(elem)), None)
-
 class UserInput:
 
     ForeignKey = namedtuple('ForeignKey', ['name', 'base_name'])
@@ -120,7 +117,11 @@ class UserInput:
         for field in self.fields:
             if field.type == 'file':
                 continue # cannot edit file contents on server, Haribol
-            print(f'editForm.{field.name} = datum.{field.name};', file=self.output)
+            print(f'editForm.{field.name} =', end=' ', file=self.output)
+            if field.type == 'checkbox':
+                print(f'!!datum.{field.name}; // cast to boolean, Haribol', file=self.output)
+            else:
+                print(f'datum.{field.name};', file=self.output)
         print('******\n', file=self.output)
         return self.output
     
