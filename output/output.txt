@@ -40,6 +40,38 @@
 'guides.photo_path',
 ******
 
+*** Form: addForm ***
+name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: null,
+languageId: null,
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+id: null,
+name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: null,
+languageId: null,
+contactId: props.contactId,
+******
+
+*** editRow ***
+editForm.name = datum.name;
+editForm.email = datum.email;
+editForm.mobile = datum.mobile;
+editForm.dob = datum.dob;
+editForm.active = !!datum.active; // cast to boolean, Haribol
+editForm.languageId = datum.languageId;
+******
+
 *** UI: addForm ***
 <FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
               v-model="addForm.name" :error="addForm.errors.name" />
@@ -72,6 +104,16 @@
               v-model="editForm.languageId" :error="editForm.errors.languageId" />
 ******
 
+*** Controller: validation ***
+name => '',
+email => '',
+mobile => '',
+photoPath => '',
+dob => '',
+active => '',
+languageId => '',
+******
+
 *** Store data ***
 return Guide::create([
 'name' => $validated['name'],
@@ -97,37 +139,5 @@ $guide->language_id = $validated['languageId'];
 $guide->contact_id = request('contactId');
 LogActivityHelper::save($guide);
 return $guide;
-******
-
-*** Form: addForm ***
-name: null,
-email: null,
-mobile: null,
-photoPath: null,
-dob: null,
-active: null,
-languageId: null,
-contactId: props.contactId,
-******
-
-*** Form: editForm ***
-id: null,
-name: null,
-email: null,
-mobile: null,
-photoPath: null,
-dob: null,
-active: null,
-languageId: null,
-contactId: props.contactId,
-******
-
-*** editRow ***
-editForm.name = datum.name;
-editForm.email = datum.email;
-editForm.mobile = datum.mobile;
-editForm.dob = datum.dob;
-editForm.active = !!datum.active; // cast to boolean, Haribol
-editForm.languageId = datum.languageId;
 ******
 

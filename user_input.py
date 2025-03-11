@@ -141,21 +141,13 @@ class UserInput:
                 print(f"datum.{field.name};", file=self.output)
         print("******\n", file=self.output)
         return self.output
-
-    # def id_field(self, field_name:str):
-    #     if field_name.endswith('Name'):
-    #         # id = next((field for field in self.fields if field.name.endswith('Id')), None)
-    #         if id := find(lambda field: field.name.endswith('Id'), self.fields):
-    #             print(f'datum.{field_name} = props.tablename_here.find(v => v.id === editForm.{id})?.name;')
-    #             continue
-
-    # def generate_edit_row_done(self):
-    #     print('*** editRow: successful ***', file=self.output)
-    #     for field in self.fields:
-    #         if field.type == 'file':
-    #             print(f'datum{field.name} = ')
-    #         print(f'editForm.{field.name} = datum.{field.name};', file=self.output)
-    #     print('******\n', file=self.output)
+    
+    def generate_controller_validation(self):
+        print('*** Controller: validation ***', file=self.output)
+        for field in self.fields:
+            print(f"{field.name} => '',", file=self.output)
+        print('******\n', file=self.output)
+        return self.output
 
     def generate_store_server(self):
         print(f"*** Store data ***", file=self.output)
@@ -204,18 +196,6 @@ class UserInput:
         return self.output
 
     def generate(self):
-        if not self.generate_form_elements("addForm"):
-            return None
-
-        if not self.generate_form_elements("editForm"):
-            return None
-
-        if not self.generate_store_server():
-            return None
-
-        if not self.generate_update_server():
-            return None
-
         if not self.generate_form("addForm"):
             return None
 
@@ -224,4 +204,20 @@ class UserInput:
 
         if not self.generate_edit_row():
             return None
+
+        if not self.generate_form_elements("addForm"):
+            return None
+
+        if not self.generate_form_elements("editForm"):
+            return None
+
+        if not self.generate_controller_validation():
+            return None
+        
+        if not self.generate_store_server():
+            return None
+
+        if not self.generate_update_server():
+            return None
+
         return self.output
