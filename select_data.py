@@ -12,11 +12,6 @@ def morph(specs: str):
 
 
 class SelectData:
-    # class Table:
-    #     def __init__(self, name):
-    #         self.name = name
-    #         self.fields = []
-
     class Field:
         sort_symbol = "^"
         search_symbol = "?"
@@ -29,7 +24,7 @@ class SelectData:
             self.searchable = self.search_symbol in qualities if qualities else None
 
     def __init__(self, spec: str, model: Model):
-        self.subject, self.primary_key = [s.strip() for s in spec.split(";")]
+        self.model_table, self.primary_key = [s.strip() for s in spec.split(";")]
         self.output = io.StringIO()
         self.tables = {}
         self.fields = None  # track the fields in current table, Haribol
@@ -86,32 +81,36 @@ class SelectData:
                 )
             )
 
+    def ensure_primary_key_pagination(self):
+        fields = self.tables.setdefault(self.model_table, [])
+        if not find(lambda x: x.name == self.primary_key, fields):
+            self.tables[self.model_table].append(
+                self.Field(self.primary_key, None, None)
+            )
+            print("included, Haribol!")
+
     def generate_select_data(self):
         print(
-            f"*** SelectData: {self.subject}, {self.primary_key} ***", file=self.output
+            f"*** SelectData: {self.model_table}, {self.primary_key} ***",
+            file=self.output,
         )
+        self.ensure_primary_key_pagination()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""
                 print(f"'{table}.{field.name}{alias}',", file=self.output)
-        # TODO: in subject table if primary key hasn't been selected include it, automatically, Haribol
+        # TODO: in model_table table if primary key hasn't been selected include it, automatically, Haribol
         print("******\n", file=self.output)
-
-    def ensure_primary_key_pagination(self):
-        if not find(lambda x: x.name == self.primary_key, self.tables[self.subject]):
-            self.tables[self.subject].append(self.Field(self.primary_key, None, None))
-            print("included, Haribol!")
 
     def generate_pagination(self):
         print("*** Paginate (SelectData) ***", file=self.output)
-        self.ensure_primary_key_pagination()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = field.alias if field.alias else field.name
                 print(
                     (
                         "'id'"
-                        if table == self.subject and field.name == self.primary_key
+                        if table == self.model_table and field.name == self.primary_key
                         else f"'{camel_case(alias)}'"
                     ),
                     "=>",
