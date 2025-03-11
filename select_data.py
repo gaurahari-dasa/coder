@@ -19,7 +19,9 @@ class SelectData:
         def __init__(self, name: str, alias: str, specs: tuple[str, str]):
             self.name = name
             self.alias = alias
-            self.specs, qualities = specs if specs else (None, None)
+            self.specs, qualities, self.fillable = (
+                specs if specs else (None, None, False)
+            )
             self.sortable = self.sort_symbol in qualities if qualities else None
             self.searchable = self.search_symbol in qualities if qualities else None
 
@@ -34,6 +36,7 @@ class SelectData:
     def assignSpecs(self, field_name: str, back_name: str, specs: str):
         morph_specs = None
         qualities = None  # search / sort
+        fillable = False  # user can enter data
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
             matched = re.match(r"[ ]*(i|#|\$)[ ]*\((.*)\)(.*)", spec)
@@ -46,6 +49,7 @@ class SelectData:
                             matched.group(2),
                             matched.group(3),
                         )
+                        fillable = True
                     case "#":
                         morph_specs = morph(matched.group(2))
                         qualities = matched.group(3)
@@ -53,7 +57,7 @@ class SelectData:
                         self.ui.assign_foreign_key(camel_case(field_name), back_name)
                     case _:
                         warn("Unheard specs type, Haribol")
-        return (morph_specs, qualities)
+        return (morph_specs, qualities, fillable)
 
     def append(self, line: str):
         if not (line := line.strip()):
@@ -144,10 +148,27 @@ class SelectData:
                     print(f"'{table[0]}.{field.name}',", file=self.output)
         print("******\n", file=self.output)
 
+    def generate_sort_by_id(self):
+        print("*** Sort by id column ***", file=self.output)
+        id_field = find(
+            lambda x: x.name == self.primary_key, self.tables[self.model_table]
+        )
+        if id_field and id_field.sortable:
+            print(
+                rf"""
+                if ($sortField === 'id') {{
+                    $sortField = '{self.primary_key}'
+                }}
+                """,
+                file=self.output,
+            )
+        print("******\n", file=self.output)
+
     def generate(self):
         self.generate_select_data()
         self.generate_pagination()
         self.generate_search_clause()
+        self.generate_sort_by_id()
         ui_code = self.ui.generate()
         if ui_code:
             self.output.write(ui_code.getvalue())

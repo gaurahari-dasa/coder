@@ -40,6 +40,9 @@
 'guides.photo_path',
 ******
 
+*** Sort by id column ***
+******
+
 *** Form: addForm ***
 name: null,
 email: null,
