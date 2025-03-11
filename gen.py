@@ -9,10 +9,11 @@ sections = []
 cur_sect = None
 
 model_section = None
+select_data_section = None
 
 
 def read_sections():
-    global cur_sect
+    global cur_sect, model_section, select_data_section
     spec = open("templates/input.spec")
     while line := spec.readline():
         line = line.strip()
@@ -22,7 +23,7 @@ def read_sections():
         if matched:
             match (matched.group(1)):
                 case "SelectData":
-                    sections.append(SelectData(matched.group(2), model_section))
+                    sections.append(select_data_section := SelectData(matched.group(2), model_section))
                 case "Model":
                     sections.append(model_section := Model(matched.group(2)))
                 case _:
@@ -39,6 +40,12 @@ output = open(
     "output/output.txt",
     "wt",
 )
-for section in sections:
-    if gen := section.generate():
-        output.write(gen.getvalue())
+
+if gen := select_data_section.generate():
+    output.write(gen.getvalue())
+if gen := model_section.generate():
+    output.write(gen.getvalue())
+
+# for section in sections:
+#     if gen := section.generate():
+#         output.write(gen.getvalue())

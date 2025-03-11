@@ -1,12 +1,3 @@
-*** Model: fillable ***
-'name',
-'email',
-'mobile',
-'photo_path',
-'dob',
-'active',
-******
-
 *** SelectData: guides, guide_id ***
 'guides.guide_id',
 'guides.name',
@@ -142,5 +133,14 @@ $guide->language_id = $validated['languageId'];
 $guide->contact_id = request('contactId');
 LogActivityHelper::save($guide);
 return $guide;
+******
+
+*** Model: fillable ***
+'name',
+'email',
+'mobile',
+'photo_path',
+'dob',
+'active',
 ******
 

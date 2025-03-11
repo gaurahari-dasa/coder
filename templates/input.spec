@@ -1,10 +1,4 @@
 *** Model: Guide ***
-name
-email
-mobile
-photo_path
-dob
-active
 
 *** SelectData: guides; guide_id ***
 

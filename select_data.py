@@ -29,11 +29,14 @@ class SelectData:
         self.model_table, self.primary_key = [s.strip() for s in spec.split(";")]
         self.output = io.StringIO()
         self.tables = {}
+        self.cur_table = None  # track the table whose fields are being read
         self.fields = None  # track the fields in current table, Haribol
-        # self.model = model
+        self.model = model
         self.ui = UserInput(model)
 
-    def assignSpecs(self, field_name: str, back_name: str, specs: str):
+    def parse_specs(
+        self, field_name: str, back_name: str, specs: str, model_owned: bool
+    ):
         morph_specs = None
         qualities = None  # search / sort
         fillable = False  # user can enter data
@@ -49,6 +52,8 @@ class SelectData:
                             matched.group(2),
                             matched.group(3),
                         )
+                        if model_owned:
+                            self.model.append_field(field_name)
                         fillable = True
                     case "#":
                         morph_specs = morph(matched.group(2))
@@ -64,7 +69,8 @@ class SelectData:
             return
         matched = re.match("\\*{2}[ ]*(.*?)[ ]*\\*{2}", line)
         if matched:
-            self.fields = self.tables.setdefault(matched.group(1), [])
+            self.cur_table = matched.group(1)
+            self.fields = self.tables.setdefault(self.cur_table, [])
         else:
             matched = re.match(
                 f"({identifier})(?:[ ]+as[ ]+({identifier}))?(?:[ ]*:(.*))?", line
@@ -81,7 +87,12 @@ class SelectData:
                 self.Field(
                     name,
                     alias,
-                    self.assignSpecs(alias if alias else name, name, matched.group(3)),
+                    self.parse_specs(
+                        alias if alias else name,
+                        name,
+                        matched.group(3),
+                        self.cur_table == self.model_table,
+                    ),
                 )
             )
 
