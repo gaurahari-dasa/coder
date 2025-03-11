@@ -23,7 +23,11 @@ def read_sections():
         if matched:
             match (matched.group(1)):
                 case "SelectData":
-                    sections.append(select_data_section := SelectData(matched.group(2), model_section))
+                    sections.append(
+                        select_data_section := SelectData(
+                            matched.group(2), model_section
+                        )
+                    )
                 case "Model":
                     sections.append(model_section := Model(matched.group(2)))
                 case _:

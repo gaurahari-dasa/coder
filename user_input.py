@@ -26,11 +26,12 @@ class UserInput:
 
     def __init__(self, model: Model):
         self.fields = []
+        self.lookups = set()
         self.foreign_key = None
         self.model = model
         self.output = io.StringIO()
 
-    def appendField(self, name, base_name, specs, qualities):
+    def append_field(self, name, base_name, specs, qualities):
         self.fields.append(self.Field(name, base_name, specs, qualities))
 
     def assign_foreign_key(self, name, base_name):
@@ -59,6 +60,7 @@ class UserInput:
         self.generate_typed_input(field, type="date")
 
     def generate_select_input(self, field):
+        self.lookups.add(field.options)
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
@@ -141,12 +143,26 @@ class UserInput:
                 print(f"datum.{field.name};", file=self.output)
         print("******\n", file=self.output)
         return self.output
-    
+
+    def generate_vue_props(self):
+        print("*** Vue props ***", file=self.output)
+        for lookup in self.lookups:
+            print(f"{lookup}: Array,", file=self.output)
+        print("******\n", file=self.output)
+        return self.output
+
+    def generate_controller_props(self):
+        print("*** Controller props ***", file=self.output)
+        for lookup in self.lookups:
+            print(f"'{lookup}' => HelperClass::list()->get,", file=self.output)
+        print("******\n", file=self.output)
+        return self.output
+
     def generate_controller_validation(self):
-        print('*** Controller: validation ***', file=self.output)
+        print("*** Controller: validation ***", file=self.output)
         for field in self.fields:
             print(f"{field.name} => '',", file=self.output)
-        print('******\n', file=self.output)
+        print("******\n", file=self.output)
         return self.output
 
     def generate_store_server(self):
@@ -211,9 +227,15 @@ class UserInput:
         if not self.generate_form_elements("editForm"):
             return None
 
+        if not self.generate_vue_props():
+            return None
+
+        if not self.generate_controller_props():
+            return None
+
         if not self.generate_controller_validation():
             return None
-        
+
         if not self.generate_store_server():
             return None
 

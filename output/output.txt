@@ -31,7 +31,7 @@
 'guides.photo_path',
 ******
 
-*** Sort by id column ***
+*** Sort by id column (SelectData) ***
 ******
 
 *** Form: addForm ***
@@ -96,6 +96,14 @@ editForm.languageId = datum.languageId;
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="editForm.languageId" :error="editForm.errors.languageId" />
+******
+
+*** Vue props ***
+languages: Array,
+******
+
+*** Controller props ***
+'languages' => HelperClass::list()->get,
 ******
 
 *** Controller: validation ***

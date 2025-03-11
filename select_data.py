@@ -46,7 +46,7 @@ class SelectData:
             if matched:
                 match matched.group(1):
                     case "i":
-                        self.ui.appendField(
+                        self.ui.append_field(
                             camel_case(field_name),
                             back_name,
                             matched.group(2),
@@ -102,7 +102,7 @@ class SelectData:
             self.tables[self.model_table].append(
                 self.Field(self.primary_key, None, None)
             )
-            print("included, Haribol!")
+            print("Auto-included primary key, Haribol!")
 
     def generate_select_data(self):
         print(
@@ -160,7 +160,7 @@ class SelectData:
         print("******\n", file=self.output)
 
     def generate_sort_by_id(self):
-        print("*** Sort by id column ***", file=self.output)
+        print("*** Sort by id column (SelectData) ***", file=self.output)
         id_field = find(
             lambda x: x.name == self.primary_key, self.tables[self.model_table]
         )
