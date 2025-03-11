@@ -24,11 +24,12 @@ class UserInput:
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
 
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, model_table: str):
         self.fields = []
         self.lookups = set()
         self.foreign_key = None
         self.model = model
+        self.model_table = model_table
         self.output = io.StringIO()
 
     def append_field(self, name, base_name, specs, qualities):
@@ -111,6 +112,23 @@ class UserInput:
         self.form_type = form_type
         for field in self.fields:
             self.generate_control(field)
+        print("******\n", file=self.output)
+        return self.output
+
+    def generate_pagination_urls(self):
+        print("*** Pagination URLs ***", file=self.output)
+        iter_var = self.model.name.lower()
+        print(
+            rf"""
+for (const {iter_var} of props.{self.model_table}.data) {{
+    data.value.push({{ ...{iter_var} }});
+}}
+
+const prevUrl = props.{self.model_table}.prev_page_url;
+const nextUrl = props.{self.model_table}.next_page_url;
+""",
+            file=self.output,
+        )
         print("******\n", file=self.output)
         return self.output
 
@@ -219,6 +237,9 @@ class UserInput:
         return self.output
 
     def generate(self):
+        if not self.generate_pagination_urls():
+            return None
+
         if not self.generate_form("addForm"):
             return None
 

@@ -34,6 +34,17 @@
 *** Sort by id column (SelectData) ***
 ******
 
+*** Pagination URLs ***
+
+for (const guide of props.guides.data) {
+    data.value.push({ ...guide });
+}
+
+const prevUrl = props.guides.prev_page_url;
+const nextUrl = props.guides.next_page_url;
+
+******
+
 *** Form: addForm ***
 name: null,
 email: null,

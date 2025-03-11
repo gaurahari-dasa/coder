@@ -32,7 +32,7 @@ class SelectData:
         self.cur_table = None  # track the table whose fields are being read
         self.fields = None  # track the fields in current table, Haribol
         self.model = model
-        self.ui = UserInput(model)
+        self.ui = UserInput(model, self.model_table)
 
     def parse_specs(
         self, field_name: str, back_name: str, specs: str, model_owned: bool
