@@ -99,7 +99,6 @@ class SelectData:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""
                 print(f"'{table}.{field.name}{alias}',", file=self.output)
-        # TODO: in model_table table if primary key hasn't been selected include it, automatically, Haribol
         print("******\n", file=self.output)
 
     def generate_pagination(self):

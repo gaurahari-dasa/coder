@@ -13,7 +13,7 @@ model_section = None
 
 def read_sections():
     global cur_sect
-    spec = open("input.spec")
+    spec = open("templates/input.spec")
     while line := spec.readline():
         line = line.strip()
         if not line or line.startswith("#"):  # comment, Haribol
@@ -36,7 +36,7 @@ def read_sections():
 read_sections()
 
 output = open(
-    "output.txt",
+    "output/output.txt",
     "wt",
 )
 for section in sections:
