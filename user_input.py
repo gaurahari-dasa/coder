@@ -113,7 +113,6 @@ class UserInput:
         for field in self.fields:
             self.generate_control(field)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_pagination_urls(self):
         print("*** Pagination URLs ***", file=self.output)
@@ -130,7 +129,6 @@ const nextUrl = props.{self.model_table}.next_page_url;
             file=self.output,
         )
         print("******\n", file=self.output)
-        return self.output
 
     def generate_form(self, form_type):
         print(f"*** Form: {form_type} ***", file=self.output)
@@ -144,7 +142,6 @@ const nextUrl = props.{self.model_table}.next_page_url;
                 file=self.output,
             )
         print("******\n", file=self.output)
-        return self.output
 
     def generate_edit_row(self):
         print("*** editRow ***", file=self.output)
@@ -167,28 +164,24 @@ const nextUrl = props.{self.model_table}.next_page_url;
             else:
                 print(f"datum.{field.name};", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_vue_props(self):
         print("*** Vue props ***", file=self.output)
         for lookup in self.lookups:
             print(f"{lookup}: Array,", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_controller_props(self):
         print("*** Controller props ***", file=self.output)
         for lookup in self.lookups:
             print(f"'{lookup}' => HelperClass::list()->get,", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_controller_validation(self):
         print("*** Controller: validation ***", file=self.output)
         for field in self.fields:
             print(f"{field.name} => '',", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_store_server(self):
         print(f"*** Store data ***", file=self.output)
@@ -210,7 +203,6 @@ const nextUrl = props.{self.model_table}.next_page_url;
             )
         print("]);", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate_update_server(self):
         print(f"*** Update data ***", file=self.output)
@@ -234,40 +226,17 @@ const nextUrl = props.{self.model_table}.next_page_url;
         print(f"LogActivityHelper::save({varname});", file=self.output)
         print(f"return {varname};", file=self.output)
         print("******\n", file=self.output)
-        return self.output
 
     def generate(self):
-        if not self.generate_pagination_urls():
-            return None
-
-        if not self.generate_form("addForm"):
-            return None
-
-        if not self.generate_form("editForm"):
-            return None
-
-        if not self.generate_edit_row():
-            return None
-
-        if not self.generate_form_elements("addForm"):
-            return None
-
-        if not self.generate_form_elements("editForm"):
-            return None
-
-        if not self.generate_vue_props():
-            return None
-
-        if not self.generate_controller_props():
-            return None
-
-        if not self.generate_controller_validation():
-            return None
-
-        if not self.generate_store_server():
-            return None
-
-        if not self.generate_update_server():
-            return None
-
+        self.generate_pagination_urls()
+        self.generate_form("addForm")
+        self.generate_form("editForm")
+        self.generate_edit_row()
+        self.generate_form_elements("addForm")
+        self.generate_form_elements("editForm")
+        self.generate_vue_props()
+        self.generate_controller_props()
+        self.generate_controller_validation()
+        self.generate_store_server()
+        self.generate_update_server()
         return self.output
