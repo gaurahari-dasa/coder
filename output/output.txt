@@ -58,6 +58,10 @@ contactId: props.contactId,
 ******
 
 *** editRow ***
+
+    editForm.id = id;
+    const datum = data.value.find(v => v.id === id);
+        
 editForm.name = datum.name;
 editForm.email = datum.email;
 editForm.mobile = datum.mobile;

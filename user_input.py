@@ -130,6 +130,13 @@ class UserInput:
 
     def generate_edit_row(self):
         print("*** editRow ***", file=self.output)
+        print(  # following is boiler-plate, but very imp code, Haribol
+            r"""
+    editForm.id = id;
+    const datum = data.value.find(v => v.id === id);
+        """,
+            file=self.output,
+        )
         for field in self.fields:
             if field.type == "file":
                 continue  # cannot edit file contents on server, Haribol
