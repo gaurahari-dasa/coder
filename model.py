@@ -17,11 +17,31 @@ class Model:
     def append_field(self, field: str):
         self.fields.append(field)
 
-    def generate(self):
-        print("*** Model: fillable ***", file=self.output)
+    def generate_fillable(self):
+        output = io.StringIO()
         for field in self.fields:
             matched = re.match(f"[ ]*({identifier})[ ]*", field)
             if matched:
-                print(f"'{matched.group(1)}',", file=self.output)
+                print(f"'{matched.group(1)}',", file=output)
+        return output
+
+    def generate(self):
+        print("*** Model: fillable ***", file=self.output)
+        self.output.write(self.generate_fillable().getvalue())
         print("******\n", file=self.output)
         return self.output
+
+    def hydrate(self):
+        file = open("templates/model.txt")
+        while line := file.readline():
+            print(
+                hydrate(
+                    line,
+                    {
+                        "1": self.name,
+                        "3": self.generate_fillable().getvalue()
+                    },
+                ),
+                end="",
+            )
+        file.close()

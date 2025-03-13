@@ -36,3 +36,12 @@ def camel_case(name: str):
 
 def find(pred, elems: iter):
     return next((elem for elem in elems if pred(elem)), None)
+
+
+def hydrate(line: str, args: dict):
+    if not args:
+        return line
+    
+    return re.sub(
+        "@@@[ ]*([0-9;]+)[ ]*@@@\n?", lambda x: args.get(x.group(1), x.group(0)), line
+    )
