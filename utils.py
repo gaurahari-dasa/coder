@@ -41,7 +41,14 @@ def find(pred, elems: iter):
 def hydrate(line: str, args: dict):
     if not args:
         return line
-    
+
+    def replace(match: re.Match):
+        try:
+            return args[match.group(1)]
+        except:
+            warn("Not hydrated:", match.group(0))
+            return match.group(0)
+
     return re.sub(
-        "@@@[ ]*([0-9;]+)[ ]*@@@\n?", lambda x: args.get(x.group(1), x.group(0)), line
+        "@@@[ ]*([0-9;]+)[ ]*@@@\n?", replace, line
     )
