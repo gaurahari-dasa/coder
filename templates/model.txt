@@ -9,7 +9,7 @@ class @@@ 1 @@@ extends Model
     const CREATED_AT = 'created_on';
     const UPDATED_AT = 'modified_on';
 
-    protected $primaryKey = @@@ 2 @@@;
+    protected $primaryKey = '@@@ 2 @@@';
 
     protected $fillable = [
         @@@ 3 @@@
