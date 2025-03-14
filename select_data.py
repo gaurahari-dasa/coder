@@ -1,5 +1,6 @@
 import re
 import io
+import sql_utils
 
 from utils import *
 from model import Model
@@ -71,6 +72,7 @@ class SelectData:
         matched = re.match("\\*{2}[ ]*(.*?)[ ]*\\*{2}", line)
         if matched:
             self.cur_table = matched.group(1)
+            sql_utils.check_table(self.cur_table)
             self.fields = self.tables.setdefault(self.cur_table, [])
         else:
             matched = re.match(
@@ -83,6 +85,7 @@ class SelectData:
                 error("No table name in specs, Haribol!")
 
             name = matched.group(1)
+            sql_utils.check_column(self.cur_table, name)
             alias = matched.group(2)
             self.fields.append(
                 self.Field(
@@ -185,3 +188,23 @@ class SelectData:
         if ui_code:
             self.output.write(ui_code.getvalue())
         return self.output
+
+    def hydrate(self):
+        template = open("templates/ModelHelper.txt")
+        helperClass = f'{self.model.name}Helper'
+        output = open(f"output/{helperClass}.php", "wt")
+        while line := template.readline():
+            print(
+                hydrate(
+                    line,
+                    {
+                        "1": helperClass,
+                        "2": self.primary_key,
+                        "3": self.generate_fillable().getvalue(),
+                    },
+                ),
+                end="",
+                file=output,
+            )
+        template.close()
+        output.close()

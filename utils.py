@@ -8,17 +8,17 @@ identifier = "[a-zA-Z0-9_]+"
 
 def note(mesg, *args):
     colon = ":" if args else ""
-    print(f"{cf.green}{mesg}{colon}", *args, cf.reset)
+    print(f"{cf.yellow}{mesg}{colon}", *args, cf.reset)
 
 
 def warn(mesg, *args):
     colon = ":" if args else ""
-    print(f"{cf.red}{mesg}{colon}", *args, cf.reset)
+    print(f"{cf.coral}{mesg}{colon}", *args, cf.reset)
 
 
 def error(mesg, *args, halt=True):
     colon = ":" if args else ""
-    print(f"{cf.yellow}{mesg}{colon}", *args, cf.reset)
+    print(f"{cf.red}{mesg}{colon}", *args, cf.reset)
     if halt:
         exit()
 
