@@ -27,21 +27,24 @@ class Model:
 
     def generate(self):
         print("*** Model: fillable ***", file=self.output)
-        self.output.write(self.generate_fillable().getvalue())
+        try:
+            self.output.write(self.generate_fillable().getvalue())
+        except Exception as ex:
+            warn(ex)
         print("******\n", file=self.output)
         return self.output
 
     def hydrate(self):
-        file = open("templates/model.txt")
-        while line := file.readline():
+        template = open("templates/model.txt")
+        output = open(f"output/{self.name}.php", 'wt')
+        while line := template.readline():
             print(
                 hydrate(
                     line,
-                    {
-                        "1": self.name,
-                        "3": self.generate_fillable().getvalue()
-                    },
+                    {"1": self.name, "3": self.generate_fillable().getvalue()},
                 ),
                 end="",
+                file=output,
             )
-        file.close()
+        template.close()
+        output.close()

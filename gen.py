@@ -15,27 +15,30 @@ select_data_section = None
 def read_sections():
     global cur_sect, model_section, select_data_section
     spec = open("templates/input.spec")
-    while line := spec.readline():
-        line = line.strip()
-        if not line or line.startswith("#"):  # comment, Haribol
-            continue
-        matched = re.match("\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}", line)
-        if matched:
-            match (matched.group(1)):
-                case "SelectData":
-                    sections.append(
-                        select_data_section := SelectData(
-                            matched.group(2), model_section
+    try:
+        while line := spec.readline():
+            line = line.strip()
+            if not line or line.startswith("#"):  # comment, Haribol
+                continue
+            matched = re.match("\\*{3}[ ]*(.*?)(?::[ ]*(.*?))?[ ]*\\*{3}", line)
+            if matched:
+                match (matched.group(1)):
+                    case "SelectData":
+                        sections.append(
+                            select_data_section := SelectData(
+                                matched.group(2), model_section
+                            )
                         )
-                    )
-                case "Model":
-                    sections.append(model_section := Model(matched.group(2)))
-                case _:
-                    print("section: <", matched.group(1), ">", sep="")
-                    continue
-            cur_sect = sections[-1]
-        elif cur_sect:
-            cur_sect.append(line)
+                    case "Model":
+                        sections.append(model_section := Model(matched.group(2)))
+                    case _:
+                        print("section: <", matched.group(1), ">", sep="")
+                        continue
+                cur_sect = sections[-1]
+            elif cur_sect:
+                cur_sect.append(line)
+    finally:
+        spec.close()
 
 
 read_sections()
