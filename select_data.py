@@ -1,8 +1,8 @@
 import re
 import io
-import sql_utils
 
-from utils import *
+import utils
+import sql_utils
 from model import Model
 from user_input import UserInput
 
@@ -49,7 +49,7 @@ class SelectData:
                 match matched.group(1):
                     case "i":
                         self.ui.append_field(
-                            camel_case(field_name),
+                            utils.camel_case(field_name),
                             back_name,
                             matched.group(2),
                             matched.group(3),
@@ -61,9 +61,9 @@ class SelectData:
                         morph_specs = morph(matched.group(2))
                         qualities = matched.group(3)
                     case "$":
-                        self.ui.assign_foreign_key(camel_case(field_name), back_name)
+                        self.ui.assign_foreign_key(utils.camel_case(field_name), back_name)
                     case _:
-                        warn("Unheard specs type, Haribol")
+                        utils.warn("Unheard specs type, Haribol")
         return (morph_specs, qualities, fillable)
 
     def append(self, line: str):
@@ -76,13 +76,13 @@ class SelectData:
             self.fields = self.tables.setdefault(self.cur_table, [])
         else:
             matched = re.match(
-                f"({identifier})(?:[ ]+as[ ]+({identifier}))?(?:[ ]*:(.*))?", line
+                f"({utils.identifier})(?:[ ]+as[ ]+({utils.identifier}))?(?:[ ]*:(.*))?", line
             )
             if not matched:
-                error("DB field name spec is improper, Haribol!")
+                utils.error("DB field name spec is improper, Haribol!")
 
             if self.fields is None:
-                error("No table name in specs, Haribol!")
+                utils.error("No table name in specs, Haribol!")
 
             name = matched.group(1)
             sql_utils.check_column(self.cur_table, name)
@@ -102,7 +102,7 @@ class SelectData:
 
     def ensure_primary_key_pagination(self):
         fields = self.tables.setdefault(self.model_table, [])
-        if not find(lambda x: x.name == self.primary_key, fields):
+        if not utils.find(lambda x: x.name == self.primary_key, fields):
             self.tables[self.model_table].append(
                 self.Field(self.primary_key, None, None)
             )
@@ -129,7 +129,7 @@ class SelectData:
                     (
                         "'id'"
                         if table == self.model_table and field.name == self.primary_key
-                        else f"'{camel_case(alias)}'"
+                        else f"'{utils.camel_case(alias)}'"
                     ),
                     "=>",
                     end=" ",
@@ -152,7 +152,7 @@ class SelectData:
                         )
                     case _:
                         print(file=self.output)
-                        warn("Unknown transformation type, Haribol", field.specs)
+                        utils.warn("Unknown transformation type, Haribol", field.specs)
         print("******\n", file=self.output)
 
     def generate_search_clause(self):
@@ -165,7 +165,7 @@ class SelectData:
 
     def generate_sort_by_id(self):
         print("*** Sort by id column (SelectData) ***", file=self.output)
-        id_field = find(
+        id_field = utils.find(
             lambda x: x.name == self.primary_key, self.tables[self.model_table]
         )
         if id_field and id_field.sortable:
@@ -195,7 +195,7 @@ class SelectData:
         output = open(f"output/{helperClass}.php", "wt")
         while line := template.readline():
             print(
-                hydrate(
+                utils.hydrate(
                     line,
                     {
                         "1": helperClass,

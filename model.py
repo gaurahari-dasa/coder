@@ -1,7 +1,7 @@
 import re
 import io
 
-from utils import *
+import utils
 
 
 class Model:
@@ -20,7 +20,7 @@ class Model:
     def generate_fillable(self):
         output = io.StringIO()
         for field in self.fields:
-            matched = re.match(f"[ ]*({identifier})[ ]*", field)
+            matched = re.match(f"[ ]*({utils.identifier})[ ]*", field)
             if matched:
                 print(f"'{matched.group(1)}',", file=output)
         return output
@@ -30,7 +30,7 @@ class Model:
         try:
             self.output.write(self.generate_fillable().getvalue())
         except Exception as ex:
-            warn(ex)
+            utils.warn(ex)
         print("******\n", file=self.output)
         return self.output
 
@@ -39,7 +39,7 @@ class Model:
         output = open(f"output/{self.name}.php", "wt")
         while line := template.readline():
             print(
-                hydrate(
+                utils.hydrate(
                     line,
                     {
                         "1": self.name,

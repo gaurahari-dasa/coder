@@ -7,7 +7,7 @@ cnx = mysql.connector.connect(
 )
 
 if not (cnx and cnx.is_connected()):
-    utils.error("DB connection failure, Haribol!")
+    utils.error("Failed to connect to DB, Haribol!")
 
 
 def query(qry: str):

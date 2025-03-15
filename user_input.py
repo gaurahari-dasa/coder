@@ -2,7 +2,7 @@ import re
 import io
 from collections import namedtuple
 
-from utils import *
+import utils
 from model import Model
 
 
@@ -19,8 +19,8 @@ class UserInput:
             self.base_name = base_name  # name in database, Haribol
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
             self.type = specs[0]
-            self.title = nullishIndex(specs, 1)
-            self.options = nullishIndex(specs, 2)
+            self.title = utils.nullishIndex(specs, 1)
+            self.options = utils.nullishIndex(specs, 2)
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
 
@@ -105,7 +105,7 @@ class UserInput:
             case "auto":
                 self.generate_autocomplete(field)
             case _:
-                warn("Unknown control, Haribol!", field.name, field.type)
+                utils.warn("Unknown control, Haribol!", field.name, field.type)
 
     def generate_form_elements(self, form_type):
         print(f"*** UI: {form_type} ***", file=self.output)
@@ -188,7 +188,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
         print(f"return {self.model.name}::create([", file=self.output)
         for field in self.fields:
             if field.type == "file":
-                note("File type inputs require to be saved to disk, Haribol!")
+                utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"'{field.base_name}' =>", end=" ", file=self.output)
             if field.type == "date":
                 print(
@@ -210,7 +210,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
         print(f"{varname} = {self.model.name}::find(request('id'));", file=self.output)
         for field in self.fields:
             if field.type == "file":
-                note("File type inputs require to be saved to disk, Haribol!")
+                utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=self.output)
             if field.type == "date":
                 print(
