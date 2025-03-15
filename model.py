@@ -42,9 +42,9 @@ class Model:
                 utils.hydrate(
                     line,
                     {
-                        "1": self.name,
-                        "2": self.primary_key,
-                        "3": self.generate_fillable().getvalue(),
+                        "model": self.name,
+                        "primary_key": self.primary_key,
+                        "fillable": self.generate_fillable().getvalue(),
                     },
                 ),
                 end="",

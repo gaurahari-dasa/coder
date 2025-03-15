@@ -50,5 +50,5 @@ def hydrate(line: str, args: dict):
             return match.group(0)
 
     return re.sub(
-        "@@@[ ]*([0-9;]+)[ ]*@@@\n?", replace, line
+        "@@@[ ]*([a-z_0-9]+)[ ]*@@@\n?", replace, line
     )
