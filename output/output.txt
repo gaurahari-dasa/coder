@@ -1,4 +1,4 @@
-*** SelectData: guides, guide_id ***
+*** SelectData: model_table, primary_key ***
 'guides.guide_id',
 'guides.name',
 'guides.email',

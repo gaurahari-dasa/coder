@@ -54,6 +54,7 @@ if gen := model_section.generate():
     output.write(gen.getvalue())
 
 model_section.hydrate()
+select_data_section.hydrate()
 # for section in sections:
 #     if gen := section.generate():
 #         output.write(gen.getvalue())

@@ -38,17 +38,19 @@ def find(pred, elems: iter):
     return next((elem for elem in elems if pred(elem)), None)
 
 
+def strip_last_newline(s: str):
+    return s[:-1] if s.endswith('\n') else s
+
+
 def hydrate(line: str, args: dict):
     if not args:
         return line
-
+    
     def replace(match: re.Match):
         try:
-            return args[match.group(1)]
+            return strip_last_newline(args[match.group(1)])
         except:
             warn("Not hydrated:", match.group(0))
             return match.group(0)
 
-    return re.sub(
-        "@@@[ ]*([a-z_0-9]+)[ ]*@@@\n?", replace, line
-    )
+    return re.sub("@@@[ ]*([a-z_0-9]+)[ ]*@@@", replace, line)

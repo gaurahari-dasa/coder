@@ -61,7 +61,9 @@ class SelectData:
                         morph_specs = morph(matched.group(2))
                         qualities = matched.group(3)
                     case "$":
-                        self.ui.assign_foreign_key(utils.camel_case(field_name), back_name)
+                        self.ui.assign_foreign_key(
+                            utils.camel_case(field_name), back_name
+                        )
                     case _:
                         utils.warn("Unheard specs type, Haribol")
         return (morph_specs, qualities, fillable)
@@ -76,7 +78,8 @@ class SelectData:
             self.fields = self.tables.setdefault(self.cur_table, [])
         else:
             matched = re.match(
-                f"({utils.identifier})(?:[ ]+as[ ]+({utils.identifier}))?(?:[ ]*:(.*))?", line
+                f"({utils.identifier})(?:[ ]+as[ ]+({utils.identifier}))?(?:[ ]*:(.*))?",
+                line,
             )
             if not matched:
                 utils.error("DB field name spec is improper, Haribol!")
@@ -109,19 +112,16 @@ class SelectData:
             print("Auto-included primary key, Haribol!")
 
     def generate_select_data(self):
-        print(
-            f"*** SelectData: {self.model_table}, {self.primary_key} ***",
-            file=self.output,
-        )
+        output = io.StringIO()
         self.ensure_primary_key_pagination()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""
-                print(f"'{table}.{field.name}{alias}',", file=self.output)
-        print("******\n", file=self.output)
+                print(f"'{table}.{field.name}{alias}',", file=output)
+        return output
 
     def generate_pagination(self):
-        print("*** Paginate (SelectData) ***", file=self.output)
+        output = io.StringIO()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = field.alias if field.alias else field.name
@@ -133,38 +133,38 @@ class SelectData:
                     ),
                     "=>",
                     end=" ",
-                    file=self.output,
+                    file=output,
                 )
                 match field.specs:
                     case None:
-                        print(f"$item->{alias},", file=self.output)
+                        print(f"$item->{alias},", file=output)
                     case "file":
-                        print(f"Storage::url($item->{alias}),", file=self.output)
+                        print(f"Storage::url($item->{alias}),", file=output)
                     case "date-only":
                         print(
                             f"Utils::formatDateJs($item->{alias}, DateFormatJs::OnlyDate),",
-                            file=self.output,
+                            file=output,
                         )
                     case "date-time":
                         print(
                             f"Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),",
-                            file=self.output,
+                            file=output,
                         )
                     case _:
-                        print(file=self.output)
+                        print(file=output)
                         utils.warn("Unknown transformation type, Haribol", field.specs)
-        print("******\n", file=self.output)
+        return output
 
     def generate_search_clause(self):
-        print("*** Search clause (Select Data) ***", file=self.output)
+        output = io.StringIO()
         for table in self.tables.items():
             for field in table[1]:
                 if field.searchable:
-                    print(f"'{table[0]}.{field.name}',", file=self.output)
-        print("******\n", file=self.output)
+                    print(f"'{table[0]}.{field.name}',", file=output)
+        return output
 
     def generate_sort_by_id(self):
-        print("*** Sort by id column (SelectData) ***", file=self.output)
+        output = io.StringIO()
         id_field = utils.find(
             lambda x: x.name == self.primary_key, self.tables[self.model_table]
         )
@@ -175,15 +175,25 @@ class SelectData:
                     $sortField = '{self.primary_key}'
                 }}
                 """,
-                file=self.output,
+                file=output,
             )
-        print("******\n", file=self.output)
+        return output
+
+    funcs = [
+        ('*** SelectData: model_table, primary_key ***', generate_select_data),
+        ('*** Paginate (SelectData) ***', generate_pagination),
+        ('*** Search clause (Select Data) ***', generate_search_clause),
+        ('*** Sort by id column (SelectData) ***', generate_sort_by_id),
+    ]
 
     def generate(self):
-        self.generate_select_data()
-        self.generate_pagination()
-        self.generate_search_clause()
-        self.generate_sort_by_id()
+        for func in self.funcs:
+            print(func[0], file=self.output)
+            try:
+                self.output.write(func[1](self).getvalue())
+            except Exception as ex:
+                utils.warn(ex)
+            print("******\n", file=self.output)
         ui_code = self.ui.generate()
         if ui_code:
             self.output.write(ui_code.getvalue())
@@ -191,16 +201,16 @@ class SelectData:
 
     def hydrate(self):
         template = open("templates/ModelHelper.txt")
-        helperClass = f'{self.model.name}Helper'
-        output = open(f"output/{helperClass}.php", "wt")
+        model_helper = f"{self.model.name}Helper"
+        output = open(f"output/{model_helper}.php", "wt")
         while line := template.readline():
             print(
                 utils.hydrate(
                     line,
                     {
-                        "1": helperClass,
-                        "2": self.primary_key,
-                        "3": self.generate_fillable().getvalue(),
+                        "model": self.model.name,
+                        "model_helper": model_helper,
+                        "select_data": self.generate_select_data().getvalue(),
                     },
                 ),
                 end="",

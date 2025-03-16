@@ -38,15 +38,16 @@ class Model:
         template = open("templates/model.txt")
         output = open(f"output/{self.name}.php", "wt")
         while line := template.readline():
-            print(
-                utils.hydrate(
+            hydrated = utils.hydrate(
                     line,
                     {
                         "model": self.name,
                         "primary_key": self.primary_key,
                         "fillable": self.generate_fillable().getvalue(),
                     },
-                ),
+                )
+            print(
+                hydrated,
                 end="",
                 file=output,
             )
