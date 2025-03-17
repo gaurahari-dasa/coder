@@ -11,6 +11,7 @@ photo_path: i (file; Photo), # (%ImageColumn; ; ~file)?^
 # dob: i (date; DOB), # (~date-only)
 active: i (checkbox; Active), # (ActiveColumn; Active; )
 contact_id: $(contacts)
+language_id: $(languages)
 
 ** languages **
 language_id: i (select; Language; languages)

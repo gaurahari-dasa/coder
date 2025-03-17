@@ -111,12 +111,12 @@ languages: Array,
 ******
 
 *** Controller: validation ***
-name => '',
-email => '',
-mobile => '',
-photoPath => '',
-active => '',
-languageId => '',
+'name' => '',
+'email' => '',
+'mobile' => '',
+'photoPath' => '',
+'active' => '',
+'languageId' => '',
 ******
 
 *** Store data ***
@@ -150,5 +150,7 @@ return $guide;
 'mobile',
 'photo_path',
 'active',
+'contact_id',
+'language_id',
 ******
 

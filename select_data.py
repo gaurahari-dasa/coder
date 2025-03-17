@@ -52,7 +52,7 @@ class SelectData:
         morph_specs = None
         qualities = None  # search / sort, Haribol
         fillable = False  # mass assignable, Haribol
-        foreign = None  # foreign key, Haribol
+        foreign = None  # specifies foreign table, Haribol
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
             matched = re.match(r"[ ]*(i|#|\$)[ ]*\((.*)\)(.*)", spec)
@@ -65,24 +65,24 @@ class SelectData:
                             matched.group(2),
                             matched.group(3),
                         )
-                        if model_owned:
-                            self.model.append_field(field_name)
-                        fillable = True
                     case "#":
                         morph_specs = morph(matched.group(2))
                         qualities = matched.group(3)
                     case "$":
-                        self.ui.assign_foreign_key(
-                            utils.camel_case(field_name), back_name
-                        )
                         foreign = matched.group(2)
-                        fillable = True
-                        if not self.foreign_key:
-                            # self.foreign_key = back_name
-                            # self.cntxt_table = foreign
-                            utils.error("No foreign table specs defined, Haribol")
+                        if foreign == self.cntxt_table:
+                            self.ui.assign_foreign_key(
+                                utils.camel_case(field_name), back_name
+                            )
+                        # if not self.foreign_key:
+                        #     # self.foreign_key = back_name
+                        #     # self.cntxt_table = foreign
+                        #     utils.error("No foreign table specs defined, Haribol")
                     case _:
                         utils.warn("Unheard specs type, Haribol")
+                if matched.group(1) in ["i", "$"] and model_owned:
+                    self.model.append_field(field_name)
+                    fillable = True
         return (morph_specs, qualities, fillable, foreign)
 
     def append(self, line: str):
@@ -235,7 +235,7 @@ class SelectData:
 
     def cntxt_filter(self):
         foreign = self.foreign()
-        if not foreign:
+        if not foreign == self.cntxt_table:
             return ""
         alias = foreign.alias if foreign.alias else foreign.name
         return f"\n->where('{self.model_table}.{foreign.name}', request('{utils.kebab_case(alias)}'))"

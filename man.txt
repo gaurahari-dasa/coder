@@ -1,0 +1,34 @@
+Jai Srila Prabhupada, Jai Harinam, Jai Sri Caitanya Mahaprabhu, Jai Sri Sri RadhaKrsnacandra
+
+As of now for Model specification only one line containing the Model tag is sufficient like so:
+
+*** Model: <model name> ***
+
+For Selecting which data should be exposed from the DB, we use the following tag:
+
+*** SelectData: guides; guide_id ***
+
+The above tag specifies that the guide entities are in the guides table which has a primary key column by name 'guide_id'.
+
+To specify the context foreign table with which this entity has many to one relationship, we need to add the foreign table spec to the SelectData tag like so:
+
+*** SelectData: guides; guide_id, contacts; contact_id ***
+
+What the above spec means is that there are many guides for a single contact entity. The contact entities are in the contacts table with primary key column as contact_id.
+
+Without specifying the name of the column in the guides table that refers to the contact in the contacts table, it's convened that the column name is same as the foreign table's primary key column which is 'contact_id'.
+If the actual column is differently named in the guides table, we must specify using the $ spec like so:
+
+contact_id: $(contacts)
+
+The above specification goes into sub-section which is demarcated like so:
+
+** guides **
+
+This means the column 'contact_id' belongs to the 'guides' table and it refers to 'contacts' table. In other words, it's a foreign key column referring to the 'contact_id' column in the 'contacts' table.
+
+We can also have 'lookup' tables connected with our guide entity. In the example below we have a language_id column in the guides table that refers to the languages table. Each guide can speak one and only one specific language. This is also a many to one relationship. A language can be spoken by many guides. Hence this is also specified with a $ spec as shown below.
+
+language_id: $(languages)
+
+But, since in this particular scenario we have assumed that language doesn't contextualize or partition the guides, we didn't specify it like the contacts table was specified in the SelectData tag.

@@ -180,7 +180,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
     def generate_controller_validation(self):
         print("*** Controller: validation ***", file=self.output)
         for field in self.fields:
-            print(f"{field.name} => '',", file=self.output)
+            print(f"'{field.name}' => '',", file=self.output)
         print("******\n", file=self.output)
 
     def generate_store_server(self):
