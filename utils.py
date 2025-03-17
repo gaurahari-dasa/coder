@@ -16,11 +16,10 @@ def warn(mesg, *args):
     print(f"{cf.coral}{mesg}{colon}", *args, cf.reset)
 
 
-def error(mesg, *args, halt=True):
+def error(mesg, *args):
     colon = ":" if args else ""
     print(f"{cf.red}{mesg}{colon}", *args, cf.reset)
-    if halt:
-        exit()
+    exit()
 
 
 def nullishIndex(ar: list, ix: int):
@@ -34,18 +33,22 @@ def camel_case(name: str):
     return re.sub("_(.)", lambda v: v.group(1).upper(), name)
 
 
+def kebab_case(name: str):
+    return name.replace("_", "-")
+
+
 def find(pred, elems: iter):
     return next((elem for elem in elems if pred(elem)), None)
 
 
 def strip_last_newline(s: str):
-    return s[:-1] if s.endswith('\n') else s
+    return s[:-1] if s.endswith("\n") else s
 
 
 def hydrate(line: str, args: dict):
     if not args:
         return line
-    
+
     def replace(match: re.Match):
         try:
             return strip_last_newline(args[match.group(1)])

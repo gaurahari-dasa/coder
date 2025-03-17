@@ -78,8 +78,9 @@ class SelectData:
                         foreign = matched.group(2)
                         fillable = True
                         if not self.foreign_key:
-                            self.foreign_key = back_name
-                            self.cntxt_table = foreign
+                            # self.foreign_key = back_name
+                            # self.cntxt_table = foreign
+                            utils.error("No foreign table specs defined, Haribol")
                     case _:
                         utils.warn("Unheard specs type, Haribol")
         return (morph_specs, qualities, fillable, foreign)
@@ -124,6 +125,10 @@ class SelectData:
         if not utils.find(lambda x: x.name == self.primary_key, fields):
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
+
+    def foreign(self):
+        fields = self.tables[self.model_table]
+        return utils.find(lambda x: x.foreign == self.cntxt_table, fields)
 
     def ensure_foreign_key_cntxt(self):
         fields = self.tables.setdefault(self.model_table, [])
@@ -228,6 +233,13 @@ class SelectData:
             self.output.write(ui_code.getvalue())
         return self.output
 
+    def cntxt_filter(self):
+        foreign = self.foreign()
+        if not foreign:
+            return ""
+        alias = foreign.alias if foreign.alias else foreign.name
+        return f"\n->where('{self.model_table}.{foreign.name}', request('{utils.kebab_case(alias)}'))"
+
     def hydrate(self):
         template = open("templates/ModelHelper.txt")
         model_helper = f"{self.model.name}Helper"
@@ -240,7 +252,7 @@ class SelectData:
                         "model": self.model.name,
                         "model_helper": model_helper,
                         "select_data": self.generate_select_data().getvalue(),
-                        # 'conte'
+                        "cntxt_filter": self.cntxt_filter(),
                     },
                 ),
                 end="",
