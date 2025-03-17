@@ -5,10 +5,10 @@ import utils
 
 
 class Model:
-    def __init__(self, spec: str):
+    def __init__(self, specs: str):
         self.lines = []
         self.fields = []
-        self.name = spec.strip()
+        self.name = specs.strip()
         self.output = io.StringIO()
 
     def append(self, line):

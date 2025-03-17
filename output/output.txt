@@ -48,6 +48,7 @@ mobile: null,
 photoPath: null,
 active: null,
 languageId: null,
+contactId: props.contactId,
 ******
 
 *** Form: editForm ***
@@ -58,6 +59,7 @@ mobile: null,
 photoPath: null,
 active: null,
 languageId: null,
+contactId: props.contactId,
 ******
 
 *** editRow ***
@@ -125,6 +127,7 @@ return Guide::create([
 'photo_path' => $validated['photoPath'],
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
+'contact_id' => request('contactId'),
 ]);
 ******
 
@@ -136,6 +139,7 @@ $guide->mobile = $validated['mobile'];
 $guide->photo_path = $validated['photoPath'];
 $guide->active = $validated['active'];
 $guide->language_id = $validated['languageId'];
+$guide->contact_id = request('contactId');
 LogActivityHelper::save($guide);
 return $guide;
 ******

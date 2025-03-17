@@ -1,5 +1,11 @@
+# pip install mysql-connector-python
 import mysql.connector
 import utils
+import json
+
+cfg_file = open('sql.json')
+config = json.loads(cfg_file.read())
+disable = config['disable']
 
 
 cnx = mysql.connector.connect(
@@ -25,6 +31,8 @@ def check_table(name):
 
 
 def check_column(table, column):
+    if disable:
+        return
     if not query(f"SELECT {column} from {table} LIMIT 1"):
         if column == "*":
             utils.error(f"Table {table} seems to be missing, Haribol.")

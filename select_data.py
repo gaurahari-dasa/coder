@@ -17,20 +17,30 @@ class SelectData:
         sort_symbol = "^"
         search_symbol = "?"
 
-        def __init__(self, name: str, alias: str, specs: tuple[str, str]):
+        def __init__(self, name: str, alias: str, specs: tuple[str, str, bool, str]):
             self.name = name
             self.alias = alias
-            self.specs, qualities, self.fillable = (
-                specs if specs else (None, None, False)
+            self.specs, qualities, self.fillable, self.foreign = (
+                specs if specs else (None, None, False, None)
             )
             self.sortable = self.sort_symbol in qualities if qualities else None
             self.searchable = self.search_symbol in qualities if qualities else None
 
-    def __init__(self, spec: str, model: Model):
-        self.model_table, self.primary_key = [s.strip() for s in spec.split(";")]
+    def __init__(self, specs: str, model: Model):
+        specs = specs.split(",")
+        native_specs = specs[0]
+        foreign_specs = specs[1:]
+        self.model_table, self.primary_key = [
+            s.strip() for s in native_specs.split(";")
+        ]
+        self.cntxt_table, self.foreign_key = (
+            [s.strip() for s in foreign_specs[0].split(";")]
+            if foreign_specs
+            else (None, None)
+        )
         self.output = io.StringIO()
         self.tables = {}
-        self.cur_table = None  # track the table whose fields are being read
+        self.cur_table = None  # track the table whose fields are being read, Haribol
         self.fields = None  # track the fields in current table, Haribol
         self.model = model
         model.primary_key = self.primary_key
@@ -40,8 +50,9 @@ class SelectData:
         self, field_name: str, back_name: str, specs: str, model_owned: bool
     ):
         morph_specs = None
-        qualities = None  # search / sort
-        fillable = False  # user can enter data
+        qualities = None  # search / sort, Haribol
+        fillable = False  # mass assignable, Haribol
+        foreign = None  # foreign key, Haribol
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
             matched = re.match(r"[ ]*(i|#|\$)[ ]*\((.*)\)(.*)", spec)
@@ -64,9 +75,14 @@ class SelectData:
                         self.ui.assign_foreign_key(
                             utils.camel_case(field_name), back_name
                         )
+                        foreign = matched.group(2)
+                        fillable = True
+                        if not self.foreign_key:
+                            self.foreign_key = back_name
+                            self.cntxt_table = foreign
                     case _:
                         utils.warn("Unheard specs type, Haribol")
-        return (morph_specs, qualities, fillable)
+        return (morph_specs, qualities, fillable, foreign)
 
     def append(self, line: str):
         if not (line := line.strip()):
@@ -106,24 +122,37 @@ class SelectData:
     def ensure_primary_key_pagination(self):
         fields = self.tables.setdefault(self.model_table, [])
         if not utils.find(lambda x: x.name == self.primary_key, fields):
-            self.tables[self.model_table].append(
-                self.Field(self.primary_key, None, None)
-            )
+            fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
+
+    def ensure_foreign_key_cntxt(self):
+        fields = self.tables.setdefault(self.model_table, [])
+        if self.foreign_key and not utils.find(lambda x: x.foreign, fields):
+            self.ui.assign_foreign_key(
+                utils.camel_case(self.foreign_key), self.foreign_key
+            )
+            fields.append(
+                self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
+            )
+            print("Auto-included foreign key, Haribol!")
 
     def generate_select_data(self):
         output = io.StringIO()
         self.ensure_primary_key_pagination()
+        self.ensure_foreign_key_cntxt()
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""
-                print(f"'{table}.{field.name}{alias}',", file=output)
+                if not field.foreign:
+                    print(f"'{table}.{field.name}{alias}',", file=output)
         return output
 
     def generate_pagination(self):
         output = io.StringIO()
         for table in self.tables:
             for field in self.tables[table]:
+                if field.foreign:
+                    continue
                 alias = field.alias if field.alias else field.name
                 print(
                     (
@@ -180,10 +209,10 @@ class SelectData:
         return output
 
     funcs = [
-        ('*** SelectData: model_table, primary_key ***', generate_select_data),
-        ('*** Paginate (SelectData) ***', generate_pagination),
-        ('*** Search clause (Select Data) ***', generate_search_clause),
-        ('*** Sort by id column (SelectData) ***', generate_sort_by_id),
+        ("*** SelectData: model_table, primary_key ***", generate_select_data),
+        ("*** Paginate (SelectData) ***", generate_pagination),
+        ("*** Search clause (Select Data) ***", generate_search_clause),
+        ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
     ]
 
     def generate(self):
@@ -211,6 +240,7 @@ class SelectData:
                         "model": self.model.name,
                         "model_helper": model_helper,
                         "select_data": self.generate_select_data().getvalue(),
+                        # 'conte'
                     },
                 ),
                 end="",

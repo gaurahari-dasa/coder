@@ -1,6 +1,6 @@
 *** Model: Guide ***
 
-*** SelectData: guides; guide_id ***
+*** SelectData: guides; guide_id, contacts; contact_id ***
 
 ** guides **
 guide_id
@@ -10,7 +10,7 @@ mobile: i (text; Mobile)*, # (; Mobile; )?^
 photo_path: i (file; Photo), # (%ImageColumn; ; ~file)?^
 # dob: i (date; DOB), # (~date-only)
 active: i (checkbox; Active), # (ActiveColumn; Active; )
-# contact_id: $()
+contact_id: $(contacts)
 
 ** languages **
 language_id: i (select; Language; languages)
