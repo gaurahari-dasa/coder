@@ -59,6 +59,7 @@ class SelectData:
             if matched:
                 match matched.group(1):
                     case "i":
+                        fillable = True
                         self.ui.append_field(
                             utils.camel_case(field_name),
                             back_name,
@@ -69,6 +70,7 @@ class SelectData:
                         morph_specs = morph(matched.group(2))
                         qualities = matched.group(3)
                     case "$":
+                        fillable = True
                         foreign = matched.group(2)
                         if foreign == self.cntxt_table:
                             self.ui.assign_foreign_key(
@@ -80,9 +82,8 @@ class SelectData:
                         #     utils.error("No foreign table specs defined, Haribol")
                     case _:
                         utils.warn("Unheard specs type, Haribol")
-                if matched.group(1) in ["i", "$"] and model_owned:
-                    self.model.append_field(field_name)
-                    fillable = True
+        if fillable and model_owned: # TODO: disallow non-model field specs in the future - and remove the model_owned condition
+            self.model.append_field(field_name)
         return (morph_specs, qualities, fillable, foreign)
 
     def append(self, line: str):
@@ -126,18 +127,23 @@ class SelectData:
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
 
-    def foreign(self):
-        fields = self.tables[self.model_table]
-        return utils.find(lambda x: x.foreign == self.cntxt_table, fields)
+#set or get cntxt_field, Haribol
+    def cntxt_field(self, field=None):
+        if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
+            raise Exception('No context table defined, Haribol')
+        fields = self.tables.setdefault(self.model_table, [])
+        foreign = utils.find(lambda x: x.foreign == self.cntxt_table, fields)
+        if field and foreign:
+            return field
+        elif field:
+            fields.append(field)
+        return foreign # return foreign field, Haribol
 
     def ensure_foreign_key_cntxt(self):
-        fields = self.tables.setdefault(self.model_table, [])
-        if self.foreign_key and not utils.find(lambda x: x.foreign, fields):
+        field = self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
+        if self.foreign_key and not self.cntxt_field(field):
             self.ui.assign_foreign_key(
                 utils.camel_case(self.foreign_key), self.foreign_key
-            )
-            fields.append(
-                self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
             )
             print("Auto-included foreign key, Haribol!")
 
@@ -234,11 +240,11 @@ class SelectData:
         return self.output
 
     def cntxt_filter(self):
-        foreign = self.foreign()
-        if not foreign == self.cntxt_table:
-            return ""
-        alias = foreign.alias if foreign.alias else foreign.name
-        return f"\n->where('{self.model_table}.{foreign.name}', request('{utils.kebab_case(alias)}'))"
+        if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
+            return ''
+        field = self.cntxt_field()
+        alias = field.alias if field.alias else field.name
+        return f"\n->where('{self.model_table}.{field.name}', request('{utils.kebab_case(alias)}'))"
 
     def hydrate(self):
         template = open("templates/ModelHelper.txt")

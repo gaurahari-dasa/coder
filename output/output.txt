@@ -46,7 +46,7 @@ name: null,
 email: null,
 mobile: null,
 photoPath: null,
-active: null,
+active: false,
 languageId: null,
 contactId: props.contactId,
 ******

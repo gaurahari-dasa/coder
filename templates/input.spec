@@ -9,10 +9,10 @@ email: i (email; Email), # (; Email; )?^
 mobile: i (text; Mobile)*, # (; Mobile; )?^
 photo_path: i (file; Photo), # (%ImageColumn; ; ~file)?^
 # dob: i (date; DOB), # (~date-only)
-active: i (checkbox; Active), # (ActiveColumn; Active; )
+active: i (checkbox; Active; false), # (ActiveColumn; Active; )
 contact_id: $(contacts)
-language_id: $(languages)
+language_id: $(languages), i (select; Language; languages)
 
 ** languages **
-language_id: i (select; Language; languages)
+language_id
 name as language_name

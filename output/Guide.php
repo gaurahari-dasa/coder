@@ -17,5 +17,7 @@ class Guide extends Model
 'mobile',
 'photo_path',
 'active',
+'contact_id',
+'language_id',
     ];
 }

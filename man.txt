@@ -32,3 +32,12 @@ We can also have 'lookup' tables connected with our guide entity. In the example
 language_id: $(languages)
 
 But, since in this particular scenario we have assumed that language doesn't contextualize or partition the guides, we didn't specify it like the contacts table was specified in the SelectData tag.
+
+Where do I add the i-spec?
+--------------------------
+As of now we can add the i-spec either to the language_id column specs described above or to a separate language_id column described in it's own owning table section like so:
+** languages **
+language_id: i(select; Language; languages)
+name as language_name
+
+But the above practice is discouraged. It's better to provide the i-spec to the language_id column described in the section on guides.

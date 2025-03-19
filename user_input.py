@@ -135,7 +135,15 @@ const nextUrl = props.{self.model_table}.next_page_url;
         if form_type == "editForm":
             print("id: null,", file=self.output)
         for field in self.fields:
-            print(f"{field.name}: null,", file=self.output)
+            if form_type == 'addForm' and field.type == 'checkbox':
+                if field.options:
+                    value = field.options
+                else:
+                    value = 'false'
+                    utils.warn('Missing default value for checkbox type input; it will be set to false, Haribol!')
+            else:
+                value = 'null'
+            print(f"{field.name}: {value},", file=self.output)
         if self.foreign_key:
             print(
                 f"{self.foreign_key.name}: props.{self.foreign_key.name},",
