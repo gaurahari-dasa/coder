@@ -1,25 +1,37 @@
 import re
+import io
 
 # pip install colorful
 import colorful as cf
 
 identifier = "[a-zA-Z0-9_]+"
+mesg_board = set()
+
+
+def __write_message(color, mesg, *args):
+    colon = ":" if args else ""
+    buffer = io.StringIO()
+    print(f"{color}{mesg}{colon}", *args, cf.reset, file=buffer)
+    mesg_board.add(buffer.getvalue())
+    buffer.close()
 
 
 def note(mesg, *args):
-    colon = ":" if args else ""
-    print(f"{cf.yellow}{mesg}{colon}", *args, cf.reset)
+    __write_message(cf.yellow, mesg, *args)
 
 
 def warn(mesg, *args):
-    colon = ":" if args else ""
-    print(f"{cf.coral}{mesg}{colon}", *args, cf.reset)
+    __write_message(cf.coral, mesg, *args)
 
 
 def error(mesg, *args):
-    colon = ":" if args else ""
-    print(f"{cf.red}{mesg}{colon}", *args, cf.reset)
+    __write_message(cf.red, mesg, *args)
     exit()
+
+
+def diagnostics():
+    for mesg in mesg_board:
+        print(mesg, end="")
 
 
 def nullishIndex(ar: list, ix: int):

@@ -1,5 +1,5 @@
 import re
-import io
+import utils
 
 from utils import *
 from select_data import SelectData
@@ -55,6 +55,7 @@ if gen := model_section.generate():
 
 model_section.hydrate()
 select_data_section.hydrate()
+utils.diagnostics()
 # for section in sections:
 #     if gen := section.generate():
 #         output.write(gen.getvalue())
