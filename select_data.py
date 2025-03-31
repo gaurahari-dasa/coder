@@ -264,25 +264,20 @@ class SelectData:
         template = open("templates/ModelHelper.txt")
         model_helper = f"{self.model.name}Helper"
         output = open(f"output/{model_helper}.php", "wt")
+        repo = {
+            "model": self.model.name,
+            "model_helper": model_helper,
+            "cntxt_id": self.cntxt_id(),
+            "select_data": self.generate_select_data().getvalue(),
+            "cntxt_filter": self.cntxt_filter(),
+            "search_clause": self.generate_search_clause().getvalue(),
+            "pagination_data": self.generate_pagination_data().getvalue(),
+            # "pagination_cntxt": self.pagination_cntxt(), # required only if URL does not contain the context field, Haribol
+            "store_data": self.ui.generate_store_data().getvalue(),
+            "update_data": self.ui.generate_update_data().getvalue(),
+        }
         while line := template.readline():
-            print(
-                utils.hydrate(
-                    line,
-                    {
-                        "model": self.model.name,
-                        "model_helper": model_helper,
-                        "cntxt_id": self.cntxt_id(),
-                        "select_data": self.generate_select_data().getvalue(),
-                        "cntxt_filter": self.cntxt_filter(),
-                        "search_clause": self.generate_search_clause().getvalue(),
-                        "pagination_data": self.generate_pagination_data().getvalue(),
-                        # "pagination_cntxt": self.pagination_cntxt(), # required only if URL does not contain the context field, Haribol
-                        'store_data': self.ui.generate_store_data().getvalue(),
-                        'update_data': self.ui.generate_update_data().getvalue(),
-                    },
-                ),
-                end="",
-                file=output,
-            )
+            hydrated = utils.hydrate(line, repo)
+            print(hydrated, end="", file=output)
         template.close()
         output.close()

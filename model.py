@@ -37,19 +37,13 @@ class Model:
     def hydrate(self):
         template = open("templates/model.txt")
         output = open(f"output/{self.name}.php", "wt")
+        repo = {
+            "model": self.name,
+            "primary_key": self.primary_key,
+            "fillable": self.generate_fillable().getvalue(),
+        }
         while line := template.readline():
-            hydrated = utils.hydrate(
-                    line,
-                    {
-                        "model": self.name,
-                        "primary_key": self.primary_key,
-                        "fillable": self.generate_fillable().getvalue(),
-                    },
-                )
-            print(
-                hydrated,
-                end="",
-                file=output,
-            )
+            hydrated = utils.hydrate(line, repo)
+            print(hydrated, end="", file=output)
         template.close()
         output.close()

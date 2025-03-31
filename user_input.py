@@ -201,9 +201,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"'{field.base_name}' =>", end=" ", file=output)
             if field.type == "date":
-                print(
-                    f"Utils::parseDate($validated['{field.name}']),", file=output
-                )
+                print(f"Utils::parseDate($validated['{field.name}']),", file=output)
             else:
                 print(f"$validated['{field.name}'],", file=output)
         if self.foreign_key:
@@ -223,9 +221,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=output)
             if field.type == "date":
-                print(
-                    f"Utils::parseDate($validated['{field.name}']);", file=output
-                )
+                print(f"Utils::parseDate($validated['{field.name}']);", file=output)
             else:
                 print(f"$validated['{field.name}'];", file=output)
         if self.foreign_key:
