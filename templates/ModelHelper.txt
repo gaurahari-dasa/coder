@@ -2,61 +2,43 @@
 
 namespace App\Helpers;
 
-use App\Models\Guide;
+use App\Models\@@@ model @@@;
 // use App\Models\Contact;
 // use App\Traits\ContactContext;
 
-class GuideHelper
+class @@@ model_helper @@@
 {
     // use ContactContext;
 
     public static function listAll($sortField = null, $sortDir = null)
     {
-        return Guide
+        return @@@ model @@@
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
 			// ->join('contacts', 'addresses.contact_id', '=', 'contacts.contact_id')
             // ->leftJoin('countries', 'addresses.country_id', '=', 'countries.country_id')
             ->select(
-                'guides.guide_id',
-'guides.name',
-'guides.email',
-'guides.mobile',
-'guides.photo_path',
-'guides.active',
-'languages.language_id',
-'languages.name as language_name',
+                @@@ select_data @@@
             );
     }
 
-    public static function paginate($contactId)
+    public static function paginate(@@@ cntxt_id @@@)
     {
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');
         $sortField = request('sort-field');
         $sortDir = request('sort');
-        $items = self::listAll(Utils::snakeCase($sortField), $sortDir)
-->where('guides.contact_id', $contactId);
+        $items = self::listAll(Utils::snakeCase($sortField), $sortDir)@@@ cntxt_filter @@@;
 
         if ($searchKey) {
             $items = $items->whereAny([
-                'guides.name',
-'guides.email',
-'guides.mobile',
-'guides.photo_path',
+                @@@ search_clause @@@
             ], 'like', "%{$searchKey}%");
         }
 
         return $items->paginate($rowCount)
             ->through(function ($item) {
                 return [
-                    'id' => $item->guide_id,
-'name' => $item->name,
-'email' => $item->email,
-'mobile' => $item->mobile,
-'photoPath' => Storage::url($item->photo_path),
-'active' => $item->active,
-'languageId' => $item->language_id,
-'languageName' => $item->language_name,
+                    @@@ pagination_data @@@
                 ];
             })
             ->appends(['row-count' => $rowCount])
@@ -68,15 +50,7 @@ class GuideHelper
     public static function addEntity($validated)
     {
         return LogActivityHelper::create(function () use ($validated) {
-            return Guide::create([
-'name' => $validated['name'],
-'email' => $validated['email'],
-'mobile' => $validated['mobile'],
-'photo_path' => $validated['photoPath'],
-'active' => $validated['active'],
-'language_id' => $validated['languageId'],
-'contact_id' => request('contactId'),
-]);
+            @@@ store_data @@@
         });
     }
 

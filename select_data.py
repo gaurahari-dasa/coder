@@ -76,13 +76,11 @@ class SelectData:
                             self.ui.assign_foreign_key(
                                 utils.camel_case(field_name), back_name
                             )
-                        # if not self.foreign_key:
-                        #     # self.foreign_key = back_name
-                        #     # self.cntxt_table = foreign
-                        #     utils.error("No foreign table specs defined, Haribol")
                     case _:
                         utils.warn("Unheard specs type, Haribol")
-        if fillable and model_owned: # TODO: disallow non-model field specs in the future - and remove the model_owned condition
+        if (
+            fillable and model_owned
+        ):  # TODO: disallow non-model field specs in the future - and remove the model_owned condition
             self.model.append_field(field_name)
         return (morph_specs, qualities, fillable, foreign)
 
@@ -127,17 +125,17 @@ class SelectData:
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
 
-#set or get cntxt_field, Haribol
+    # set or get cntxt_field, Haribol
     def cntxt_field(self, field=None):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
-            raise Exception('No context table defined, Haribol')
+            raise Exception("No context table defined, Haribol")
         fields = self.tables.setdefault(self.model_table, [])
         foreign = utils.find(lambda x: x.foreign == self.cntxt_table, fields)
         if field and foreign:
             return field
         elif field:
             fields.append(field)
-        return foreign # return foreign field, Haribol
+        return foreign  # return foreign field, Haribol
 
     def ensure_foreign_key_cntxt(self):
         field = self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
@@ -158,7 +156,7 @@ class SelectData:
                     print(f"'{table}.{field.name}{alias}',", file=output)
         return output
 
-    def generate_pagination(self):
+    def generate_pagination_data(self):
         output = io.StringIO()
         for table in self.tables:
             for field in self.tables[table]:
@@ -221,7 +219,7 @@ class SelectData:
 
     funcs = [
         ("*** SelectData: model_table, primary_key ***", generate_select_data),
-        ("*** Paginate (SelectData) ***", generate_pagination),
+        ("*** Paginate (SelectData) ***", generate_pagination_data),
         ("*** Search clause (Select Data) ***", generate_search_clause),
         ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
     ]
@@ -230,7 +228,7 @@ class SelectData:
         for func in self.funcs:
             print(func[0], file=self.output)
             try:
-                self.output.write(func[1](self).getvalue())
+                self.output.write(func[1](self, *func[2:]).getvalue())
             except Exception as ex:
                 utils.warn(ex)
             print("******\n", file=self.output)
@@ -239,12 +237,28 @@ class SelectData:
             self.output.write(ui_code.getvalue())
         return self.output
 
-    def cntxt_filter(self):
+    def cntxt_id(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
-            return ''
+            return ""
         field = self.cntxt_field()
         alias = field.alias if field.alias else field.name
-        return f"\n->where('{self.model_table}.{field.name}', request('{utils.kebab_case(alias)}'))"
+        return f"${utils.camel_case(alias)}"
+
+    def cntxt_filter(self):
+        if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
+            return ""
+        field = self.cntxt_field()
+        alias = field.alias if field.alias else field.name
+        return (
+            f"\n->where('{self.model_table}.{field.name}', ${utils.camel_case(alias)})"
+        )
+
+    # def pagination_cntxt(self):
+    #     if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
+    #         return ""
+    #     field = self.cntxt_field()
+    #     alias = field.alias if field.alias else field.name
+    #     return f"\n->appends(['${utils.kebab_case(alias)}' => ${utils.camel_case(alias)}])"
 
     def hydrate(self):
         template = open("templates/ModelHelper.txt")
@@ -257,8 +271,14 @@ class SelectData:
                     {
                         "model": self.model.name,
                         "model_helper": model_helper,
+                        "cntxt_id": self.cntxt_id(),
                         "select_data": self.generate_select_data().getvalue(),
                         "cntxt_filter": self.cntxt_filter(),
+                        "search_clause": self.generate_search_clause().getvalue(),
+                        "pagination_data": self.generate_pagination_data().getvalue(),
+                        # "pagination_cntxt": self.pagination_cntxt(), # required only if URL does not contain the context field, Haribol
+                        'store_data': self.ui.generate_store_data().getvalue(),
+                        'update_data': self.ui.generate_update_data().getvalue(),
                     },
                 ),
                 end="",
