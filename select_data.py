@@ -275,6 +275,7 @@ class SelectData:
             # "pagination_cntxt": self.pagination_cntxt(), # required only if URL does not contain the context field, Haribol
             "store_data": self.ui.generate_store_data().getvalue(),
             "update_data": self.ui.generate_update_data().getvalue(),
+            "model_varname": self.ui.model_varname(),
         }
         while line := template.readline():
             hydrated = utils.hydrate(line, repo)

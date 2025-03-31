@@ -80,22 +80,17 @@ class GuideHelper
         });
     }
 
-    public static function updateAddress($validated)
+    public static function updateAddress(Guide $guide, array $validated)
     {
-        $address = Address::find(request('id'));
-        $address->line1 = $validated['line1'];
-        $address->line2 = $validated['line2'];
-        $address->area = $validated['area'];
-        $address->city = $validated['city'];
-        $address->state = $validated['state'];
-        $address->country_id = $validated['country'];
-        $address->mailing = $validated['mailing'];
-        $address->address_type = $validated['addressType'];
-        $address->pin_code = $validated['pinCode'];
-        $address->active = $validated['active'];
-        $address->contact_id = request('contact');
-        LogActivityHelper::save($address);
-
-        return $address;
+        $guide = Guide::find(request('id'));
+$guide->name = $validated['name'];
+$guide->email = $validated['email'];
+$guide->mobile = $validated['mobile'];
+$guide->photo_path = $validated['photoPath'];
+$guide->active = $validated['active'];
+$guide->language_id = $validated['languageId'];
+$guide->contact_id = request('contactId');
+LogActivityHelper::save($guide);
+return $guide;
     }
 }

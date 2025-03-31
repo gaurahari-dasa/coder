@@ -212,9 +212,12 @@ const nextUrl = props.{self.model_table}.next_page_url;
         print("]);", file=output)
         return output
 
+    def model_varname(self):
+        return "$" + utils.first_char_lower(self.model.name)
+
     def generate_update_data(self):
         output = io.StringIO()
-        varname = "$" + self.model.name.lower()
+        varname = self.model_varname()
         print(f"{varname} = {self.model.name}::find(request('id'));", file=output)
         for field in self.fields:
             if field.type == "file":

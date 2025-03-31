@@ -49,6 +49,10 @@ def kebab_case(name: str):
     return name.replace("_", "-")
 
 
+def first_char_lower(name: str):
+    return name[0].lower() + name[1:] if name else name
+
+
 def find(pred, elems: iter):
     return next((elem for elem in elems if pred(elem)), None)
 

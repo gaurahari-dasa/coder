@@ -54,22 +54,8 @@ class @@@ model_helper @@@
         });
     }
 
-    public static function updateAddress($validated)
+    public static function updateAddress(@@@ model @@@ @@@ model_varname @@@, array $validated)
     {
-        $address = Address::find(request('id'));
-        $address->line1 = $validated['line1'];
-        $address->line2 = $validated['line2'];
-        $address->area = $validated['area'];
-        $address->city = $validated['city'];
-        $address->state = $validated['state'];
-        $address->country_id = $validated['country'];
-        $address->mailing = $validated['mailing'];
-        $address->address_type = $validated['addressType'];
-        $address->pin_code = $validated['pinCode'];
-        $address->active = $validated['active'];
-        $address->contact_id = request('contact');
-        LogActivityHelper::save($address);
-
-        return $address;
+        @@@ update_data @@@
     }
 }
