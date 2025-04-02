@@ -129,7 +129,7 @@ class SelectData:
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             raise Exception("No context table defined, Haribol")
         fields = self.tables.setdefault(self.model_table, [])
-        foreign = utils.find(lambda x: x.foreign == self.cntxt_table, fields)
+        foreign = utils.find(lambda x: x.foreign == self.foreign_key, fields)
         if field and foreign:
             return field
         elif field:
@@ -148,6 +148,10 @@ class SelectData:
         output = io.StringIO()
         self.ensure_primary_key_pagination()
         self.ensure_foreign_key_cntxt()
+        
+        if self.foreign_key:
+            self.model.append_field(utils.camel_case(self.foreign_key))
+
         for table in self.tables:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""

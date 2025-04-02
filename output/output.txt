@@ -64,7 +64,7 @@ contactId: props.contactId,
 
 *** editRow ***
 
-    editForm.id = id;
+    editId = id;
     const datum = data.value.find(v => v.id === id);
         
 editForm.name = datum.name;
@@ -132,7 +132,6 @@ return Guide::create([
 ******
 
 *** Update data ***
-$guide = Guide::find(request('id'));
 $guide->name = $validated['name'];
 $guide->email = $validated['email'];
 $guide->mobile = $validated['mobile'];
@@ -150,7 +149,7 @@ return $guide;
 'mobile',
 'photo_path',
 'active',
-'contact_id',
 'language_id',
+'contactId',
 ******
 

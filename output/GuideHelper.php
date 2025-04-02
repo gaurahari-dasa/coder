@@ -82,8 +82,7 @@ class GuideHelper
 
     public static function updateAddress(Guide $guide, array $validated)
     {
-        $guide = Guide::find(request('id'));
-$guide->name = $validated['name'];
+        $guide->name = $validated['name'];
 $guide->email = $validated['email'];
 $guide->mobile = $validated['mobile'];
 $guide->photo_path = $validated['photoPath'];

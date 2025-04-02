@@ -224,7 +224,6 @@ const nextUrl = props.{self.model_table}.next_page_url;
     def generate_update_data(self):
         output = io.StringIO()
         varname = self.model_varname()
-        print(f"{varname} = {self.model.name}::find(request('id'));", file=output)
         for field in self.fields:
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
