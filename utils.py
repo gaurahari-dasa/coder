@@ -26,6 +26,7 @@ def warn(mesg, *args):
 
 def error(mesg, *args):
     __write_message(cf.red, mesg, *args)
+    diagnostics()
     exit()
 
 

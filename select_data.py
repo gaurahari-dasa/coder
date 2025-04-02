@@ -72,10 +72,9 @@ class SelectData:
                     case "$":
                         fillable = True
                         foreign = matched.group(2)
-                        if foreign == self.cntxt_table:
-                            self.ui.assign_foreign_key(
-                                utils.camel_case(field_name), back_name
-                            )
+                        self.ui.append_grid_source(
+                            utils.camel_case(field_name), utils.camel_case(foreign)
+                        )
                     case _:
                         utils.warn("Unheard specs type, Haribol")
         if (

@@ -14,9 +14,11 @@ To specify the context foreign table with which this entity has many to one rela
 
 *** SelectData: guides; guide_id, contacts; contact_id ***
 
-What the above spec means is that there are many guides for a single contact entity. The contact entities are in the contacts table with primary key column as contact_id.
+What the above spec means is that there can be one or more guides for a single contact entity. In other words, the contacts compartmentalize the guides. The contact entities are in the contacts table with primary key column as contact_id.
 
-Without specifying the name of the column in the guides table that refers to the contact in the contacts table, it's convened that the column name is same as the foreign table's primary key column which is 'contact_id'.
+Without explicitly specifying the name of the column in the guides table that refers to the contact in the contacts table, it's convened that the column name is same as the foreign table's primary key column's name which is 'contact_id'.
+
+@@@ deprecated - Ignore this section of the manual @@@
 If the actual column is differently named in the guides table, we must specify using the $ spec like so:
 
 contact_id: $(contacts)
@@ -26,12 +28,25 @@ The above specification goes into sub-section which is demarcated like so:
 ** guides **
 
 This means the column 'contact_id' belongs to the 'guides' table and it refers to 'contacts' table. In other words, it's a foreign key column referring to the 'contact_id' column in the 'contacts' table.
+@@@@@@
 
-We can also have 'lookup' tables connected with our guide entity. In the example below we have a language_id column in the guides table that refers to the languages table. Each guide can speak one and only one specific language. This is also a many to one relationship. A language can be spoken by many guides. Hence this is also specified with a $ spec as shown below.
 
-language_id: $(languages)
+Reference specification - the $-spec
+------------------------------------
+We can also specify that a field in our guide entity takes values from a 'lookup' table. This is done using the reference spec $(). In the example below we have a language_id column in the guides table that refers to the languages table.
 
-But, since in this particular scenario we have assumed that language doesn't contextualize or partition the guides, we didn't specify it like the contacts table was specified in the SelectData tag.
+language_id: $(language_id)
+
+What the above spec means is that the language_id column in the guides table references the language_id column of the languages table (specified later in the spec). Functionally this means that when editing a guide entity from the grid, the value of language_id is taken from a field of the grid with the same name - not actually - it's the camel cased name. If the grid field had a different name say motherTongueId, then we must specify this as so:
+
+language_id: $(mother_tongue_id)
+
+Note that all the above facts hold if there's a specification following the above like so:
+
+** languages **
+language_id as mother_tongue_id
+language_name as mother_tongue_name
+
 
 Where do I add the i-spec?
 --------------------------
@@ -40,4 +55,9 @@ As of now we can add the i-spec either to the language_id column specs described
 language_id: i(select; Language; languages)
 name as language_name
 
-But the above practice is discouraged. It's better to provide the i-spec to the language_id column described in the section on guides.
+But the latter practice is deprecated and bound to be removed in the future. The correct practice is to provide the i-spec to the language_id column described in the section on guides.
+
+
+Which data will be selected for (sent to) the grid?
+---------------------------------------------------
+All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the grid specs #() are applied.

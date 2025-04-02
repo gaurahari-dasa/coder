@@ -26,7 +26,8 @@ class UserInput:
 
     def __init__(self, model: Model, model_table: str):
         self.fields = []
-        self.lookups = set()
+        self.grid_sources = {}
+        self.lookup_props = set()
         self.foreign_key = None
         self.model = model
         self.model_table = model_table
@@ -34,6 +35,9 @@ class UserInput:
 
     def append_field(self, name, base_name, specs, qualities):
         self.fields.append(self.Field(name, base_name, specs, qualities))
+
+    def append_grid_source(self, name: str, grid_source: str):
+        self.grid_sources[name] = grid_source
 
     def assign_foreign_key(self, name, base_name):
         self.foreign_key = self.ForeignKey(name, base_name)
@@ -61,7 +65,7 @@ class UserInput:
         self.generate_typed_input(field, output, type="date")
 
     def generate_select_input(self, field, output):
-        self.lookups.add(field.options)
+        self.lookup_props.add(field.options)
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
@@ -82,6 +86,7 @@ class UserInput:
         )
 
     def generate_autocomplete(self, field, output):
+        self.lookup_props.add(field.options)
         print(
             f"""<FormAutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
@@ -157,7 +162,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
         output = io.StringIO()
         print(  # following is boiler-plate, but very imp code, Haribol
             r"""
-    editForm.id = id;
+    editId = id;
     const datum = data.value.find(v => v.id === id);
         """,
             file=output,
@@ -165,25 +170,26 @@ const nextUrl = props.{self.model_table}.next_page_url;
         for field in self.fields:
             if field.type == "file":
                 continue  # cannot edit file contents on server, Haribol
+            source = self.grid_sources.get(field.name, field.name)
             print(f"editForm.{field.name} =", end=" ", file=output)
             if field.type == "checkbox":
                 print(
-                    f"!!datum.{field.name}; // cast to boolean, Haribol",
+                    f"!!datum.{source}; // cast to boolean, Haribol",
                     file=output,
                 )
             else:
-                print(f"datum.{field.name};", file=output)
+                print(f"datum.{source};", file=output)
         return output
 
     def generate_vue_props(self):
         output = io.StringIO()
-        for lookup in self.lookups:
+        for lookup in self.lookup_props:
             print(f"{lookup}: Array,", file=output)
         return output
 
     def generate_controller_props(self):
         output = io.StringIO()
-        for lookup in self.lookups:
+        for lookup in self.lookup_props:
             print(f"'{lookup}' => HelperClass::list()->get,", file=output)
         return output
 
