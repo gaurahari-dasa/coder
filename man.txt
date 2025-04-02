@@ -60,4 +60,4 @@ But the latter practice is deprecated and bound to be removed in the future. The
 
 Which data will be selected for (sent to) the grid?
 ---------------------------------------------------
-All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the grid specs #() are applied.
+All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the grid specs #() are applied. Apart from this, the primary key will be selected even without being explicitly mentioned in the SelectData section.

@@ -151,7 +151,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
             else:
                 value = "null"
             print(f"{field.name}: {value},", file=output)
-        if self.foreign_key:
+        if form_type == "addForm" and self.foreign_key:
             print(
                 f"{self.foreign_key.name}: props.{self.foreign_key.name},",
                 file=output,
@@ -232,11 +232,6 @@ const nextUrl = props.{self.model_table}.next_page_url;
                 print(f"Utils::parseDate($validated['{field.name}']);", file=output)
             else:
                 print(f"$validated['{field.name}'];", file=output)
-        if self.foreign_key:
-            print(
-                f"{varname}->{self.foreign_key.base_name} = request('{self.foreign_key.name}');",
-                file=output,
-            )
         print(f"LogActivityHelper::save({varname});", file=output)
         print(f"return {varname};", file=output)
         return output

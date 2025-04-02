@@ -88,7 +88,6 @@ $guide->mobile = $validated['mobile'];
 $guide->photo_path = $validated['photoPath'];
 $guide->active = $validated['active'];
 $guide->language_id = $validated['languageId'];
-$guide->contact_id = request('contactId');
 LogActivityHelper::save($guide);
 return $guide;
     }
