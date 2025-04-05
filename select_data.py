@@ -27,6 +27,18 @@ class SelectData:
             )
             self.searchable = self.search_symbol in qualities if qualities else None
 
+    def __parse_foreign_specs(self, foreign_specs: list[str]):
+        if not foreign_specs:
+            self.cntxt_table, self.foreign_key = (None, None)
+            return
+        self.cntxt_table, self.foreign_key = [
+            s.strip() for s in foreign_specs[0].split(";")
+        ]
+        sql_utils.check_table(self.cntxt_table)
+        sql_utils.check_column(self.cntxt_table, self.foreign_key)
+        self.ui.assign_foreign_key(utils.camel_case(self.foreign_key), self.foreign_key)
+        return
+
     def __init__(self, specs: str, model: Model):
         specs = specs.split(",")
         native_specs = specs[0]
@@ -39,18 +51,14 @@ class SelectData:
         if not self.primary_key:
             utils.error("Primary key name is missing, Haribol!")
 
-        self.cntxt_table, self.foreign_key = (
-            [s.strip() for s in foreign_specs[0].split(";")]
-            if foreign_specs
-            else (None, None)
-        )
+        self.ui = UserInput(model, self.model_table)
+        self.__parse_foreign_specs(foreign_specs)
         self.output = io.StringIO()
         self.tables = {}
         self.cur_table = None  # track the table whose fields are being read, Haribol
         self.fields = None  # track the fields in current table, Haribol
         self.model = model
         model.primary_key = self.primary_key
-        self.ui = UserInput(model, self.model_table)
 
     def parse_specs(
         self, field_name: str, back_name: str, specs: str, model_owned: bool
@@ -140,30 +148,30 @@ class SelectData:
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
 
-    # set or get cntxt_field, Haribol
-    def cntxt_field(self, field=None):
-        if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
-            raise Exception("No context table defined, Haribol")
-        fields = self.tables.setdefault(self.model_table, [])
-        foreign = utils.find(lambda x: x.foreign == self.foreign_key, fields)
-        if field and foreign:
-            return field
-        elif field:
-            fields.append(field)
-        return foreign  # return foreign field, Haribol
+    # # set or get cntxt_field, Haribol
+    # def cntxt_field(self, field=None):
+    #     if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
+    #         raise Exception("No context table defined, Haribol")
+    #     fields = self.tables.setdefault(self.model_table, [])
+    #     foreign = utils.find(lambda x: x.foreign == self.foreign_key, fields)
+    #     if field and foreign:
+    #         return field
+    #     elif field:
+    #         fields.append(field)
+    #     return foreign  # return foreign field, Haribol
 
-    def ensure_foreign_key_cntxt(self):
-        field = self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
-        if self.foreign_key and not self.cntxt_field(field):
-            self.ui.assign_foreign_key(
-                utils.camel_case(self.foreign_key), self.foreign_key
-            )
-            print("Auto-included foreign key, Haribol!")
+    # def ensure_foreign_key_cntxt(self):
+    #     field = self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
+    #     if self.foreign_key and not self.cntxt_field(field):
+    #         self.ui.assign_foreign_key(
+    #             utils.camel_case(self.foreign_key), self.foreign_key
+    #         )
+    #         print("Auto-included foreign key, Haribol!")
 
     def generate_select_data(self):
         output = io.StringIO()
         self.ensure_primary_key_pagination()
-        self.ensure_foreign_key_cntxt()
+        # self.ensure_foreign_key_cntxt()
 
         if self.foreign_key:
             self.model.append_field(self.foreign_key)
@@ -196,7 +204,10 @@ class SelectData:
                     case None:
                         print(f"$item->{alias},", file=output)
                     case "file":
-                        print(f"Storage::url($item->{alias}),", file=output)
+                        print(
+                            f"$item->{alias} ? Storage::url($item->{alias}) : '/img/no-photo.svg',",
+                            file=output,
+                        )
                     case "date-only":
                         print(
                             f"Utils::formatDateJs($item->{alias}, DateFormatJs::OnlyDate),",
@@ -255,25 +266,12 @@ class SelectData:
     def cntxt_id(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        field = self.cntxt_field()
-        alias = field.alias if field.alias else field.name
-        return f"${utils.camel_case(alias)}"
+        return f"${utils.camel_case(self.foreign_key)}"
 
     def cntxt_filter(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        field = self.cntxt_field()
-        alias = field.alias if field.alias else field.name
-        return (
-            f"\n->where('{self.model_table}.{field.name}', ${utils.camel_case(alias)})"
-        )
-
-    # def pagination_cntxt(self):
-    #     if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
-    #         return ""
-    #     field = self.cntxt_field()
-    #     alias = field.alias if field.alias else field.name
-    #     return f"\n->appends(['${utils.kebab_case(alias)}' => ${utils.camel_case(alias)}])"
+        return f"\n->where('{self.model_table}.{self.foreign_key}', {self.cntxt_id()})"
 
     def hydrate(self):
         template = open("templates/ModelHelper.txt")
@@ -288,7 +286,6 @@ class SelectData:
             "cntxt_filter": self.cntxt_filter(),
             "search_clause": self.generate_search_clause().getvalue(),
             "pagination_data": self.generate_pagination_data().getvalue(),
-            # "pagination_cntxt": self.pagination_cntxt(), # required only if URL does not contain the context field, Haribol
             "store_data": self.ui.generate_store_data().getvalue(),
             "update_data": self.ui.generate_update_data().getvalue(),
             "model_varname": self.ui.model_varname(),

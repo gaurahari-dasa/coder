@@ -1,0 +1,120 @@
+*** SelectData: model_table, primary_key ***
+'contact_relationships.active',
+'contact_relationships.contact_relationship_id',
+'contacts.contact_id as source_contact_id',
+'contacts.photo_path as source_contact_photo',
+'contacts.name as source_contact_name',
+'contacts.mobile as source_contact_mobile',
+'relationships.relationship_id',
+'relationships.name as relationship_name',
+******
+
+*** Paginate (SelectData) ***
+'active' => $item->active,
+'id' => $item->contact_relationship_id,
+'sourceContactId' => $item->source_contact_id,
+'sourceContactPhoto' => $item->source_contact_photo ? Storage::url($item->source_contact_photo) : '/img/no-photo.svg',
+'sourceContactName' => $item->source_contact_name,
+'sourceContactMobile' => $item->source_contact_mobile,
+'relationshipId' => $item->relationship_id,
+'relationshipName' => $item->relationship_name,
+******
+
+*** Search clause (Select Data) ***
+'contacts.name',
+'contacts.mobile',
+'relationships.name',
+******
+
+*** Sort by id column (SelectData) ***
+
+            if ($sortField === 'id') {
+                $sortField = 'contact_relationship_id';
+            }
+            
+******
+
+*** Form: addForm ***
+relationshipId: null,
+sourceContactId: null,
+active: true,
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+relationshipId: null,
+sourceContactId: null,
+active: null,
+******
+
+*** editRow ***
+
+    const datum = props.contactRelationships.data.find(v => v.id === id);
+    editId = id;
+        
+editForm.relationshipId = datum.relationshipId;
+editForm.sourceContactId = datum.sourceContactId;
+editForm.active = !!datum.active; // cast to boolean, Haribol
+******
+
+*** UI: addForm ***
+<FormSelect class="mt-4" id="relationshipId" title="Relationship" :options="relationships" setFocus required
+              v-model="addForm.relationshipId" :error="addForm.errors.relationshipId" />
+<FormInput type="text" class="mt-4" id="sourceContactId" title="Relative Name" required
+              v-model="addForm.sourceContactId" :error="addForm.errors.sourceContactId" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+******
+
+*** UI: editForm ***
+<FormSelect class="mt-4" id="relationshipId" title="Relationship" :options="relationships" setFocus required
+              v-model="editForm.relationshipId" :error="editForm.errors.relationshipId" />
+<FormInput type="text" class="mt-4" id="sourceContactId" title="Relative Name" required
+              v-model="editForm.sourceContactId" :error="editForm.errors.sourceContactId" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+******
+
+*** Grid: parameters ***
+headings: ['Name', '', 'Name', 'Mobile', 'Active']
+column_types: [DataColumn, ImageColumn, DataColumn, DataColumn, ActiveColumn]
+fields: ['relationshipName', 'sourceContactPhoto', 'sourceContactName', 'sourceContactMobile', 'active']
+sortable_fields: ['relationshipName', 'sourceContactName', 'sourceContactMobile']
+******
+
+*** Vue props ***
+relationships: Array,
+******
+
+*** Controller props ***
+'relationships' => HelperClass::list()->get,
+******
+
+*** Controller: validation ***
+'relationshipId' => '',
+'sourceContactId' => '',
+'active' => '',
+******
+
+*** Store data ***
+return ContactRelationship::create([
+'relationship_id' => $validated['relationshipId'],
+'source_contact_id' => $validated['sourceContactId'],
+'active' => $validated['active'],
+'contact_id' => request('contactId'),
+]);
+******
+
+*** Update data ***
+$contactRelationship->relationship_id = $validated['relationshipId'];
+$contactRelationship->source_contact_id = $validated['sourceContactId'];
+$contactRelationship->active = $validated['active'];
+LogActivityHelper::save($contactRelationship);
+return $contactRelationship;
+******
+
+*** Model: fillable ***
+'relationship_id',
+'source_contact_id',
+'active',
+'contact_id',
+******
+
