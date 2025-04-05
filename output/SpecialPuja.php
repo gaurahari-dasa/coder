@@ -4,21 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Guide extends Model
+class SpecialPuja extends Model
 {
     const CREATED_AT = 'created_on';
     const UPDATED_AT = 'modified_on';
 
-    protected $primaryKey = 'guide_id';
+    protected $primaryKey = 'special_puja_id';
 
     protected $fillable = [
-        'name',
-'email',
-'mobile',
-'photo_path',
-'dob',
+        'puja_date',
+'occasion_id',
+'sevak_name',
+'relationship_id',
 'active',
-'language_id',
-'contactId',
+'contact_id',
     ];
 }

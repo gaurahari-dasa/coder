@@ -4,6 +4,7 @@
 'guides.email',
 'guides.mobile',
 'guides.photo_path',
+'guides.dob',
 'guides.active',
 'languages.language_id',
 'languages.name as language_name',
@@ -15,6 +16,7 @@
 'email' => $item->email,
 'mobile' => $item->mobile,
 'photoPath' => Storage::url($item->photo_path),
+'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
 'languageName' => $item->language_name,
@@ -28,17 +30,11 @@
 ******
 
 *** Sort by id column (SelectData) ***
-******
 
-*** Pagination URLs ***
-
-for (const guide of props.guides.data) {
-    data.value.push({ ...guide });
-}
-
-const prevUrl = props.guides.prev_page_url;
-const nextUrl = props.guides.next_page_url;
-
+            if ($sortField === 'id') {
+                $sortField = 'guide_id';
+            }
+            
 ******
 
 *** Form: addForm ***
@@ -46,29 +42,31 @@ name: null,
 email: null,
 mobile: null,
 photoPath: null,
+dob: null,
 active: false,
 languageId: null,
 contactId: props.contactId,
 ******
 
 *** Form: editForm ***
-id: null,
 name: null,
 email: null,
 mobile: null,
 photoPath: null,
+dob: null,
 active: null,
 languageId: null,
 ******
 
 *** editRow ***
 
+    const datum = props.guides.data.find(v => v.id === id);
     editId = id;
-    const datum = data.value.find(v => v.id === id);
         
 editForm.name = datum.name;
 editForm.email = datum.email;
 editForm.mobile = datum.mobile;
+editForm.dob = datum.dob;
 editForm.active = !!datum.active; // cast to boolean, Haribol
 editForm.languageId = datum.languageId;
 ******
@@ -82,6 +80,8 @@ editForm.languageId = datum.languageId;
               v-model="addForm.mobile" :error="addForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="addForm.dob" :error="addForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="addForm.languageId" :error="addForm.errors.languageId" />
@@ -96,9 +96,18 @@ editForm.languageId = datum.languageId;
               v-model="editForm.mobile" :error="editForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="editForm.dob" :error="editForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="editForm.languageId" :error="editForm.errors.languageId" />
+******
+
+*** Grid: parameters ***
+headings: ['Name', 'Email', 'Mobile', '', 'Active']
+column_types: [DataColumn, DataColumn, DataColumn, ImageColumn, ActiveColumn]
+fields: ['name', 'email', 'mobile', 'photoPath', 'active']
+sortable_fields: ['name', 'email', 'mobile', 'photoPath']
 ******
 
 *** Vue props ***
@@ -114,6 +123,7 @@ languages: Array,
 'email' => '',
 'mobile' => '',
 'photoPath' => '',
+'dob' => '',
 'active' => '',
 'languageId' => '',
 ******
@@ -124,6 +134,7 @@ return Guide::create([
 'email' => $validated['email'],
 'mobile' => $validated['mobile'],
 'photo_path' => $validated['photoPath'],
+'dob' => Utils::parseDate($validated['dob']),
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
 'contact_id' => request('contactId'),
@@ -135,6 +146,7 @@ $guide->name = $validated['name'];
 $guide->email = $validated['email'];
 $guide->mobile = $validated['mobile'];
 $guide->photo_path = $validated['photoPath'];
+$guide->dob = Utils::parseDate($validated['dob']);
 $guide->active = $validated['active'];
 $guide->language_id = $validated['languageId'];
 LogActivityHelper::save($guide);
@@ -146,8 +158,9 @@ return $guide;
 'email',
 'mobile',
 'photo_path',
+'dob',
 'active',
 'language_id',
-'contactId',
+'contact_id',
 ******
 

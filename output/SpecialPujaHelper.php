@@ -2,11 +2,11 @@
 
 namespace App\Helpers;
 
-use App\Models\Guide;
+use App\Models\SpecialPuja;
 // use App\Models\Contact;
 // use App\Traits\ContactContext;
 
-class GuideHelper
+class SpecialPujaHelper
 {
     // use ContactContext;
 
@@ -14,23 +14,22 @@ class GuideHelper
     {
         
             if ($sortField === 'id') {
-                $sortField = 'guide_id'
+                $sortField = 'special_puja_id';
             }
             
-        return Guide
+        return SpecialPuja
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
 			// ->join('contacts', 'addresses.contact_id', '=', 'contacts.contact_id')
             // ->leftJoin('countries', 'addresses.country_id', '=', 'countries.country_id')
             ->select(
-                'guides.guide_id',
-'guides.name',
-'guides.email',
-'guides.mobile',
-'guides.photo_path',
-'guides.dob',
-'guides.active',
-'languages.language_id',
-'languages.name as language_name',
+                'special_pujas.special_puja_id',
+'special_pujas.puja_date',
+'special_pujas.sevak_name',
+'special_pujas.active',
+'occasions.occasion_id',
+'occasions.name as occasion_name',
+'relationships.relationship_id',
+'relationships.name as relationship_name',
             );
     }
 
@@ -41,29 +40,28 @@ class GuideHelper
         $sortField = request('sort-field');
         $sortDir = request('sort');
         $items = self::listAll(Utils::snakeCase($sortField), $sortDir)
-->where('guides.contact_id', $contactId);
+->where('special_pujas.contact_id', $contactId);
 
         if ($searchKey) {
             $items = $items->whereAny([
-                'guides.name',
-'guides.email',
-'guides.mobile',
-'guides.photo_path',
+                'special_pujas.puja_date',
+'special_pujas.sevak_name',
+'occasions.name',
+'relationships.name',
             ], 'like', "%{$searchKey}%");
         }
 
         return $items->paginate($rowCount)
             ->through(function ($item) {
                 return [
-                    'id' => $item->guide_id,
-'name' => $item->name,
-'email' => $item->email,
-'mobile' => $item->mobile,
-'photoPath' => Storage::url($item->photo_path),
-'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
+                    'id' => $item->special_puja_id,
+'pujaDate' => $item->puja_date,
+'sevakName' => $item->sevak_name,
 'active' => $item->active,
-'languageId' => $item->language_id,
-'languageName' => $item->language_name,
+'occasionId' => $item->occasion_id,
+'occasionName' => $item->occasion_name,
+'relationshipId' => $item->relationship_id,
+'relationshipName' => $item->relationship_name,
                 ];
             })
             ->appends(['row-count' => $rowCount])
@@ -75,29 +73,25 @@ class GuideHelper
     public static function addEntity($validated)
     {
         return LogActivityHelper::create(function () use ($validated) {
-            return Guide::create([
-'name' => $validated['name'],
-'email' => $validated['email'],
-'mobile' => $validated['mobile'],
-'photo_path' => $validated['photoPath'],
-'dob' => Utils::parseDate($validated['dob']),
+            return SpecialPuja::create([
+'puja_date' => Utils::parseDate($validated['pujaDate']),
+'occasion_id' => $validated['occasionId'],
+'sevak_name' => $validated['sevakName'],
+'relationship_id' => $validated['relationshipId'],
 'active' => $validated['active'],
-'language_id' => $validated['languageId'],
 'contact_id' => request('contactId'),
 ]);
         });
     }
 
-    public static function updateAddress(Guide $guide, array $validated)
+    public static function updateEntity(SpecialPuja $specialPuja, array $validated)
     {
-        $guide->name = $validated['name'];
-$guide->email = $validated['email'];
-$guide->mobile = $validated['mobile'];
-$guide->photo_path = $validated['photoPath'];
-$guide->dob = Utils::parseDate($validated['dob']);
-$guide->active = $validated['active'];
-$guide->language_id = $validated['languageId'];
-LogActivityHelper::save($guide);
-return $guide;
+        $specialPuja->puja_date = Utils::parseDate($validated['pujaDate']);
+$specialPuja->occasion_id = $validated['occasionId'];
+$specialPuja->sevak_name = $validated['sevakName'];
+$specialPuja->relationship_id = $validated['relationshipId'];
+$specialPuja->active = $validated['active'];
+LogActivityHelper::save($specialPuja);
+return $specialPuja;
     }
 }

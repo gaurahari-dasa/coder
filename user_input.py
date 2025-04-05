@@ -11,6 +11,7 @@ class UserInput:
     ForeignKey = namedtuple("ForeignKey", ["name", "base_name"])
 
     class Field:
+        sort_symbol = "^"
         focus_symbol = "@"
         required_symbol = "*"
 
@@ -24,13 +25,23 @@ class UserInput:
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
 
+    class GridColumn:
+        def __init__(self, name: str, specs: str, qualities: str):
+            self.name = name
+            specs = [s.strip() for s in (specs.split(";") if specs else specs)]
+            self.type = utils.nullishIndex(specs, 0)
+            self.title = utils.nullishIndex(specs, 1)
+            self.qualities = qualities
+
     def __init__(self, model: Model, model_table: str):
         self.fields = []
         self.grid_sources = {}
+        self.grid_columns = {}
         self.lookup_props = set()
         self.foreign_key = None
         self.model = model
         self.model_table = model_table
+        self.model_props = utils.camel_case(model_table)
         self.output = io.StringIO()
 
     def append_field(self, name, base_name, specs, qualities):
@@ -38,6 +49,11 @@ class UserInput:
 
     def append_grid_source(self, name: str, grid_source: str):
         self.grid_sources[name] = grid_source
+
+    def append_grid_column(self, index: int, name: str, spec: str, qualities: str):
+        if index in self.grid_columns:
+            utils.error("Grid column index is not unique, Haribol!")
+        self.grid_columns[index] = self.GridColumn(name, spec, qualities)
 
     def assign_foreign_key(self, name, base_name):
         self.foreign_key = self.ForeignKey(name, base_name)
@@ -119,26 +135,53 @@ class UserInput:
             self.generate_control(field, output)
         return output
 
-    def generate_pagination_urls(self):
-        output = io.StringIO()
-        iter_var = self.model.name.lower()
-        print(
-            rf"""
-for (const {iter_var} of props.{self.model_table}.data) {{
-    data.value.push({{ ...{iter_var} }});
-}}
+    def grid_headings(self):
+        return "[" + ", ".join([f"'{col.title}'" for col in self.grid_columns.values()]) + "]"
 
-const prevUrl = props.{self.model_table}.prev_page_url;
-const nextUrl = props.{self.model_table}.next_page_url;
-""",
-            file=output,
+    def grid_fields(self):
+        return "[" + ", ".join([f"'{col.name}'" for col in self.grid_columns.values()]) + "]"
+
+    def grid_column_types(self):
+        return "[" + ", ".join([f"{col.type}" for col in self.grid_columns.values()]) + "]"
+
+    def grid_sortable_fields(self):
+        return (
+            "["
+            + ", ".join(
+                [
+                    f"'{col.name}'"
+                    for col in filter(lambda v: "^" in v.qualities, self.grid_columns.values())
+                ]
+            )
+            + "]"
         )
+    
+    def generate_grid_parameters(self):
+        output = io.StringIO()
+        print('headings:', self.grid_headings(), file=output)
+        print('column_types:', self.grid_column_types(), file=output)
+        print('fields:', self.grid_fields(), file=output)
+        print('sortable_fields:', self.grid_sortable_fields(), file=output)
         return output
+
+    #     def generate_pagination_urls(self):
+    #         output = io.StringIO()
+    #         iter_var = self.model.name.lower()
+    #         print(
+    #             rf"""
+    # for (const {iter_var} of props.{self.model_table}.data) {{
+    #     data.value.push({{ ...{iter_var} }});
+    # }}
+
+    # const prevUrl = props.{self.model_table}.prev_page_url;
+    # const nextUrl = props.{self.model_table}.next_page_url;
+    # """,
+    #             file=output,
+    #         )
+    #         return output
 
     def generate_form(self, form_type: str):
         output = io.StringIO()
-        if form_type == "editForm":
-            print("id: null,", file=output)
         for field in self.fields:
             if form_type == "addForm" and field.type == "checkbox":
                 if field.options:
@@ -161,9 +204,9 @@ const nextUrl = props.{self.model_table}.next_page_url;
     def generate_edit_row(self):
         output = io.StringIO()
         print(  # following is boiler-plate, but very imp code, Haribol
-            r"""
+            fr"""
+    const datum = props.{self.model_props}.data.find(v => v.id === id);
     editId = id;
-    const datum = data.value.find(v => v.id === id);
         """,
             file=output,
         )
@@ -237,12 +280,13 @@ const nextUrl = props.{self.model_table}.next_page_url;
         return output
 
     funcs = [
-        ("*** Pagination URLs ***", generate_pagination_urls),
+        # ("*** Pagination URLs ***", generate_pagination_urls),
         ("*** Form: addForm ***", generate_form, "addForm"),
         ("*** Form: editForm ***", generate_form, "editForm"),
         ("*** editRow ***", generate_edit_row),
         ("*** UI: addForm ***", generate_form_elements, "addForm"),
         ("*** UI: editForm ***", generate_form_elements, "editForm"),
+        ("*** Grid: parameters ***", generate_grid_parameters),
         ("*** Vue props ***", generate_vue_props),
         ("*** Controller props ***", generate_controller_props),
         ("*** Controller: validation ***", generate_controller_validation),
@@ -251,6 +295,7 @@ const nextUrl = props.{self.model_table}.next_page_url;
     ]
 
     def generate(self):
+        self.grid_columns = dict(sorted(self.grid_columns.items()))
         for func in self.funcs:
             print(func[0], file=self.output)
             try:

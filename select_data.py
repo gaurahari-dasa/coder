@@ -7,14 +7,13 @@ from model import Model
 from user_input import UserInput
 
 
-def morph(specs: str):
-    matched = re.search(r"~([a-z\-]+)", specs)
-    return matched.group(1) if matched else None
+# def morph(specs: str):
+#     matched = re.search(r"~([a-z\-]+)", specs)
+#     return matched.group(1) if matched else None
 
 
 class SelectData:
     class Field:
-        sort_symbol = "^"
         search_symbol = "?"
 
         def __init__(self, name: str, alias: str, specs: tuple[str, str, bool, str]):
@@ -23,7 +22,9 @@ class SelectData:
             self.specs, qualities, self.fillable, self.foreign = (
                 specs if specs else (None, None, False, None)
             )
-            self.sortable = self.sort_symbol in qualities if qualities else None
+            self.sortable = (
+                UserInput.Field.sort_symbol in qualities if qualities else None
+            )
             self.searchable = self.search_symbol in qualities if qualities else None
 
     def __init__(self, specs: str, model: Model):
@@ -33,6 +34,11 @@ class SelectData:
         self.model_table, self.primary_key = [
             s.strip() for s in native_specs.split(";")
         ]
+        if not self.model_table:
+            utils.error("Model table name is missing, Haribol!")
+        if not self.primary_key:
+            utils.error("Primary key name is missing, Haribol!")
+
         self.cntxt_table, self.foreign_key = (
             [s.strip() for s in foreign_specs[0].split(";")]
             if foreign_specs
@@ -55,7 +61,7 @@ class SelectData:
         foreign = None  # specifies foreign table, Haribol
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
-            matched = re.match(r"[ ]*(i|#|\$)[ ]*\((.*)\)(.*)", spec)
+            matched = re.match(r"[ ]*(i|#[0-9]+|\$|~)[ ]*\((.*)\)(.*)", spec)
             if matched:
                 match matched.group(1):
                     case "i":
@@ -66,9 +72,8 @@ class SelectData:
                             matched.group(2),
                             matched.group(3),
                         )
-                    case "#":
-                        morph_specs = morph(matched.group(2))
-                        qualities = matched.group(3)
+                    case "~":
+                        morph_specs = matched.group(2)
                     case "$":
                         fillable = True
                         foreign = matched.group(2)
@@ -76,7 +81,18 @@ class SelectData:
                             utils.camel_case(field_name), utils.camel_case(foreign)
                         )
                     case _:
-                        utils.warn("Unheard specs type, Haribol")
+                        spec_type = matched.group(1)
+                        if spec_type[0] == "#":
+                            # morph_specs = morph(matched.group(2))
+                            qualities = matched.group(3)
+                            self.ui.append_grid_column(
+                                int(spec_type[1:]),
+                                utils.camel_case(field_name),
+                                matched.group(2),
+                                qualities,
+                            )
+                        else:
+                            utils.warn("Unheard specs type, Haribol")
         if (
             fillable and model_owned
         ):  # TODO: disallow non-model field specs in the future - and remove the model_owned condition
@@ -148,9 +164,9 @@ class SelectData:
         output = io.StringIO()
         self.ensure_primary_key_pagination()
         self.ensure_foreign_key_cntxt()
-        
+
         if self.foreign_key:
-            self.model.append_field(utils.camel_case(self.foreign_key))
+            self.model.append_field(self.foreign_key)
 
         for table in self.tables:
             for field in self.tables[table]:
@@ -206,18 +222,14 @@ class SelectData:
 
     def generate_sort_by_id(self):
         output = io.StringIO()
-        id_field = utils.find(
-            lambda x: x.name == self.primary_key, self.tables[self.model_table]
+        print(
+            rf"""
+            if ($sortField === 'id') {{
+                $sortField = '{self.primary_key}';
+            }}
+            """,
+            file=output,
         )
-        if id_field and id_field.sortable:
-            print(
-                rf"""
-                if ($sortField === 'id') {{
-                    $sortField = '{self.primary_key}'
-                }}
-                """,
-                file=output,
-            )
         return output
 
     funcs = [
@@ -271,6 +283,7 @@ class SelectData:
             "model": self.model.name,
             "model_helper": model_helper,
             "cntxt_id": self.cntxt_id(),
+            "if_sort_by_id": self.generate_sort_by_id().getvalue(),
             "select_data": self.generate_select_data().getvalue(),
             "cntxt_filter": self.cntxt_filter(),
             "search_clause": self.generate_search_clause().getvalue(),

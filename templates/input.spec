@@ -4,12 +4,12 @@
 
 ** guides **
 guide_id
-name: i (text; Name; )@*, # (; Name; )?^
-email: i (email; Email), # (; Email; )?^
-mobile: i (text; Mobile)*, # (; Mobile; )?^
-photo_path: i (file; Photo), # (%ImageColumn; ; ~file)?^
-# dob: i (date; DOB), # (~date-only)
-active: i (checkbox; Active; false), # (ActiveColumn; Active; )
+name: i (text; Name; )@*, #1(DataColumn; Name; )?^
+email: i (email; Email), #2(DataColumn; Email; )?^
+mobile: i (text; Mobile)*, #3(DataColumn; Mobile; )?^
+photo_path: i (file; Photo), #4(ImageColumn; ;)?^, ~(file)
+dob: i (date; DOB), ~(date-only)
+active: i (checkbox; Active; false), #6(ActiveColumn; Active; )
 language_id: $(language_id), i (select; Language; languages)
 
 ** languages **
