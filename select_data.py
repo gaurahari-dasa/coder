@@ -148,26 +148,6 @@ class SelectData:
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
 
-    # # set or get cntxt_field, Haribol
-    # def cntxt_field(self, field=None):
-    #     if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
-    #         raise Exception("No context table defined, Haribol")
-    #     fields = self.tables.setdefault(self.model_table, [])
-    #     foreign = utils.find(lambda x: x.foreign == self.foreign_key, fields)
-    #     if field and foreign:
-    #         return field
-    #     elif field:
-    #         fields.append(field)
-    #     return foreign  # return foreign field, Haribol
-
-    # def ensure_foreign_key_cntxt(self):
-    #     field = self.Field(self.foreign_key, None, (None, None, True, self.foreign_key))
-    #     if self.foreign_key and not self.cntxt_field(field):
-    #         self.ui.assign_foreign_key(
-    #             utils.camel_case(self.foreign_key), self.foreign_key
-    #         )
-    #         print("Auto-included foreign key, Haribol!")
-
     def generate_select_data(self):
         output = io.StringIO()
         self.ensure_primary_key_pagination()
