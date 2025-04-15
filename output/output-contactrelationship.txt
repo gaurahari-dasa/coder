@@ -4,7 +4,9 @@
 'contacts.contact_id as source_contact_id',
 'contacts.photo_path as source_contact_photo',
 'contacts.name as source_contact_name',
+'contacts.gender as source_contact_gender',
 'contacts.mobile as source_contact_mobile',
+'contacts.whatsapp as source_contact_whatsapp',
 'relation_pairs.relation_pair_id',
 'relation_pairs.name as relation_pair_name',
 ******
@@ -15,7 +17,9 @@
 'sourceContactId' => $item->source_contact_id,
 'sourceContactPhoto' => $item->source_contact_photo ? Storage::url($item->source_contact_photo) : '/img/no-photo.svg',
 'sourceContactName' => $item->source_contact_name,
+'sourceContactGender' => $item->source_contact_gender,
 'sourceContactMobile' => $item->source_contact_mobile,
+'sourceContactWhatsapp' => $item->source_contact_whatsapp,
 'relationPairId' => $item->relation_pair_id,
 'relationPairName' => $item->relation_pair_name,
 ******

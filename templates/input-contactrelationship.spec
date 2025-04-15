@@ -11,7 +11,9 @@ active: i (checkbox; Active; true), #5(ActiveColumn; Active)
 contact_id as source_contact_id
 photo_path as source_contact_photo: #2(ImageColumn;), ~(file)
 name as source_contact_name: #3(DataColumn; Name)?^
+gender as source_contact_gender
 mobile as source_contact_mobile: #4(DataColumn; Mobile)?^
+whatsapp as source_contact_whatsapp
 
 ** relation_pairs **
 relation_pair_id
