@@ -1,0 +1,146 @@
+<template>
+    <Layout :menus :auth>
+        <div class="flex flex-col gap-2 sm:gap-6 lg:gap-8">
+            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user=@@@ cntxt_details @@@ backLabel="Back to what (parent) ???"
+                backUrl=@@@ cntxt_route @@@ />
+            <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showAddForm">
+                <h3 class="text-lg font-semibold text-slate-800">Add what (entity) ???</h3>
+                <form class="relative" @submit.prevent="addEntity">
+                    <FormGuard :allow="!formSaved">
+                        <div class="mt-4 absolute left-40 -top-10 flex items-center gap-2">
+                            <FormCheckBox id="mailing" title="Mailing" v-model="addForm.mailing" />
+                            <FormError :error="addForm.errors.mailing" />
+                        </div>
+                        <div class="grid grid-cols-4 gap-4">
+                        @@@ form controls for adding @@@
+                        </div>
+                    </FormGuard>
+                    <div class="relative lg:mt-8 lg:gap-x-8 sm:mt-6 sm:gap-x-6 mt-2 gap-x-2 flex justify-center">
+                        <ToastMessage message="Saved Successfully, Haribol!" :show="addForm.recentlySuccessful" />
+                        <FormCancelButton @click="closeAddForm">Cancel</FormCancelButton>
+                        <FormSubmitButton :disabled="addForm.processing || formSaved">Save</FormSubmitButton>
+                    </div>
+                </form>
+            </EntityCard>
+            <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showEditForm">
+                <h3 class="text-lg font-semibold text-slate-800">Edit Address</h3>
+                <form class="relative" @submit.prevent="updateEntity">
+                    <div class="grid grid-cols-4 gap-4">
+                    @@@ form controls for editing @@@
+                    </div>
+                    <div class="relative lg:mt-8 lg:gap-x-8 sm:mt-6 sm:gap-x-6 mt-2 gap-x-2 flex justify-center">
+                        <ToastMessage message="Saved Successfully, Haribol!" :show="editForm.recentlySuccessful" />
+                        <FormCancelButton @click="closeEditForm">Cancel</FormCancelButton>
+                        <FormSubmitButton :disabled="editForm.processing">Save</FormSubmitButton>
+                    </div>
+                </form>
+            </EntityCard>
+
+            <PaginatedDataTable class="px-4 sm:px-6 lg:px-8" title="what (entities) ???" :showAdd="addable"
+                description="A list of all the what ???, Haribol"
+                :headings=@@@ headings @@@ :pageData=@@@ model_table @@@
+                :columns=@@@ column_types @@@
+                :fields=@@@ fields @@@ :searchKey
+                :sortableFields=@@@ sortable_fields @@@ :sortField :sortDir
+                @table-add="showAddForm = true; showEditForm = false;" @row-act="editRow" focusSearch :actionIcons />
+        </div>
+    </Layout>
+</template>
+
+<script setup>
+import Layout from '../../components/Layout.vue';
+import PaginatedDataTable from '../../components/PaginatedDataTable.vue';
+import EntityCard from '../../components/EntityCard.vue';
+import FormInput from '../../components/FormInput.vue';
+import FormSelect from '../../components/FormSelect.vue';
+import FormCheckBox from '../../components/FormCheckBox.vue';
+import FormCancelButton from '../../components/FormCancelButton.vue';
+import FormSubmitButton from '../../components/FormSubmitButton.vue';
+import DataColumn from '../../components/DataColumn.vue';
+import ActiveColumn from '../../components/ActiveColumn.vue';
+import FormError from '../../components/FormError.vue';
+import AvatarHeading from '../../components/AvatarHeading.vue';
+import FormAutoComplete from '../../components/FormAutoComplete.vue';
+import ToastMessage from '../../components/ToastMessage.vue';
+import { filterActions } from '../../utils';
+import FormGuard from '../../components/FormGuard.vue';
+
+import { computed, ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import { PencilSquareIcon } from '@heroicons/vue/24/outline';
+
+const props = defineProps({
+    menus: Array,
+    auth: Object,
+    privileges: Array,
+    @@@ cntxt_id @@@: Number,
+    @@@ cntxt_details @@@: Object,
+    @@@ model_table @@@: Object,
+    @@@ vue_props @@@
+    searchKey: String,
+    sortField: String,
+    sortDir: String,
+});
+
+const actionIcons = computed(() => filterActions(props.privileges, {
+    edit_addresses: PencilSquareIcon,
+}));
+
+const addable = computed(() => {
+    return props.privileges.indexOf('add_@@@ model_table @@@') !== -1;
+});
+
+const showAddForm = ref(false);
+const showEditForm = ref(false);
+
+const blanked = {
+    @@@ blanked @@@
+};
+const addForm = useForm({
+    ...blanked,
+    @@@ cntxt_id_value @@@
+});
+const editForm = useForm(blanked);
+const formSaved = ref(false);
+
+function closeAddForm() {
+    showAddForm.value = false;
+    addForm.clearErrors();
+    Object.assign(addForm, blanked);
+    formSaved.value = false;
+}
+
+function closeEditForm() {
+    showEditForm.value = false;
+    editForm.clearErrors();
+    editId = null;
+}
+
+function addEntity() {
+    addForm.post('/@@@ model_route @@@', {
+        onSuccess: () => {
+            addForm.clearErrors();
+            formSaved.value = true;
+        },
+        preserveScroll: true,
+    });
+}
+
+var editId = null;
+
+function editRow(id) {
+    const datum = props.@@@ model_table @@@.data.find(v => v.id === id);
+    editId = id;
+    @@@ edit_row @@@
+    showEditForm.value = true;
+    showAddForm.value = false;
+    countrySelected(editForm.country);
+}
+
+function updateEntity() {
+    editForm.patch(`/@@@ model_route @@@/${editId}`, {
+        onSuccess: () => editForm.clearErrors(),
+        preserveScroll: true,
+    });
+}
+</script>
