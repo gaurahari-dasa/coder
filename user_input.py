@@ -285,14 +285,14 @@ class UserInput:
 
     funcs = [
         # ("*** Pagination URLs ***", generate_pagination_urls),
-        ("*** Form: blanked ***", generate_blanked),
-        ("*** Form: addForm ***", generate_form, "addForm"),
-        ("*** Form: editForm ***", generate_form, "editForm"),
-        ("*** editRow ***", generate_edit_row),
         ("*** UI: addForm ***", generate_form_elements, "addForm"),
         ("*** UI: editForm ***", generate_form_elements, "editForm"),
         ("*** Grid: parameters ***", generate_grid_parameters),
         ("*** Vue props ***", generate_vue_props),
+        ("*** Form: blanked ***", generate_blanked),
+        ("*** Form: addForm ***", generate_form, "addForm"),
+        ("*** Form: editForm ***", generate_form, "editForm"),
+        ("*** editRow ***", generate_edit_row),
         ("*** Controller props ***", generate_controller_props),
         ("*** Controller: validation ***", generate_controller_validation),
         ("*** Store data ***", generate_store_data),

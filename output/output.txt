@@ -37,36 +37,6 @@
             
 ******
 
-*** Form: blanked ***
-name: null,
-email: null,
-mobile: null,
-photoPath: null,
-dob: null,
-active: false,
-languageId: null,
-******
-
-*** Form: addForm ***
-contactId: props.contactId,
-******
-
-*** Form: editForm ***
-******
-
-*** editRow ***
-
-    const datum = props.guides.data.find(v => v.id === id);
-    editId = id;
-        
-editForm.name = datum.name;
-editForm.email = datum.email;
-editForm.mobile = datum.mobile;
-editForm.dob = datum.dob;
-editForm.active = !!datum.active; // cast to boolean, Haribol
-editForm.languageId = datum.languageId;
-******
-
 *** UI: addForm ***
 <FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
               v-model="addForm.name" :error="addForm.errors.name" />
@@ -108,6 +78,36 @@ sortable_fields: ['name', 'email', 'mobile', 'photoPath']
 
 *** Vue props ***
 languages: Array,
+******
+
+*** Form: blanked ***
+name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: false,
+languageId: null,
+******
+
+*** Form: addForm ***
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+******
+
+*** editRow ***
+
+    const datum = props.guides.data.find(v => v.id === id);
+    editId = id;
+        
+editForm.name = datum.name;
+editForm.email = datum.email;
+editForm.mobile = datum.mobile;
+editForm.dob = datum.dob;
+editForm.active = !!datum.active; // cast to boolean, Haribol
+editForm.languageId = datum.languageId;
 ******
 
 *** Controller props ***
