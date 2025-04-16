@@ -15,7 +15,7 @@
 'name' => $item->name,
 'email' => $item->email,
 'mobile' => $item->mobile,
-'photoPath' => Storage::url($item->photo_path),
+'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
@@ -37,7 +37,7 @@
             
 ******
 
-*** Form: addForm ***
+*** Form: blanked ***
 name: null,
 email: null,
 mobile: null,
@@ -45,17 +45,13 @@ photoPath: null,
 dob: null,
 active: false,
 languageId: null,
+******
+
+*** Form: addForm ***
 contactId: props.contactId,
 ******
 
 *** Form: editForm ***
-name: null,
-email: null,
-mobile: null,
-photoPath: null,
-dob: null,
-active: null,
-languageId: null,
 ******
 
 *** editRow ***

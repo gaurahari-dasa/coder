@@ -1,0 +1,81 @@
+*** SelectData: model_table, primary_key ***
+'reading_histories.reading_history_id',
+'reading_histories.started_on',
+'reading_books.reading_book_id',
+'reading_books.name as reading_book_name',
+******
+
+*** Paginate (SelectData) ***
+'id' => $item->reading_history_id,
+'startedOn' => $item->started_on,
+'readingBookId' => $item->reading_book_id,
+'readingBookName' => $item->reading_book_name,
+******
+
+*** Search clause (Select Data) ***
+'reading_histories.current_book',
+******
+
+*** Sort by id column (SelectData) ***
+
+            if ($sortField === 'id') {
+                $sortField = 'reading_history_id';
+            }
+            
+******
+
+*** Form: blanked ***
+******
+
+*** Form: addForm ***
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+******
+
+*** editRow ***
+
+    const datum = props.readingHistories.data.find(v => v.id === id);
+    editId = id;
+        
+******
+
+*** UI: addForm ***
+******
+
+*** UI: editForm ***
+******
+
+*** Grid: parameters ***
+headings: ['Name of the book', 'Status']
+column_types: [DataColumn, DataColumn]
+fields: ['currentBook', 'startedOn']
+sortable_fields: []
+******
+
+*** Vue props ***
+******
+
+*** Controller props ***
+******
+
+*** Controller: validation ***
+******
+
+*** Store data ***
+return ReadingHistory::create([
+'contact_id' => request('contactId'),
+]);
+******
+
+*** Update data ***
+LogActivityHelper::save($readingHistory);
+return $readingHistory;
+******
+
+*** Model: fillable ***
+'current_book',
+'contact_id',
+******
+

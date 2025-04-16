@@ -23,7 +23,7 @@
                 </form>
             </EntityCard>
             <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showEditForm">
-                <h3 class="text-lg font-semibold text-slate-800">Edit Address</h3>
+                <h3 class="text-lg font-semibold text-slate-800">Edit what (entity) ???</h3>
                 <form class="relative" @submit.prevent="updateEntity">
                     <div class="grid grid-cols-4 gap-4">
                     @@@ form controls for editing @@@
@@ -38,7 +38,7 @@
 
             <PaginatedDataTable class="px-4 sm:px-6 lg:px-8" title="what (entities) ???" :showAdd="addable"
                 description="A list of all the what ???, Haribol"
-                :headings=@@@ headings @@@ :pageData=@@@ model_table @@@
+                :headings=@@@ headings @@@ :pageData=@@@ model_props @@@
                 :columns=@@@ column_types @@@
                 :fields=@@@ fields @@@ :searchKey
                 :sortableFields=@@@ sortable_fields @@@ :sortField :sortDir
@@ -75,7 +75,7 @@ const props = defineProps({
     privileges: Array,
     @@@ cntxt_id @@@: Number,
     @@@ cntxt_details @@@: Object,
-    @@@ model_table @@@: Object,
+    @@@ model_props @@@: Object,
     @@@ vue_props @@@
     searchKey: String,
     sortField: String,
@@ -83,11 +83,11 @@ const props = defineProps({
 });
 
 const actionIcons = computed(() => filterActions(props.privileges, {
-    edit_addresses: PencilSquareIcon,
+    edit_@@@ model_privilege @@@: PencilSquareIcon,
 }));
 
 const addable = computed(() => {
-    return props.privileges.indexOf('add_@@@ model_table @@@') !== -1;
+    return props.privileges.indexOf('add_@@@ model_privilege @@@') !== -1;
 });
 
 const showAddForm = ref(false);
@@ -129,7 +129,7 @@ function addEntity() {
 var editId = null;
 
 function editRow(id) {
-    const datum = props.@@@ model_table @@@.data.find(v => v.id === id);
+    const datum = props.@@@ model_props @@@.data.find(v => v.id === id);
     editId = id;
     @@@ edit_row @@@
     showEditForm.value = true;

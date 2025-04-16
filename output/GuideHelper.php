@@ -14,7 +14,7 @@ class GuideHelper
     {
         
             if ($sortField === 'id') {
-                $sortField = 'guide_id'
+                $sortField = 'guide_id';
             }
             
         return Guide
@@ -59,7 +59,7 @@ class GuideHelper
 'name' => $item->name,
 'email' => $item->email,
 'mobile' => $item->mobile,
-'photoPath' => Storage::url($item->photo_path),
+'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
@@ -88,7 +88,7 @@ class GuideHelper
         });
     }
 
-    public static function updateAddress(Guide $guide, array $validated)
+    public static function updateEntity(Guide $guide, array $validated)
     {
         $guide->name = $validated['name'];
 $guide->email = $validated['email'];

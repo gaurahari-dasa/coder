@@ -1,0 +1,78 @@
+*** SelectData: model_table, primary_key ***
+'chanting_histories.chanting_history_id',
+'chanting_histories.rounds',
+'chanting_histories.started_on',
+******
+
+*** Paginate (SelectData) ***
+'id' => $item->chanting_history_id,
+'rounds' => $item->rounds,
+'startedOn' => Utils::formatDateJs($item->started_on, DateFormatJs::OnlyDate),
+******
+
+*** Search clause (Select Data) ***
+'chanting_histories.rounds',
+******
+
+*** Sort by id column (SelectData) ***
+
+            if ($sortField === 'id') {
+                $sortField = 'chanting_history_id';
+            }
+            
+******
+
+*** Form: blanked ***
+******
+
+*** Form: addForm ***
+contactId: props.contactId,
+******
+
+*** Form: editForm ***
+******
+
+*** editRow ***
+
+    const datum = props.chantingHistories.data.find(v => v.id === id);
+    editId = id;
+        
+******
+
+*** UI: addForm ***
+******
+
+*** UI: editForm ***
+******
+
+*** Grid: parameters ***
+headings: ['Number of Rounds', 'Started On']
+column_types: [DataColumn, DateColumn]
+fields: ['rounds', 'startedOn']
+sortable_fields: ['rounds', 'startedOn']
+******
+
+*** Vue props ***
+******
+
+*** Controller props ***
+******
+
+*** Controller: validation ***
+******
+
+*** Store data ***
+return ChantingHistory::create([
+'contact_id' => request('contactId'),
+]);
+******
+
+*** Update data ***
+LogActivityHelper::save($chantingHistory);
+return $chantingHistory;
+******
+
+*** Model: fillable ***
+'contact_id',
+******
+

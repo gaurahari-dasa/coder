@@ -180,10 +180,10 @@ class UserInput:
     #         )
     #         return output
 
-    def generate_form(self, form_type: str):
+    def generate_blanked(self):
         output = io.StringIO()
         for field in self.fields:
-            if form_type == "addForm" and field.type == "checkbox":
+            if field.type == "checkbox":
                 if field.options:
                     value = field.options
                 else:
@@ -194,6 +194,10 @@ class UserInput:
             else:
                 value = "null"
             print(f"{field.name}: {value},", file=output)
+        return output
+
+    def generate_form(self, form_type: str):
+        output = io.StringIO()
         if form_type == "addForm" and self.foreign_key:
             print(
                 f"{self.foreign_key.name}: props.{self.foreign_key.name},",
@@ -281,6 +285,7 @@ class UserInput:
 
     funcs = [
         # ("*** Pagination URLs ***", generate_pagination_urls),
+        ("*** Form: blanked ***", generate_blanked),
         ("*** Form: addForm ***", generate_form, "addForm"),
         ("*** Form: editForm ***", generate_form, "editForm"),
         ("*** editRow ***", generate_edit_row),

@@ -19,6 +19,6 @@ class Guide extends Model
 'dob',
 'active',
 'language_id',
-'contactId',
+'contact_id',
     ];
 }
