@@ -1,14 +1,26 @@
 <template>
     <Layout :menus :auth>
         <div class="flex flex-col gap-2 sm:gap-6 lg:gap-8">
-            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user=@@@ cntxt @@@ backLabel="Back to what (parent) ???"
+            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
                 backUrl=@@@ cntxt_route @@@ />
             <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showAddForm">
                 <h3 class="text-lg font-semibold text-slate-800">Add what (entity) ???</h3>
                 <form class="relative" @submit.prevent="addEntity">
                     <FormGuard :allow="!formSaved">
                         <div class="grid grid-cols-4 gap-4">
-                        @@@ form_controls_for_adding @@@
+                        <FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
+              v-model="addForm.name" :error="addForm.errors.name" />
+<FormInput type="email" class="mt-4" id="email" title="Email"
+              v-model="addForm.email" :error="addForm.errors.email" />
+<FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
+              v-model="addForm.mobile" :error="addForm.errors.mobile" />
+<FormFileUpload class="mt-4" id="photoPath" title="Photo"
+              @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="addForm.dob" :error="addForm.errors.dob" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+<FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
+              v-model="addForm.languageId" :error="addForm.errors.languageId" />
                         </div>
                     </FormGuard>
                     <div class="relative lg:mt-8 lg:gap-x-8 sm:mt-6 sm:gap-x-6 mt-2 gap-x-2 flex justify-center">
@@ -22,7 +34,19 @@
                 <h3 class="text-lg font-semibold text-slate-800">Edit what (entity) ???</h3>
                 <form class="relative" @submit.prevent="updateEntity">
                     <div class="grid grid-cols-4 gap-4">
-                    @@@ form_controls_for_editing @@@
+                    <FormInput type="text" class="mt-4" id="name" title="Name" setFocus required
+              v-model="editForm.name" :error="editForm.errors.name" />
+<FormInput type="email" class="mt-4" id="email" title="Email"
+              v-model="editForm.email" :error="editForm.errors.email" />
+<FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
+              v-model="editForm.mobile" :error="editForm.errors.mobile" />
+<FormFileUpload class="mt-4" id="photoPath" title="Photo"
+              @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
+<FormInput type="date" class="mt-4" id="dob" title="DOB"
+              v-model="editForm.dob" :error="editForm.errors.dob" />
+<FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+<FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
+              v-model="editForm.languageId" :error="editForm.errors.languageId" />
                     </div>
                     <div class="relative lg:mt-8 lg:gap-x-8 sm:mt-6 sm:gap-x-6 mt-2 gap-x-2 flex justify-center">
                         <ToastMessage message="Saved Successfully, Haribol!" :show="editForm.recentlySuccessful" />
@@ -34,10 +58,10 @@
 
             <PaginatedDataTable class="px-4 sm:px-6 lg:px-8" title="what (entities) ???" :showAdd="addable"
                 description="A list of all the what ???, Haribol"
-                :headings=@@@ grid_headings @@@ :pageData="@@@ model_props @@@"
-                :columns=@@@ grid_column_types @@@
-                :fields=@@@ grid_fields @@@ :searchKey
-                :sortableFields=@@@ grid_sortable_fields @@@ :sortField :sortDir
+                :headings="['Name', 'Email', 'Mobile', '', 'Active']" :pageData="guides"
+                :columns="[DataColumn, DataColumn, DataColumn, ImageColumn, ActiveColumn]"
+                :fields="['name', 'email', 'mobile', 'photoPath', 'active']" :searchKey
+                :sortableFields="['name', 'email', 'mobile', 'photoPath']" :sortField :sortDir
                 @table-add="showAddForm = true; showEditForm = false;" @row-act="editRow" focusSearch :actionIcons />
         </div>
     </Layout>
@@ -69,8 +93,10 @@ const props = defineProps({
     menus: Array,
     auth: Object,
     privileges: Array,
-    @@@ model_props @@@: Object,
-    @@@ vue_props @@@
+    guides: Object,
+    contactId: Number,
+    contact: Object,
+languages: Array,
     searchKey: String,
     sortField: String,
     sortDir: String,
@@ -88,10 +114,17 @@ const showAddForm = ref(false);
 const showEditForm = ref(false);
 
 const blanked = {
-    @@@ blanked @@@
+    name: null,
+email: null,
+mobile: null,
+photoPath: null,
+dob: null,
+active: false,
+languageId: null,
 };
 const addForm = useForm({
-    @@@ add_form @@@
+    ...blanked,
+contactId: props.contactId,
 });
 const editForm = useForm(blanked);
 const formSaved = ref(false);
@@ -122,7 +155,14 @@ function addEntity() {
 var editId = null;
 
 function editRow(id) {
-    @@@ edit_row @@@
+    const datum = props.guides.data.find(v => v.id === id);
+    editId = id;
+editForm.name = datum.name;
+editForm.email = datum.email;
+editForm.mobile = datum.mobile;
+editForm.dob = datum.dob;
+editForm.active = !!datum.active; // cast to boolean, Haribol
+editForm.languageId = datum.languageId;
     showEditForm.value = true;
     showAddForm.value = false;
 }

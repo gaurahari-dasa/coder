@@ -7,11 +7,6 @@ from model import Model
 from user_input import UserInput
 
 
-# def morph(specs: str):
-#     matched = re.search(r"~([a-z\-]+)", specs)
-#     return matched.group(1) if matched else None
-
-
 class SelectData:
     class Field:
         search_symbol = "?"
@@ -36,7 +31,9 @@ class SelectData:
         ]
         sql_utils.check_table(self.cntxt_table)
         sql_utils.check_column(self.cntxt_table, self.foreign_key)
-        self.ui.assign_foreign_key(utils.camel_case(self.foreign_key), self.foreign_key)
+        self.ui.assign_foreign_key(
+            utils.camel_case(self.foreign_key), self.foreign_key, self.model.cntxt_name
+        )
         return
 
     def __init__(self, specs: str, model: Model):
@@ -52,12 +49,12 @@ class SelectData:
             utils.error("Primary key name is missing, Haribol!")
 
         self.ui = UserInput(model, self.model_table)
+        self.model = model
         self.__parse_foreign_specs(foreign_specs)
         self.output = io.StringIO()
         self.tables = {}
         self.cur_table = None  # track the table whose fields are being read, Haribol
         self.fields = None  # track the fields in current table, Haribol
-        self.model = model
         model.primary_key = self.primary_key
 
     def parse_specs(
@@ -214,10 +211,9 @@ class SelectData:
     def generate_sort_by_id(self):
         output = io.StringIO()
         print(
-            rf"""
-            if ($sortField === 'id') {{
+            rf"""if ($sortField === 'id') {{
                 $sortField = '{self.primary_key}';
-            }}
+        }}
             """,
             file=output,
         )
@@ -275,3 +271,4 @@ class SelectData:
             print(hydrated, end="", file=output)
         template.close()
         output.close()
+        self.ui.hydrate()

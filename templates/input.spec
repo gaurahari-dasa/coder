@@ -1,4 +1,4 @@
-*** Model: Guide ***
+*** Model: Guide, Contact ***
 
 *** SelectData: guides; guide_id, contacts; contact_id ***
 
@@ -15,3 +15,5 @@ language_id: $(language_id), i (select; Language; languages)
 ** languages **
 language_id
 name as language_name
+
+*** Routes ***

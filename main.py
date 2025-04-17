@@ -24,6 +24,9 @@ def read_sections():
             if matched:
                 match (matched.group(1)):
                     case "SelectData":
+                        if not model_section:
+                            utils.error('Model section must precede SelectData section, Haribol!')
+                            
                         sections.append(
                             select_data_section := SelectData(
                                 matched.group(2), model_section

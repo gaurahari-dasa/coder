@@ -30,10 +30,9 @@
 ******
 
 *** Sort by id column (SelectData) ***
-
-            if ($sortField === 'id') {
+if ($sortField === 'id') {
                 $sortField = 'guide_id';
-            }
+        }
             
 ******
 
@@ -77,6 +76,8 @@ sortable_fields: ['name', 'email', 'mobile', 'photoPath']
 ******
 
 *** Vue props ***
+contactId: Number,
+    contact: Object,
 languages: Array,
 ******
 
@@ -91,17 +92,17 @@ languageId: null,
 ******
 
 *** Form: addForm ***
+...blanked,
 contactId: props.contactId,
 ******
 
 *** Form: editForm ***
+...blanked,
 ******
 
 *** editRow ***
-
-    const datum = props.guides.data.find(v => v.id === id);
+const datum = props.guides.data.find(v => v.id === id);
     editId = id;
-        
 editForm.name = datum.name;
 editForm.email = datum.email;
 editForm.mobile = datum.mobile;
@@ -111,6 +112,8 @@ editForm.languageId = datum.languageId;
 ******
 
 *** Controller props ***
+'contactId' => $contact->contact_id,
+    'contact' => GuideHelper::contactDetails(),
 'languages' => HelperClass::list()->get,
 ******
 

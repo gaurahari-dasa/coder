@@ -8,7 +8,9 @@ class Model:
     def __init__(self, specs: str):
         self.lines = []
         self.fields = []
-        self.name = specs.strip()
+        specs = [s.strip() for s in specs.split(',')]
+        self.name = specs[0]
+        self.cntxt_name = utils.nullishIndex(specs, 1)
         self.output = io.StringIO()
 
     def append(self, line):

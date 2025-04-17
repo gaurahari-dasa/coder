@@ -8,7 +8,7 @@ from model import Model
 
 class UserInput:
 
-    ForeignKey = namedtuple("ForeignKey", ["name", "base_name"])
+    ForeignKey = namedtuple("ForeignKey", ["name", "base_name", "model_name"])
 
     class Field:
         sort_symbol = "^"
@@ -55,8 +55,8 @@ class UserInput:
             utils.error("Grid column index is not unique, Haribol!")
         self.grid_columns[index] = self.GridColumn(name, spec, qualities)
 
-    def assign_foreign_key(self, name, base_name):
-        self.foreign_key = self.ForeignKey(name, base_name)
+    def assign_foreign_key(self, name, base_name, model_name):
+        self.foreign_key = self.ForeignKey(name, base_name, model_name)
 
     def tackFocus(self, field):
         return " setFocus" if field.focus else ""
@@ -67,7 +67,7 @@ class UserInput:
     def generate_typed_input(self, field, output, type="text"):
         print(
             f"""<FormInput type="{type}" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
+              v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
@@ -84,20 +84,20 @@ class UserInput:
         self.lookup_props.add(field.options)
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
+              v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
     def generate_checkbox_input(self, field, output):
         print(
-            f"""<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_type}.{field.name}" />""",
+            f"""<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_obj}.{field.name}" />""",
             file=output,
         )
 
     def generate_file_upload(self, field, output):
         print(
             f"""<FormFileUpload class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
-              @pick="file => {self.form_type}.{field.name} = file" :error="{self.form_type}.errors.{field.name}" />""",
+              @pick="file => {self.form_obj}.{field.name} = file" :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
@@ -105,7 +105,7 @@ class UserInput:
         self.lookup_props.add(field.options)
         print(
             f"""<FormAutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_type}.{field.name}" :error="{self.form_type}.errors.{field.name}" />""",
+              v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
@@ -130,19 +130,29 @@ class UserInput:
 
     def generate_form_elements(self, form_type: str):
         output = io.StringIO()
-        self.form_type = form_type
+        self.form_obj = form_type + "Form"
         for field in self.fields:
             self.generate_control(field, output)
         return output
 
     def grid_headings(self):
-        return "[" + ", ".join([f"'{col.title}'" for col in self.grid_columns.values()]) + "]"
+        return (
+            "["
+            + ", ".join([f"'{col.title}'" for col in self.grid_columns.values()])
+            + "]"
+        )
 
     def grid_fields(self):
-        return "[" + ", ".join([f"'{col.name}'" for col in self.grid_columns.values()]) + "]"
+        return (
+            "["
+            + ", ".join([f"'{col.name}'" for col in self.grid_columns.values()])
+            + "]"
+        )
 
     def grid_column_types(self):
-        return "[" + ", ".join([f"{col.type}" for col in self.grid_columns.values()]) + "]"
+        return (
+            "[" + ", ".join([f"{col.type}" for col in self.grid_columns.values()]) + "]"
+        )
 
     def grid_sortable_fields(self):
         return (
@@ -150,35 +160,21 @@ class UserInput:
             + ", ".join(
                 [
                     f"'{col.name}'"
-                    for col in filter(lambda v: "^" in v.qualities, self.grid_columns.values())
+                    for col in filter(
+                        lambda v: "^" in v.qualities, self.grid_columns.values()
+                    )
                 ]
             )
             + "]"
         )
-    
+
     def generate_grid_parameters(self):
         output = io.StringIO()
-        print('headings:', self.grid_headings(), file=output)
-        print('column_types:', self.grid_column_types(), file=output)
-        print('fields:', self.grid_fields(), file=output)
-        print('sortable_fields:', self.grid_sortable_fields(), file=output)
+        print("headings:", self.grid_headings(), file=output)
+        print("column_types:", self.grid_column_types(), file=output)
+        print("fields:", self.grid_fields(), file=output)
+        print("sortable_fields:", self.grid_sortable_fields(), file=output)
         return output
-
-    #     def generate_pagination_urls(self):
-    #         output = io.StringIO()
-    #         iter_var = self.model.name.lower()
-    #         print(
-    #             rf"""
-    # for (const {iter_var} of props.{self.model_table}.data) {{
-    #     data.value.push({{ ...{iter_var} }});
-    # }}
-
-    # const prevUrl = props.{self.model_table}.prev_page_url;
-    # const nextUrl = props.{self.model_table}.next_page_url;
-    # """,
-    #             file=output,
-    #         )
-    #         return output
 
     def generate_blanked(self):
         output = io.StringIO()
@@ -198,7 +194,11 @@ class UserInput:
 
     def generate_form(self, form_type: str):
         output = io.StringIO()
-        if form_type == "addForm" and self.foreign_key:
+        print(
+            "...blanked,",
+            file=output,
+        )
+        if form_type == "add" and self.foreign_key:
             print(
                 f"{self.foreign_key.name}: props.{self.foreign_key.name},",
                 file=output,
@@ -208,10 +208,8 @@ class UserInput:
     def generate_edit_row(self):
         output = io.StringIO()
         print(  # following is boiler-plate, but very imp code, Haribol
-            fr"""
-    const datum = props.{self.model_props}.data.find(v => v.id === id);
-    editId = id;
-        """,
+            rf"""const datum = props.{self.model_props}.data.find(v => v.id === id);
+    editId = id;""",
             file=output,
         )
         for field in self.fields:
@@ -230,12 +228,24 @@ class UserInput:
 
     def generate_vue_props(self):
         output = io.StringIO()
+        if self.foreign_key:
+            print(
+                rf"""{self.foreign_key.name}: Number,
+    {self.foreign_key.model_name.lower()}: Object,""",
+                file=output,
+            )
         for lookup in self.lookup_props:
             print(f"{lookup}: Array,", file=output)
         return output
 
     def generate_controller_props(self):
         output = io.StringIO()
+        if self.foreign_key:
+            print(
+                rf"""'{self.foreign_key.name}' => ${self.foreign_key.model_name.lower()}->{self.foreign_key.base_name},
+    '{self.foreign_key.model_name.lower()}' => {self.model.name}Helper::{self.foreign_key.model_name.lower()}Details(),""",
+                file=output,
+            )
         for lookup in self.lookup_props:
             print(f"'{lookup}' => HelperClass::list()->get,", file=output)
         return output
@@ -285,13 +295,13 @@ class UserInput:
 
     funcs = [
         # ("*** Pagination URLs ***", generate_pagination_urls),
-        ("*** UI: addForm ***", generate_form_elements, "addForm"),
-        ("*** UI: editForm ***", generate_form_elements, "editForm"),
+        ("*** UI: addForm ***", generate_form_elements, "add"),
+        ("*** UI: editForm ***", generate_form_elements, "edit"),
         ("*** Grid: parameters ***", generate_grid_parameters),
         ("*** Vue props ***", generate_vue_props),
         ("*** Form: blanked ***", generate_blanked),
-        ("*** Form: addForm ***", generate_form, "addForm"),
-        ("*** Form: editForm ***", generate_form, "editForm"),
+        ("*** Form: addForm ***", generate_form, "add"),
+        ("*** Form: editForm ***", generate_form, "edit"),
         ("*** editRow ***", generate_edit_row),
         ("*** Controller props ***", generate_controller_props),
         ("*** Controller: validation ***", generate_controller_validation),
@@ -310,16 +320,25 @@ class UserInput:
             print("******\n", file=self.output)
         return self.output
 
-    # def generate(self):
-    #     self.generate_pagination_urls()
-    #     self.generate_form("addForm")
-    #     self.generate_form("editForm")
-    #     self.generate_edit_row()
-    #     self.generate_form_elements("addForm")
-    #     self.generate_form_elements("editForm")
-    #     self.generate_vue_props()
-    #     self.generate_controller_props()
-    #     self.generate_controller_validation()
-    #     self.generate_store_server()
-    #     self.generate_update_server()
-    #     return self.output
+    def hydrate(self):
+        template = open("templates/View.txt")
+        output = open(f"output/Index.vue", "wt")
+        repo = {
+            "cntxt": f'"{self.foreign_key.model_name.lower()}"',
+            "form_controls_for_adding": self.generate_form_elements("add").getvalue(),
+            "form_controls_for_editing": self.generate_form_elements("edit").getvalue(),
+            "grid_headings": f'"{self.grid_headings()}"',
+            "model_props": self.model_props,
+            "grid_column_types": f'"{self.grid_column_types()}"',
+            "grid_fields": f'"{self.grid_fields()}"',
+            "grid_sortable_fields": f'"{self.grid_sortable_fields()}"',
+            "vue_props": self.generate_vue_props().getvalue(),
+            "blanked": self.generate_blanked().getvalue(),
+            "add_form": self.generate_form("add").getvalue(),
+            "edit_row": self.generate_edit_row().getvalue(),
+        }
+        while line := template.readline():
+            hydrated = utils.hydrate(line, repo)
+            print(hydrated, end="", file=output)
+        template.close()
+        output.close()

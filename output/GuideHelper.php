@@ -12,10 +12,9 @@ class GuideHelper
 
     public static function listAll($sortField = null, $sortDir = null)
     {
-        
-            if ($sortField === 'id') {
+        if ($sortField === 'id') {
                 $sortField = 'guide_id';
-            }
+        }
             
         return Guide
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
