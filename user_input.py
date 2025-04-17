@@ -58,6 +58,16 @@ class UserInput:
     def assign_foreign_key(self, name, base_name, model_name):
         self.foreign_key = self.ForeignKey(name, base_name, model_name)
 
+    def generate_avatar_heading(self):
+        output = io.StringIO()
+        if self.foreign_key:
+            print(
+                rf"""<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.model_name.lower()}" backLabel="Back to what (parent) ???"
+                backUrl=@@@ cntxt_route @@@ />""",
+                file=output,
+            )
+        return output
+
     def tackFocus(self, field):
         return " setFocus" if field.focus else ""
 
@@ -294,7 +304,7 @@ class UserInput:
         return output
 
     funcs = [
-        # ("*** Pagination URLs ***", generate_pagination_urls),
+        ("*** Avatar Heading ***", generate_avatar_heading),
         ("*** UI: addForm ***", generate_form_elements, "add"),
         ("*** UI: editForm ***", generate_form_elements, "edit"),
         ("*** Grid: parameters ***", generate_grid_parameters),
@@ -324,7 +334,7 @@ class UserInput:
         template = open("templates/View.txt")
         output = open(f"output/Index.vue", "wt")
         repo = {
-            "cntxt": f'"{self.foreign_key.model_name.lower()}"',
+            "avatar_heading": self.generate_avatar_heading().getvalue(),
             "form_controls_for_adding": self.generate_form_elements("add").getvalue(),
             "form_controls_for_editing": self.generate_form_elements("edit").getvalue(),
             "grid_headings": f'"{self.grid_headings()}"',

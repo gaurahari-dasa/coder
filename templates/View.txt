@@ -1,8 +1,7 @@
 <template>
     <Layout :menus :auth>
         <div class="flex flex-col gap-2 sm:gap-6 lg:gap-8">
-            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user=@@@ cntxt @@@ backLabel="Back to what (parent) ???"
-                backUrl=@@@ cntxt_route @@@ />
+            @@@ avatar_heading @@@
             <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showAddForm">
                 <h3 class="text-lg font-semibold text-slate-800">Add what (entity) ???</h3>
                 <form class="relative" @submit.prevent="addEntity">
