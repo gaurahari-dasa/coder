@@ -1,15 +1,12 @@
 import re
 import utils
+import sections
 
-from utils import *
 from select_data import SelectData
 from model import Model
+from routes import Routes
 
-sections = []
 cur_sect = None
-
-model_section = None
-select_data_section = None
 
 
 def read_sections():
@@ -24,20 +21,17 @@ def read_sections():
             if matched:
                 match (matched.group(1)):
                     case "SelectData":
-                        if not model_section:
-                            utils.error('Model section must precede SelectData section, Haribol!')
-                            
-                        sections.append(
-                            select_data_section := SelectData(
-                                matched.group(2), model_section
-                            )
+                        sections.set(
+                            SelectData(matched.group(2)), "SelectData"
                         )
                     case "Model":
-                        sections.append(model_section := Model(matched.group(2)))
+                        sections.set(Model(matched.group(2)), "Model")
+                    case "Routes":
+                        sections.set(Routes(matched.group(2)), "Routes")
                     case _:
                         print("section: <", matched.group(1), ">", sep="")
                         continue
-                cur_sect = sections[-1]
+                cur_sect = sections.last_set()
             elif cur_sect:
                 cur_sect.append(line)
     finally:
@@ -51,13 +45,14 @@ output = open(
     "wt",
 )
 
-if gen := select_data_section.generate():
+if gen := sections.ix('SelectData').generate():
     output.write(gen.getvalue())
-if gen := model_section.generate():
+if gen := sections.ix('Model').generate():
     output.write(gen.getvalue())
 
-model_section.hydrate()
-select_data_section.hydrate()
+for section in sections.iterator():
+    section.hydrate()
+
 utils.diagnostics()
 # for section in sections:
 #     if gen := section.generate():

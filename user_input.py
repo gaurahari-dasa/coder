@@ -3,12 +3,12 @@ import io
 from collections import namedtuple
 
 import utils
-from model import Model
+import sections
 
 
 class UserInput:
 
-    ForeignKey = namedtuple("ForeignKey", ["name", "base_name", "model_name"])
+    ForeignKey = namedtuple("ForeignKey", ["name", "base_name", "prop"])
 
     class Field:
         sort_symbol = "^"
@@ -33,15 +33,16 @@ class UserInput:
             self.title = utils.nullishIndex(specs, 1)
             self.qualities = qualities
 
-    def __init__(self, model: Model, model_table: str):
+    def __init__(self, model_table: str):
         self.fields = []
         self.grid_sources = {}
         self.grid_columns = {}
         self.lookup_props = set()
         self.foreign_key = None
-        self.model = model
+        self.model = sections.ix("Model")
         self.model_table = model_table
         self.model_props = utils.camel_case(model_table)
+        self.routes = sections.ix("Routes")
         self.output = io.StringIO()
 
     def append_field(self, name, base_name, specs, qualities):
@@ -56,14 +57,16 @@ class UserInput:
         self.grid_columns[index] = self.GridColumn(name, spec, qualities)
 
     def assign_foreign_key(self, name, base_name, model_name):
-        self.foreign_key = self.ForeignKey(name, base_name, model_name)
+        self.foreign_key = self.ForeignKey(
+            name, base_name, utils.first_char_lower(model_name)
+        )
 
     def generate_avatar_heading(self):
         output = io.StringIO()
         if self.foreign_key:
             print(
-                rf"""<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.model_name.lower()}" backLabel="Back to what (parent) ???"
-                backUrl=@@@ cntxt_route @@@ />""",
+                rf"""<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
+                backUrl={self.routes.cntxt_url} />""",
                 file=output,
             )
         return output
@@ -241,7 +244,7 @@ class UserInput:
         if self.foreign_key:
             print(
                 rf"""{self.foreign_key.name}: Number,
-    {self.foreign_key.model_name.lower()}: Object,""",
+    {self.foreign_key.prop}: Object,""",
                 file=output,
             )
         for lookup in self.lookup_props:
@@ -252,8 +255,8 @@ class UserInput:
         output = io.StringIO()
         if self.foreign_key:
             print(
-                rf"""'{self.foreign_key.name}' => ${self.foreign_key.model_name.lower()}->{self.foreign_key.base_name},
-    '{self.foreign_key.model_name.lower()}' => {self.model.name}Helper::{self.foreign_key.model_name.lower()}Details(),""",
+                rf"""'{self.foreign_key.name}' => ${self.foreign_key.prop}->{self.foreign_key.base_name},
+    '{self.foreign_key.prop}' => {self.model.name}Helper::{self.foreign_key.prop}Details(),""",
                 file=output,
             )
         for lookup in self.lookup_props:
@@ -346,6 +349,8 @@ class UserInput:
             "blanked": self.generate_blanked().getvalue(),
             "add_form": self.generate_form("add").getvalue(),
             "edit_row": self.generate_edit_row().getvalue(),
+            "model_route": self.routes.url,
+            "privy_suffix": f"_{self.routes.name}" if self.foreign_key else "",
         }
         while line := template.readline():
             hydrated = utils.hydrate(line, repo)

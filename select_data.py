@@ -2,8 +2,8 @@ import re
 import io
 
 import utils
+import sections
 import sql_utils
-from model import Model
 from user_input import UserInput
 
 
@@ -36,7 +36,7 @@ class SelectData:
         )
         return
 
-    def __init__(self, specs: str, model: Model):
+    def __init__(self, specs: str):
         specs = specs.split(",")
         native_specs = specs[0]
         foreign_specs = specs[1:]
@@ -48,14 +48,14 @@ class SelectData:
         if not self.primary_key:
             utils.error("Primary key name is missing, Haribol!")
 
-        self.ui = UserInput(model, self.model_table)
-        self.model = model
+        self.model = sections.ix("Model")
+        self.model.primary_key = self.primary_key
+        self.ui = UserInput(self.model_table)
         self.__parse_foreign_specs(foreign_specs)
         self.output = io.StringIO()
         self.tables = {}
         self.cur_table = None  # track the table whose fields are being read, Haribol
         self.fields = None  # track the fields in current table, Haribol
-        model.primary_key = self.primary_key
 
     def parse_specs(
         self, field_name: str, back_name: str, specs: str, model_owned: bool

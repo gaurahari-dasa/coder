@@ -2,7 +2,7 @@
     <Layout :menus :auth>
         <div class="flex flex-col gap-2 sm:gap-6 lg:gap-8">
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
-                backUrl=@@@ cntxt_route @@@ />
+                backUrl=/contacts />
             <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showAddForm">
                 <h3 class="text-lg font-semibold text-slate-800">Add what (entity) ???</h3>
                 <form class="relative" @submit.prevent="addEntity">
@@ -103,11 +103,11 @@ languages: Array,
 });
 
 const actionIcons = computed(() => filterActions(props.privileges, {
-    edit_@@@ model_privilege @@@: PencilSquareIcon,
+    edit_guides: PencilSquareIcon,
 }));
 
 const addable = computed(() => {
-    return props.privileges.indexOf('add_@@@ model_privilege @@@') !== -1;
+    return props.privileges.indexOf('add_guides') !== -1;
 });
 
 const showAddForm = ref(false);
@@ -143,7 +143,7 @@ function closeEditForm() {
 }
 
 function addEntity() {
-    addForm.post('/@@@ model_route @@@', {
+    addForm.post('/guides', {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -168,7 +168,7 @@ editForm.languageId = datum.languageId;
 }
 
 function updateEntity() {
-    editForm.patch(`/@@@ model_route @@@/${editId}`, {
+    editForm.patch(`/guides/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });

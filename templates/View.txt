@@ -76,11 +76,11 @@ const props = defineProps({
 });
 
 const actionIcons = computed(() => filterActions(props.privileges, {
-    edit_@@@ model_privilege @@@: PencilSquareIcon,
+    edit@@@ privy_suffix @@@: PencilSquareIcon,
 }));
 
 const addable = computed(() => {
-    return props.privileges.indexOf('add_@@@ model_privilege @@@') !== -1;
+    return props.privileges.indexOf('add@@@ privy_suffix @@@') !== -1;
 });
 
 const showAddForm = ref(false);
@@ -109,7 +109,7 @@ function closeEditForm() {
 }
 
 function addEntity() {
-    addForm.post('/@@@ model_route @@@', {
+    addForm.post('@@@ model_route @@@', {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -127,7 +127,7 @@ function editRow(id) {
 }
 
 function updateEntity() {
-    editForm.patch(`/@@@ model_route @@@/${editId}`, {
+    editForm.patch(`@@@ model_route @@@/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });

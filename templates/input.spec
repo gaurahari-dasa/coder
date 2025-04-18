@@ -1,5 +1,14 @@
 *** Model: Guide, Contact ***
 
+
+
+*** Routes: /guides(guides), /contacts ***
+#index: visit_guides
+#store: add_guides
+#update: edit_guides
+
+
+
 *** SelectData: guides; guide_id, contacts; contact_id ***
 
 ** guides **
@@ -15,5 +24,3 @@ language_id: $(language_id), i (select; Language; languages)
 ** languages **
 language_id
 name as language_name
-
-*** Routes ***
