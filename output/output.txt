@@ -10,16 +10,8 @@
 'languages.name as language_name',
 ******
 
-*** Paginate (SelectData) ***
-'id' => $item->guide_id,
-'name' => $item->name,
-'email' => $item->email,
-'mobile' => $item->mobile,
-'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
-'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
-'active' => $item->active,
-'languageId' => $item->language_id,
-'languageName' => $item->language_name,
+*** Log Access (SelectData) ***
+LogAccessHelper::log(Guide::class, $searchKey);
 ******
 
 *** Search clause (Select Data) ***
@@ -34,6 +26,18 @@ if ($sortField === 'id') {
                 $sortField = 'guide_id';
         }
             
+******
+
+*** Paginate (SelectData) ***
+'id' => $item->guide_id,
+'name' => $item->name,
+'email' => $item->email,
+'mobile' => $item->mobile,
+'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
+'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
+'active' => $item->active,
+'languageId' => $item->language_id,
+'languageName' => $item->language_name,
 ******
 
 *** Avatar Heading ***

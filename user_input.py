@@ -4,6 +4,8 @@ from collections import namedtuple
 
 import utils
 import sections
+from model import Model
+from routes import Routes
 from OrderedSet import OrderedSet
 
 
@@ -40,10 +42,10 @@ class UserInput:
         self.grid_columns = {}
         self.lookup_props = set()
         self.foreign_key = None
-        self.model = sections.ix("Model")
+        self.model: Model = sections.ix("Model")
         self.model_table = model_table
         self.model_props = utils.camel_case(model_table)
-        self.routes = sections.ix("Routes")
+        self.routes: Routes = sections.ix("Routes")
         self.vue_imports = OrderedSet()
         self.output = io.StringIO()
 

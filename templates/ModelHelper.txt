@@ -31,6 +31,7 @@ class @@@ model_helper @@@
         $items = self::listAll(Utils::snakeCase($sortField), $sortDir)@@@ cntxt_filter @@@;
 
         if ($searchKey) {
+            @@@ log_access @@@
             $items = $items->whereAny([
                 @@@ search_clause @@@
             ], 'like', "%{$searchKey}%");

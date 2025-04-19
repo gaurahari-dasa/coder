@@ -4,6 +4,7 @@ import io
 import utils
 import sections
 import sql_utils
+from model import Model
 from user_input import UserInput
 
 
@@ -48,7 +49,7 @@ class SelectData:
         if not self.primary_key:
             utils.error("Primary key name is missing, Haribol!")
 
-        self.model = sections.ix("Model")
+        self.model: Model = sections.ix("Model")
         self.model.primary_key = self.primary_key
         self.ui = UserInput(self.model_table)
         self.__parse_foreign_specs(foreign_specs)
@@ -200,6 +201,11 @@ class SelectData:
                         utils.warn("Unknown transformation type, Haribol", field.specs)
         return output
 
+    def generate_log_access(self):
+        output = io.StringIO()
+        print(f"LogAccessHelper::log({self.model.name}::class, $searchKey);", file=output)
+        return output
+
     def generate_search_clause(self):
         output = io.StringIO()
         for table in self.tables.items():
@@ -221,9 +227,10 @@ class SelectData:
 
     funcs = [
         ("*** SelectData: model_table, primary_key ***", generate_select_data),
-        ("*** Paginate (SelectData) ***", generate_pagination_data),
+        ("*** Log Access (SelectData) ***", generate_log_access),
         ("*** Search clause (Select Data) ***", generate_search_clause),
         ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
+        ("*** Paginate (SelectData) ***", generate_pagination_data),
     ]
 
     def generate(self):
@@ -260,6 +267,7 @@ class SelectData:
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
             "select_data": self.generate_select_data().getvalue(),
             "cntxt_filter": self.cntxt_filter(),
+            "log_access": self.generate_log_access().getvalue(),
             "search_clause": self.generate_search_clause().getvalue(),
             "pagination_data": self.generate_pagination_data().getvalue(),
             "store_data": self.ui.generate_store_data().getvalue(),

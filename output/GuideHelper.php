@@ -43,6 +43,7 @@ class GuideHelper
 ->where('guides.contact_id', $contactId);
 
         if ($searchKey) {
+            LogAccessHelper::log(Guide::class, $searchKey);
             $items = $items->whereAny([
                 'guides.name',
 'guides.email',
