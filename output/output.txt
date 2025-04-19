@@ -80,6 +80,22 @@ fields: ['name', 'email', 'mobile', 'photoPath', 'active']
 sortable_fields: ['name', 'email', 'mobile', 'photoPath']
 ******
 
+*** Vue imports ***
+import AvatarHeading from '../../components/AvatarHeading.vue';
+import FormInput from '../../components/FormInput.vue';
+import FormFileUpload from '../../components/FormFileUpload.vue';
+import FormCheckBox from '../../components/FormCheckBox.vue';
+import FormSelect from '../../components/FormSelect.vue';
+import DataColumn from '../../components/DataColumn.vue';
+import ImageColumn from '../../components/ImageColumn.vue';
+import ActiveColumn from '../../components/ActiveColumn.vue';
+import EntityCard from '../../components/EntityCard.vue';
+import FormCancelButton from '../../components/FormCancelButton.vue';
+import FormSubmitButton from '../../components/FormSubmitButton.vue';
+import ToastMessage from '../../components/ToastMessage.vue';
+import FormGuard from '../../components/FormGuard.vue';
+******
+
 *** Vue props ***
 contactId: Number,
     contact: Object,
@@ -97,12 +113,14 @@ languageId: null,
 ******
 
 *** Form: addForm ***
+{
 ...blanked,
 contactId: props.contactId,
+}
 ******
 
 *** Form: editForm ***
-...blanked,
+blanked
 ******
 
 *** editRow ***

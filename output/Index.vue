@@ -70,20 +70,20 @@
 <script setup>
 import Layout from '../../components/Layout.vue';
 import PaginatedDataTable from '../../components/PaginatedDataTable.vue';
-import EntityCard from '../../components/EntityCard.vue';
+import AvatarHeading from '../../components/AvatarHeading.vue';
 import FormInput from '../../components/FormInput.vue';
-import FormSelect from '../../components/FormSelect.vue';
+import FormFileUpload from '../../components/FormFileUpload.vue';
 import FormCheckBox from '../../components/FormCheckBox.vue';
+import FormSelect from '../../components/FormSelect.vue';
+import DataColumn from '../../components/DataColumn.vue';
+import ImageColumn from '../../components/ImageColumn.vue';
+import ActiveColumn from '../../components/ActiveColumn.vue';
+import EntityCard from '../../components/EntityCard.vue';
 import FormCancelButton from '../../components/FormCancelButton.vue';
 import FormSubmitButton from '../../components/FormSubmitButton.vue';
-import DataColumn from '../../components/DataColumn.vue';
-import ActiveColumn from '../../components/ActiveColumn.vue';
-import FormError from '../../components/FormError.vue';
-import AvatarHeading from '../../components/AvatarHeading.vue';
-import FormAutoComplete from '../../components/FormAutoComplete.vue';
 import ToastMessage from '../../components/ToastMessage.vue';
-import { filterActions } from '../../utils';
 import FormGuard from '../../components/FormGuard.vue';
+import { filterActions } from '../../utils';
 
 import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
@@ -123,7 +123,7 @@ active: false,
 languageId: null,
 };
 const addForm = useForm({
-    ...blanked,
+...blanked,
 contactId: props.contactId,
 });
 const editForm = useForm(blanked);

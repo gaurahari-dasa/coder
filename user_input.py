@@ -4,6 +4,7 @@ from collections import namedtuple
 
 import utils
 import sections
+from OrderedSet import OrderedSet
 
 
 class UserInput:
@@ -43,6 +44,7 @@ class UserInput:
         self.model_table = model_table
         self.model_props = utils.camel_case(model_table)
         self.routes = sections.ix("Routes")
+        self.vue_imports = OrderedSet()
         self.output = io.StringIO()
 
     def append_field(self, name, base_name, specs, qualities):
@@ -64,6 +66,9 @@ class UserInput:
     def generate_avatar_heading(self):
         output = io.StringIO()
         if self.foreign_key:
+            self.vue_imports.add(
+                "import AvatarHeading from '../../components/AvatarHeading.vue';"
+            )
             print(
                 rf"""<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
                 backUrl={self.routes.cntxt_url} />""",
@@ -78,6 +83,7 @@ class UserInput:
         return " required" if field.required else ""
 
     def generate_typed_input(self, field, output, type="text"):
+        self.vue_imports.add("import FormInput from '../../components/FormInput.vue';")
         print(
             f"""<FormInput type="{type}" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
@@ -95,6 +101,9 @@ class UserInput:
 
     def generate_select_input(self, field, output):
         self.lookup_props.add(field.options)
+        self.vue_imports.add(
+            "import FormSelect from '../../components/FormSelect.vue';"
+        )
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
@@ -102,12 +111,18 @@ class UserInput:
         )
 
     def generate_checkbox_input(self, field, output):
+        self.vue_imports.add(
+            "import FormCheckBox from '../../components/FormCheckBox.vue';"
+        )
         print(
             f"""<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_obj}.{field.name}" />""",
             file=output,
         )
 
     def generate_file_upload(self, field, output):
+        self.vue_imports.add(
+            "import FormFileUpload from '../../components/FormFileUpload.vue';"
+        )
         print(
             f"""<FormFileUpload class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
               @pick="file => {self.form_obj}.{field.name} = file" :error="{self.form_obj}.errors.{field.name}" />""",
@@ -116,6 +131,9 @@ class UserInput:
 
     def generate_autocomplete(self, field, output):
         self.lookup_props.add(field.options)
+        self.vue_imports.add(
+            "import FormAutoComplete from '../../components/FormAutoComplete.vue';"
+        )
         print(
             f"""<FormAutoComplete class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
@@ -163,6 +181,10 @@ class UserInput:
         )
 
     def grid_column_types(self):
+        for col in self.grid_columns.values():
+            self.vue_imports.add(
+                f"import {col.type} from '../../components/{col.type}.vue';"
+            )
         return (
             "[" + ", ".join([f"{col.type}" for col in self.grid_columns.values()]) + "]"
         )
@@ -189,6 +211,22 @@ class UserInput:
         print("sortable_fields:", self.grid_sortable_fields(), file=output)
         return output
 
+    def generate_vue_imports(self):
+        output = io.StringIO()
+        print(
+            "\n".join(self.vue_imports),
+            file=output,
+        )
+        print(
+            r"""import EntityCard from '../../components/EntityCard.vue';
+import FormCancelButton from '../../components/FormCancelButton.vue';
+import FormSubmitButton from '../../components/FormSubmitButton.vue';
+import ToastMessage from '../../components/ToastMessage.vue';
+import FormGuard from '../../components/FormGuard.vue';""",
+            file=output,
+        )
+        return output
+
     def generate_blanked(self):
         output = io.StringIO()
         for field in self.fields:
@@ -207,15 +245,19 @@ class UserInput:
 
     def generate_form(self, form_type: str):
         output = io.StringIO()
-        print(
-            "...blanked,",
-            file=output,
-        )
         if form_type == "add" and self.foreign_key:
+            print("{", file=output)
+            print(
+                "...blanked,",
+                file=output,
+            )
             print(
                 f"{self.foreign_key.name}: props.{self.foreign_key.name},",
                 file=output,
             )
+            print("}", file=output)
+        else:
+            print("blanked", file=output)
         return output
 
     def generate_edit_row(self):
@@ -311,6 +353,7 @@ class UserInput:
         ("*** UI: addForm ***", generate_form_elements, "add"),
         ("*** UI: editForm ***", generate_form_elements, "edit"),
         ("*** Grid: parameters ***", generate_grid_parameters),
+        ("*** Vue imports ***", generate_vue_imports),
         ("*** Vue props ***", generate_vue_props),
         ("*** Form: blanked ***", generate_blanked),
         ("*** Form: addForm ***", generate_form, "add"),
@@ -345,9 +388,11 @@ class UserInput:
             "grid_column_types": f'"{self.grid_column_types()}"',
             "grid_fields": f'"{self.grid_fields()}"',
             "grid_sortable_fields": f'"{self.grid_sortable_fields()}"',
+            "vue_imports": self.generate_vue_imports().getvalue(),
             "vue_props": self.generate_vue_props().getvalue(),
             "blanked": self.generate_blanked().getvalue(),
             "add_form": self.generate_form("add").getvalue(),
+            "edit_form": self.generate_form("edit").getvalue(),
             "edit_row": self.generate_edit_row().getvalue(),
             "model_route": self.routes.url,
             "privy_suffix": f"_{self.routes.name}" if self.foreign_key else "",
