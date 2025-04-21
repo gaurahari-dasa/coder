@@ -347,7 +347,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             else:
                 print(f"$validated['{field.name}'];", file=output)
         print(f"LogActivityHelper::save({varname});", file=output)
-        print(f"return {varname};", file=output)
+        # print(f"return {varname};", file=output)
         return output
 
     funcs = [

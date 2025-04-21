@@ -98,6 +98,5 @@ $guide->dob = Utils::parseDate($validated['dob']);
 $guide->active = $validated['active'];
 $guide->language_id = $validated['languageId'];
 LogActivityHelper::save($guide);
-return $guide;
     }
 }
