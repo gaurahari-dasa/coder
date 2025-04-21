@@ -17,7 +17,7 @@ class GuideHelper
         }
             
         return Guide
-            ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
+            ::orderBy($sortField ?? 'guides.name', $sortDir ?? 'asc')
 			// ->join('contacts', 'addresses.contact_id', '=', 'contacts.contact_id')
             // ->leftJoin('countries', 'addresses.country_id', '=', 'countries.country_id')
             ->select(

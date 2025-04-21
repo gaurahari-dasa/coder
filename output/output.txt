@@ -1,3 +1,10 @@
+*** Sort by id column (SelectData) ***
+if ($sortField === 'id') {
+                $sortField = 'guide_id';
+        }
+            
+******
+
 *** SelectData: model_table, primary_key ***
 'guides.guide_id',
 'guides.name',
@@ -19,13 +26,6 @@ LogAccessHelper::log(Guide::class, $searchKey);
 'guides.email',
 'guides.mobile',
 'guides.photo_path',
-******
-
-*** Sort by id column (SelectData) ***
-if ($sortField === 'id') {
-                $sortField = 'guide_id';
-        }
-            
 ******
 
 *** Paginate (SelectData) ***

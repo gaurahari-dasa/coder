@@ -13,7 +13,7 @@
 
 ** guides **
 guide_id
-name: i (text; Name; )@*, #1(DataColumn; Name; )?^
+name: i (text; Name; )@*, #1(DataColumn; Name; )?^0
 email: i (email; Email), #2(DataColumn; Email; )?^
 mobile: i (text; Mobile)*, #3(DataColumn; Mobile; )?^
 photo_path: i (file; Photo), #4(ImageColumn; ;)?^, ~(file)

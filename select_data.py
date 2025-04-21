@@ -18,8 +18,13 @@ class SelectData:
             self.specs, qualities, self.fillable, self.foreign = (
                 specs if specs else (None, None, False, None)
             )
-            self.sortable = (
-                UserInput.Field.sort_symbol in qualities if qualities else None
+            # self.sortable = (
+            #     UserInput.Field.sort_symbol in qualities if qualities else None
+            # )
+            self.sortOrdinal = (
+                (int(m.group(1)) if m.group(1) else None)
+                if qualities and (m := re.search(r"\^([0-9]*)", qualities))
+                else None
             )
             self.searchable = self.search_symbol in qualities if qualities else None
 
@@ -203,7 +208,9 @@ class SelectData:
 
     def generate_log_access(self):
         output = io.StringIO()
-        print(f"LogAccessHelper::log({self.model.name}::class, $searchKey);", file=output)
+        print(
+            f"LogAccessHelper::log({self.model.name}::class, $searchKey);", file=output
+        )
         return output
 
     def generate_search_clause(self):
@@ -213,6 +220,13 @@ class SelectData:
                 if field.searchable:
                     print(f"'{table[0]}.{field.name}',", file=output)
         return output
+
+    def default_sort_field(self):
+        for table in self.tables:
+            for field in self.tables[table]:
+                if field.sortOrdinal == 0:
+                    return f"'{table}.{field.name}'"
+        return f"'{self.model_table}.{self.primary_key}'"
 
     def generate_sort_by_id(self):
         output = io.StringIO()
@@ -226,10 +240,10 @@ class SelectData:
         return output
 
     funcs = [
+        ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
         ("*** SelectData: model_table, primary_key ***", generate_select_data),
         ("*** Log Access (SelectData) ***", generate_log_access),
         ("*** Search clause (Select Data) ***", generate_search_clause),
-        ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
         ("*** Paginate (SelectData) ***", generate_pagination_data),
     ]
 
@@ -264,6 +278,7 @@ class SelectData:
             "model": self.model.name,
             "model_helper": model_helper,
             "cntxt_id": self.cntxt_id(),
+            "default_sort_field": self.default_sort_field(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
             "select_data": self.generate_select_data().getvalue(),
             "cntxt_filter": self.cntxt_filter(),
