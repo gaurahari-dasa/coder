@@ -13,5 +13,5 @@ class @@@ model @@@ extends Model
 
     protected $fillable = [
         @@@ fillable @@@
-    ];
+    ];@@@ casts_method @@@
 }

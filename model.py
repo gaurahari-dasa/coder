@@ -2,6 +2,7 @@ import re
 import io
 
 import utils
+import sections
 
 
 class Model:
@@ -27,13 +28,41 @@ class Model:
                 print(f"'{matched.group(1)}',", file=output)
         return output
 
+    def generate_casts_method(self):
+        output = io.StringIO()
+        fields = sections.ix("SelectData").ui.fields
+        bools = []
+        for field in fields:
+            if field.type == "checkbox":
+                bools.append(field.base_name)
+        if bools:
+            bools_csv = "\n".join([f"'{b}' => 'boolean'," for b in bools])
+            print(
+                rf"""
+
+    protected function casts(): array
+    {{
+        return [
+            {bools_csv}
+        ];
+    }}""",
+                file=output,
+            )
+        return output
+
+    funcs = [
+        ("*** Model: fillable ***", generate_fillable),
+        ("*** Model: casts method ***", generate_casts_method),
+    ]
+
     def generate(self):
-        print("*** Model: fillable ***", file=self.output)
-        try:
-            self.output.write(self.generate_fillable().getvalue())
-        except Exception as ex:
-            utils.warn(ex)
-        print("******\n", file=self.output)
+        for func in self.funcs:
+            print(func[0], file=self.output)
+            try:
+                self.output.write(func[1](self, *func[2:]).getvalue())
+            except Exception as ex:
+                utils.warn(ex)
+            print("******\n", file=self.output)
         return self.output
 
     def hydrate(self):
@@ -43,6 +72,7 @@ class Model:
             "model": self.name,
             "primary_key": self.primary_key,
             "fillable": self.generate_fillable().getvalue(),
+            "casts_method": self.generate_casts_method().getvalue(),
         }
         while line := template.readline():
             hydrated = utils.hydrate(line, repo)

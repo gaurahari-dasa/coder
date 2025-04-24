@@ -21,4 +21,11 @@ class Guide extends Model
 'language_id',
 'contact_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+        ];
+    }
 }

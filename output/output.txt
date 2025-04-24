@@ -146,7 +146,7 @@ editForm.name = datum.name;
 editForm.email = datum.email;
 editForm.mobile = datum.mobile;
 editForm.dob = datum.dob;
-editForm.active = !!datum.active; // cast to boolean, Haribol
+editForm.active = datum.active;
 editForm.languageId = datum.languageId;
 ******
 
@@ -199,5 +199,16 @@ LogActivityHelper::save($guide);
 'active',
 'language_id',
 'contact_id',
+******
+
+*** Model: casts method ***
+
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+        ];
+    }
 ******
 

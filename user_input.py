@@ -275,13 +275,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
                 continue  # cannot edit file contents on server, Haribol
             source = self.grid_sources.get(field.name, field.name)
             print(f"editForm.{field.name} =", end=" ", file=output)
-            if field.type == "checkbox":
-                print(
-                    f"!!datum.{source}; // cast to boolean, Haribol",
-                    file=output,
-                )
-            else:
-                print(f"datum.{source};", file=output)
+            print(f"datum.{source};", file=output)
         return output
 
     def generate_vue_props(self):
