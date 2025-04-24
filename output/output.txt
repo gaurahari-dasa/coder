@@ -52,7 +52,8 @@ LogAccessHelper::log(Guide::class, $searchKey);
 ******
 
 *** Avatar Heading ***
-<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
+
+            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
                 backUrl=/contacts />
 ******
 

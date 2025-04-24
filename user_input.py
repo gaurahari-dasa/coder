@@ -72,7 +72,8 @@ class UserInput:
                 "import AvatarHeading from '../../components/AvatarHeading.vue';"
             )
             print(
-                rf"""<AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
+                rf"""
+            <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
                 backUrl={self.routes.cntxt_url} />""",
                 file=output,
             )
