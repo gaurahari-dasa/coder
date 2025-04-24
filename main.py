@@ -21,9 +21,7 @@ def read_sections():
             if matched:
                 match (matched.group(1)):
                     case "SelectData":
-                        sections.set(
-                            SelectData(matched.group(2)), "SelectData"
-                        )
+                        sections.set(SelectData(matched.group(2)), "SelectData")
                     case "Model":
                         sections.set(Model(matched.group(2)), "Model")
                     case "Routes":
@@ -45,9 +43,9 @@ output = open(
     "wt",
 )
 
-if gen := sections.ix('SelectData').generate():
+if gen := sections.ix("SelectData").generate():
     output.write(gen.getvalue())
-if gen := sections.ix('Model').generate():
+if gen := sections.ix("Model").generate():
     output.write(gen.getvalue())
 
 for section in sections.iterator():

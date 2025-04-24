@@ -1,3 +1,14 @@
+*** Context Declaration ***
+use App\Traits\ContactContext;
+
+******
+
+*** Context Usage ***
+
+use ContactContext;
+
+******
+
 *** Sort by id column (SelectData) ***
 if ($sortField === 'id') {
                 $sortField = 'guide_id';
@@ -5,7 +16,7 @@ if ($sortField === 'id') {
             
 ******
 
-*** SelectData: model_table, primary_key ***
+*** SelectData columns ***
 'guides.guide_id',
 'guides.name',
 'guides.email',
@@ -141,7 +152,7 @@ editForm.languageId = datum.languageId;
 *** Controller props ***
 'contactId' => $contact->contact_id,
     'contact' => GuideHelper::contactDetails(),
-'languages' => HelperClass::list()->get,
+'languages' => HelperClass::list()->get(),
 ******
 
 *** Controller: validation ***

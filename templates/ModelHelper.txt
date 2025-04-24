@@ -3,13 +3,9 @@
 namespace App\Helpers;
 
 use App\Models\@@@ model @@@;
-// use App\Models\Contact;
-// use App\Traits\ContactContext;
-
+@@@ declare_cntxt_trait @@@
 class @@@ model_helper @@@
-{
-    // use ContactContext;
-
+{@@@ use_cntxt_trait @@@
     public static function listAll($sortField = null, $sortDir = null)
     {
         @@@ if_sort_by_id @@@

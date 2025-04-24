@@ -3,12 +3,11 @@
 namespace App\Helpers;
 
 use App\Models\Guide;
-// use App\Models\Contact;
-// use App\Traits\ContactContext;
+use App\Traits\ContactContext;
 
 class GuideHelper
 {
-    // use ContactContext;
+use ContactContext;
 
     public static function listAll($sortField = null, $sortDir = null)
     {

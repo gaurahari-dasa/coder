@@ -228,6 +228,18 @@ class SelectData:
                     return f"'{table}.{field.name}'"
         return f"'{self.model_table}.{self.primary_key}'"
 
+    def generate_declare_cntxt_trait(self):
+        output = io.StringIO()
+        if self.cntxt_table:
+            print(f"use App\\Traits\\{self.model.cntxt_name}Context;\n", file=output)
+        return output
+
+    def generate_use_cntxt_trait(self):
+        output = io.StringIO()
+        if self.cntxt_table:
+            print(f"\nuse {self.model.cntxt_name}Context;\n", file=output)
+        return output
+
     def generate_sort_by_id(self):
         output = io.StringIO()
         print(
@@ -240,8 +252,10 @@ class SelectData:
         return output
 
     funcs = [
+        ("*** Context Declaration ***", generate_declare_cntxt_trait),
+        ("*** Context Usage ***", generate_use_cntxt_trait),
         ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
-        ("*** SelectData: model_table, primary_key ***", generate_select_data),
+        ("*** SelectData columns ***", generate_select_data),
         ("*** Log Access (SelectData) ***", generate_log_access),
         ("*** Search clause (Select Data) ***", generate_search_clause),
         ("*** Paginate (SelectData) ***", generate_pagination_data),
@@ -276,6 +290,8 @@ class SelectData:
         output = open(f"output/{model_helper}.php", "wt")
         repo = {
             "model": self.model.name,
+            "declare_cntxt_trait": self.generate_declare_cntxt_trait().getvalue(),
+            "use_cntxt_trait": self.generate_use_cntxt_trait().getvalue(),
             "model_helper": model_helper,
             "cntxt_id": self.cntxt_id(),
             "default_sort_field": self.default_sort_field(),
