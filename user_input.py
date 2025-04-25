@@ -374,7 +374,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
         return self.output
 
     def hydrate(self):
-        template = open("templates/View.txt")
+        template = open("templates/Index.txt")
         output = open(f"output/Index.vue", "wt")
         repo = {
             "avatar_heading": self.generate_avatar_heading().getvalue(),
