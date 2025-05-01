@@ -16,6 +16,10 @@ if ($sortField === 'id') {
             
 ******
 
+*** Join clause (SelectData) ***
+->join('languages', 'guides.language_id', '=', 'languages.language_id')
+******
+
 *** SelectData columns ***
 'guides.guide_id',
 'guides.name',

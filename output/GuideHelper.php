@@ -17,8 +17,7 @@ use ContactContext;
             
         return Guide
             ::orderBy($sortField ?? 'guides.name', $sortDir ?? 'asc')
-			// ->join('contacts', 'addresses.contact_id', '=', 'contacts.contact_id')
-            // ->leftJoin('countries', 'addresses.country_id', '=', 'countries.country_id')
+            ->join('languages', 'guides.language_id', '=', 'languages.language_id')
             ->select(
                 'guides.guide_id',
 'guides.name',

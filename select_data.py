@@ -59,9 +59,13 @@ class SelectData:
         self.ui = UserInput(self.model_table)
         self.__parse_foreign_specs(foreign_specs)
         self.output = io.StringIO()
-        self.tables = {}
-        self.cur_table = None  # track the table whose fields are being read, Haribol
-        self.fields = None  # track the fields in current table, Haribol
+        self.tables: dict[str, list[SelectData.Field]] = {}
+        self.cur_table: str = (
+            None  # track the table whose fields are being read, Haribol
+        )
+        self.fields: list[SelectData.Field] = (
+            None  # track the fields in current table, Haribol
+        )
 
     def parse_specs(
         self, field_name: str, back_name: str, specs: str, model_owned: bool
@@ -150,6 +154,31 @@ class SelectData:
         if not utils.find(lambda x: x.name == self.primary_key, fields):
             fields.append(self.Field(self.primary_key, None, None))
             print("Auto-included primary key, Haribol!")
+
+    def find_foreign_table(self, key):
+        for table, fields in self.tables.items():
+            if table == self.model_table:
+                continue
+            for field in fields:
+                if (
+                    field.alias
+                    and field.alias == key
+                    or not field.alias
+                    and field.name == key
+                ):
+                    return (table, field.name)
+        return (None, None)
+
+    def generate_join_clause(self):
+        output = io.StringIO()
+        for field in self.tables[self.model_table]:
+            if field.foreign:
+                foreign_table, ref_key = self.find_foreign_table(field.foreign)
+                print(
+                    f"->join('{foreign_table}', '{self.model_table}.{field.name}', '=', '{foreign_table}.{ref_key}')",
+                    file=output,
+                )
+        return output
 
     def generate_select_data(self):
         output = io.StringIO()
@@ -255,6 +284,7 @@ class SelectData:
         ("*** Context Declaration ***", generate_declare_cntxt_trait),
         ("*** Context Usage ***", generate_use_cntxt_trait),
         ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
+        ("*** Join clause (SelectData) ***", generate_join_clause),
         ("*** SelectData columns ***", generate_select_data),
         ("*** Log Access (SelectData) ***", generate_log_access),
         ("*** Search clause (Select Data) ***", generate_search_clause),
@@ -295,6 +325,7 @@ class SelectData:
             "model_helper": model_helper,
             "cntxt_id": self.cntxt_id(),
             "default_sort_field": self.default_sort_field(),
+            "join_clause": self.generate_join_clause().getvalue(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
             "select_data": self.generate_select_data().getvalue(),
             "cntxt_filter": self.cntxt_filter(),

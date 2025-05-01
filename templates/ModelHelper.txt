@@ -11,8 +11,7 @@ class @@@ model_helper @@@
         @@@ if_sort_by_id @@@
         return @@@ model @@@
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
-			// ->join('contacts', 'addresses.contact_id', '=', 'contacts.contact_id')
-            // ->leftJoin('countries', 'addresses.country_id', '=', 'countries.country_id')
+            @@@ join_clause @@@
             ->select(
                 @@@ select_data @@@
             );
