@@ -94,7 +94,7 @@ const props = defineProps({
     auth: Object,
     privileges: Array,
     guides: Object,
-    contactId: Number,
+contactId: Number,
     contact: Object,
 languages: Array,
     searchKey: String,

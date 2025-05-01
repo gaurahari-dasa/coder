@@ -117,6 +117,7 @@ import FormGuard from '../../components/FormGuard.vue';
 ******
 
 *** Vue props ***
+
 contactId: Number,
     contact: Object,
 languages: Array,

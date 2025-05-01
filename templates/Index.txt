@@ -55,8 +55,7 @@ const props = defineProps({
     menus: Array,
     auth: Object,
     privileges: Array,
-    @@@ model_props @@@: Object,
-    @@@ vue_props @@@
+    @@@ model_props @@@: Object,@@@ vue_props @@@
     searchKey: String,
     sortField: String,
     sortDir: String,

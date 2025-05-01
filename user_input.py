@@ -280,6 +280,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
 
     def generate_vue_props(self):
         output = io.StringIO()
+        output.write('\n')
         if self.foreign_key:
             print(
                 rf"""{self.foreign_key.name}: Number,
@@ -288,6 +289,8 @@ import FormGuard from '../../components/FormGuard.vue';""",
             )
         for lookup in self.lookup_props:
             print(f"{lookup}: Array,", file=output)
+        if output.getvalue() == '\n':
+            output.truncate()
         return output
 
     def generate_controller_props(self):
