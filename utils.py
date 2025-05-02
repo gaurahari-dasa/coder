@@ -50,6 +50,10 @@ def kebab_case(name: str):
     return name.replace("_", "-")
 
 
+def title_case(name: str):
+    return re.sub("_(.)", lambda v: v.group(1).upper(), name)
+
+
 def first_char_lower(name: str):
     return name[0].lower() + name[1:] if name else name
 

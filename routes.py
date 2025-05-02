@@ -13,7 +13,11 @@ class Routes:
             utils.error("Route definition is improper", specs[0])
         self.url = m.group(1)
         self.name = m.group(2)
-        self.cntxt_url = utils.nullishIndex(specs, 1)
+        cntxt_specs:str = utils.nullishIndex(specs, 1)
+        if cntxt_specs and not (m := re.match("(.*?)\((.*)\)", cntxt_specs)):
+            utils.error("Context route definition is improper", cntxt_specs)
+        self.cntxt_url = m.group(1) if cntxt_specs else None
+        self.cntxt_name = m.group(2) if cntxt_specs else None
 
     def append(self, line):
         if not (line := line.strip()):

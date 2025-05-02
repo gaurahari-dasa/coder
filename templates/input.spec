@@ -2,7 +2,7 @@
 
 
 
-*** Routes: /guides(guides), /contacts ***
+*** Routes: /guides(guides), /contacts(contacts) ***
 #index: visit_guides
 #store: add_guides
 #update: edit_guides

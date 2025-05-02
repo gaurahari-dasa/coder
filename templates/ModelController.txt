@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Helpers\@@@ model_helper @@@;
+use App\Helpers\ListingHelper;
+use App\Helpers\MenuHelper;
+use App\Helpers\UserHelper;
+use App\Models\@@@ model @@@;@@@ declare_cntxt @@@
+use Illuminate\Http\Request;
+
+class @@@ model @@@Controller extends Controller
+{
+    public function index(@@@ declare_cntxt_var @@@)
+    {
+        return inertia('@@@ model_view_folder @@@/Index', [
+            'menus' => MenuHelper::list(),
+            'privileges' => UserHelper::privileges(request()->user()@@@ menu_route @@@),
+            @@@ controller_props @@@
+            'searchKey' => request('search-key'),
+            'sortField' => request('sort-field'),
+            'sortDir' => request('sort'),
+        ]);
+    }
+
+    public function store()
+    {
+        $validated = request()->validate([
+            @@@ validation_fields @@@
+        ]);
+        @@@ model_helper @@@::addEntity($validated);
+
+        return to_route(@@@ model_route @@@, @@@ cntxt_route_param_store @@@);
+    }
+
+    public function update(@@@ model @@@ @@@ model_varname @@@)
+    {
+        $validated = request()->validate([
+            @@@ validation_fields @@@
+        ]);
+        @@@ model_helper @@@::updateEntity(@@@ model_varname @@@, $validated);
+
+        return to_route(@@@ model_route @@@, @@@ cntxt_route_param_update @@@);
+    }
+}

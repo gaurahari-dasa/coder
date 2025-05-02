@@ -6,6 +6,7 @@ import sections
 import sql_utils
 from model import Model
 from user_input import UserInput
+from routes import Routes
 
 
 class SelectData:
@@ -66,6 +67,7 @@ class SelectData:
         self.fields: list[SelectData.Field] = (
             None  # track the fields in current table, Haribol
         )
+        self.routes: Routes = sections.ix("Routes")
 
     def parse_specs(
         self, field_name: str, back_name: str, specs: str, model_owned: bool
@@ -257,6 +259,12 @@ class SelectData:
                     return f"'{table}.{field.name}'"
         return f"'{self.model_table}.{self.primary_key}'"
 
+    def generate_declare_cntxt(self):
+        output = io.StringIO()
+        if self.cntxt_table:
+            print(f"\nuse App\\Models\\{self.model.cntxt_name};", file=output)
+        return output
+
     def generate_declare_cntxt_trait(self):
         output = io.StringIO()
         if self.cntxt_table:
@@ -281,8 +289,9 @@ class SelectData:
         return output
 
     funcs = [
-        ("*** Context Declaration ***", generate_declare_cntxt_trait),
-        ("*** Context Usage ***", generate_use_cntxt_trait),
+        ("*** Context Declaration ***", generate_declare_cntxt),
+        ("*** Context Trait Declaration ***", generate_declare_cntxt_trait),
+        ("*** Context Trait Usage ***", generate_use_cntxt_trait),
         ("*** Sort by id column (SelectData) ***", generate_sort_by_id),
         ("*** Join clause (SelectData) ***", generate_join_clause),
         ("*** SelectData columns ***", generate_select_data),
@@ -304,17 +313,39 @@ class SelectData:
             self.output.write(ui_code.getvalue())
         return self.output
 
-    def cntxt_id(self):
+    def declare_cntxt_variable(self):
+        # output = io.StringIO()
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        return f"${utils.camel_case(self.foreign_key)}"
+        return f"{self.model.cntxt_name} ${utils.camel_case(self.foreign_key)}"
+        # return output
+
+    def cntxt_id(self):
+        return utils.camel_case(self.foreign_key)
 
     def cntxt_filter(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        return f"\n->where('{self.model_table}.{self.foreign_key}', {self.cntxt_id()})"
+        return f"\n->where('{self.model_table}.{self.foreign_key}', ${self.cntxt_id()})"
 
-    def hydrate(self):
+    def menu_route_name(self):
+        return self.routes.cntxt_name if self.routes.cntxt_name else self.routes.name
+
+    def cntxt_route_param_store(self):
+        if not self.cntxt_table:
+            return ""
+        return rf"""[
+            '{utils.first_char_lower(self.model.cntxt_name)}' => request('{self.cntxt_id()}')
+        ]"""
+
+    def cntxt_route_param_update(self):
+        if not self.cntxt_table:
+            return ""
+        return rf"""[
+            '{utils.first_char_lower(self.model.cntxt_name)}' => {self.ui.model_varname()}->{self.foreign_key}
+        ]"""
+
+    def hydrateHelper(self):
         template = open("templates/ModelHelper.txt")
         model_helper = f"{self.model.name}Helper"
         output = open(f"output/{model_helper}.php", "wt")
@@ -323,7 +354,7 @@ class SelectData:
             "declare_cntxt_trait": self.generate_declare_cntxt_trait().getvalue(),
             "use_cntxt_trait": self.generate_use_cntxt_trait().getvalue(),
             "model_helper": model_helper,
-            "cntxt_id": self.cntxt_id(),
+            "declare_cntxt_var": self.declare_cntxt_variable(),
             "default_sort_field": self.default_sort_field(),
             "join_clause": self.generate_join_clause().getvalue(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
@@ -341,4 +372,34 @@ class SelectData:
             print(hydrated, end="", file=output)
         template.close()
         output.close()
+        self.ui.hydrate()
+
+    def hydrateController(self):
+        model_helper = f"{self.model.name}Helper"
+        template = open("templates/ModelController.txt")
+        model_controller = f"{self.model.name}Controller"
+        output = open(f"output/{model_controller}.php", "wt")
+        repo = {
+            "model": self.model.name,
+            "declare_cntxt": self.generate_declare_cntxt().getvalue(),
+            "model_helper": model_helper,
+            "declare_cntxt_var": self.declare_cntxt_variable(),
+            "model_view_folder": utils.title_case(self.model_table).capitalize(),
+            "menu_route": f', \'{self.menu_route_name()}\'',
+            "controller_props": self.ui.generate_controller_props().getvalue(),
+            "validation_fields": self.ui.generate_controller_validation().getvalue(),
+            "model_varname": self.ui.model_varname(),
+            "model_route": f"'{self.routes.name}'",
+            "cntxt_route_param_store": self.cntxt_route_param_store(),
+            "cntxt_route_param_update": self.cntxt_route_param_update(),
+        }
+        while line := template.readline():
+            hydrated = utils.hydrate(line, repo)
+            print(hydrated, end="", file=output)
+        template.close()
+        output.close()
+
+    def hydrate(self):
+        self.hydrateHelper()
+        self.hydrateController()
         self.ui.hydrate()

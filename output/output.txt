@@ -1,9 +1,14 @@
 *** Context Declaration ***
+
+use App\Models\Contact;
+******
+
+*** Context Trait Declaration ***
 use App\Traits\ContactContext;
 
 ******
 
-*** Context Usage ***
+*** Context Trait Usage ***
 
 use ContactContext;
 

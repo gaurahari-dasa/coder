@@ -17,7 +17,7 @@ class @@@ model_helper @@@
             );
     }
 
-    public static function paginate(@@@ cntxt_id @@@)
+    public static function paginate(@@@ declare_cntxt_var @@@)
     {
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');
