@@ -19,7 +19,7 @@ mobile: i (text; Mobile)*, #3(DataColumn; Mobile; )?^
 photo_path: i (file; Photo), #4(ImageColumn; ;)?^, ~(file)
 dob: i (date; DOB), ~(date-only)
 active: i (checkbox; Active; false), #6(ActiveColumn; Active; )
-language_id: $(language_id), i (select; Language; languages)
+language_id: $(language_id), i (select; Language; languages; languageName)
 
 ** languages **
 language_id

@@ -18,13 +18,31 @@ class UserInput:
         focus_symbol = "@"
         required_symbol = "*"
 
+        # HTML select (FormSelect) control:
+        # the following syntax is not yet implemented
+        # id=languageId&value=name
+        # id and value fields can be specified; if any one is missed out the default values are taken
+        # If id is missed out, it's taken to be 'id'; if value is missed out, it's taken to be 'name'
+        # the above syntax is reserved for future use
+        def parse_bindings(bindings: str):
+            bindings = [s.strip() for s in bindings.split("&")]
+            result = {}
+            for binding in bindings:
+                param, value = [s.strip() for s in binding.split("=")]
+                if ":" in param:
+                    utils.error("Parameter alias is not yet supported!")
+                result[param] = value
+
         def __init__(self, name: str, base_name: str, specs: str, qualities: str):
             self.name = name
             self.base_name = base_name  # name in database, Haribol
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
             self.type = specs[0]
             self.title = utils.nullishIndex(specs, 1)
-            self.options = utils.nullishIndex(specs, 2)
+            self.options = utils.nullishIndex(
+                specs, 2
+            )  # doubles up as the default value of checkbox, Haribol
+            self.match_value: str = utils.nullishIndex(specs, 3)
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
 
@@ -37,7 +55,8 @@ class UserInput:
             self.qualities = qualities
 
     def __init__(self, model_table: str):
-        self.fields = []
+        self.fields: list[UserInput.Field] = []
+        self.no_match_vars = set()
         self.grid_sources = {}
         self.grid_columns = {}
         self.lookup_props = set()
@@ -72,7 +91,7 @@ class UserInput:
                 "import AvatarHeading from '../../components/AvatarHeading.vue';"
             )
             print(
-                rf"""
+                f"""
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
                 backUrl={self.routes.cntxt_url} />""",
                 file=output,
@@ -102,14 +121,23 @@ class UserInput:
     def generate_date_input(self, field, output):
         self.generate_typed_input(field, output, type="date")
 
-    def generate_select_input(self, field, output):
+    def generate_select_input(self, field: Field, output):
         self.lookup_props.add(field.options)
         self.vue_imports.add(
             "import FormSelect from '../../components/FormSelect.vue';"
         )
+        if not sections.ix("SelectData").has_field(
+            utils.uncamel_case(field.match_value)
+        ):
+            utils.error("No source column for match_value, Haribol")
+        no_match_var = utils.no_match_var(field.match_value)
+        self.no_match_vars.add(no_match_var)
+        no_match_attr = (
+            f' :noMatchValue="{no_match_var}"' if self.form_obj == "editForm" else ""
+        )
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
+              v-model="{self.form_obj}.{field.name}"{no_match_attr} :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
@@ -221,7 +249,7 @@ class UserInput:
             file=output,
         )
         print(
-            r"""import EntityCard from '../../components/EntityCard.vue';
+            """import EntityCard from '../../components/EntityCard.vue';
 import FormCancelButton from '../../components/FormCancelButton.vue';
 import FormSubmitButton from '../../components/FormSubmitButton.vue';
 import ToastMessage from '../../components/ToastMessage.vue';
@@ -263,10 +291,16 @@ import FormGuard from '../../components/FormGuard.vue';""",
             print("blanked", file=output)
         return output
 
+    def generate_no_match_vars(self):
+        output = io.StringIO()
+        for nmv in self.no_match_vars:
+            print(f"var {nmv};", file=output)
+        return output
+
     def generate_edit_row(self):
         output = io.StringIO()
         print(  # following is boiler-plate, but very imp code, Haribol
-            rf"""const datum = props.{self.model_props}.data.find(v => v.id === id);
+            f"""const datum = props.{self.model_props}.data.find(v => v.id === id);
     editId = id;""",
             file=output,
         )
@@ -276,20 +310,25 @@ import FormGuard from '../../components/FormGuard.vue';""",
             source = self.grid_sources.get(field.name, field.name)
             print(f"editForm.{field.name} =", end=" ", file=output)
             print(f"datum.{source};", file=output)
+            if field.type == "select":
+                print(
+                    f"{utils.no_match_var(field.match_value)} = datum.{field.match_value};",
+                    file=output,
+                )
         return output
 
     def generate_vue_props(self):
         output = io.StringIO()
-        output.write('\n')
+        output.write("\n")
         if self.foreign_key:
             print(
-                rf"""{self.foreign_key.name}: Number,
+                f"""{self.foreign_key.name}: Number,
     {self.foreign_key.prop}: Object,""",
                 file=output,
             )
         for lookup in self.lookup_props:
             print(f"{lookup}: Array,", file=output)
-        if output.getvalue() == '\n':
+        if output.getvalue() == "\n":
             output.truncate()
         return output
 
@@ -297,7 +336,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
         output = io.StringIO()
         if self.foreign_key:
             print(
-                rf"""'{self.foreign_key.name}' => ${self.foreign_key.prop}->{self.foreign_key.base_name},
+                f"""'{self.foreign_key.name}' => ${self.foreign_key.prop}->{self.foreign_key.base_name},
     '{self.foreign_key.prop}' => {self.model.name}Helper::{self.foreign_key.prop}Details(),""",
                 file=output,
             )
@@ -358,6 +397,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
         ("*** Form: blanked ***", generate_blanked),
         ("*** Form: addForm ***", generate_form, "add"),
         ("*** Form: editForm ***", generate_form, "edit"),
+        ("*** noMatchValue variables ***", generate_no_match_vars),
         ("*** editRow ***", generate_edit_row),
         ("*** Controller props ***", generate_controller_props),
         ("*** Controller: validation ***", generate_controller_validation),
@@ -393,6 +433,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             "blanked": self.generate_blanked().getvalue(),
             "add_form": self.generate_form("add").getvalue(),
             "edit_form": self.generate_form("edit").getvalue(),
+            "no_match_vars": self.generate_no_match_vars().getvalue(),
             "edit_row": self.generate_edit_row().getvalue(),
             "model_route": self.routes.url,
             "privy_suffix": f"_{self.routes.name}" if self.foreign_key else "",

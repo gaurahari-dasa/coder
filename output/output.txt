@@ -95,7 +95,7 @@ LogAccessHelper::log(Guide::class, $searchKey);
               v-model="editForm.dob" :error="editForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
-              v-model="editForm.languageId" :error="editForm.errors.languageId" />
+              v-model="editForm.languageId" :noMatchValue="editLanguageName" :error="editForm.errors.languageId" />
 ******
 
 *** Grid: parameters ***
@@ -149,6 +149,10 @@ contactId: props.contactId,
 blanked
 ******
 
+*** noMatchValue variables ***
+var editLanguageName;
+******
+
 *** editRow ***
 const datum = props.guides.data.find(v => v.id === id);
     editId = id;
@@ -158,6 +162,7 @@ editForm.mobile = datum.mobile;
 editForm.dob = datum.dob;
 editForm.active = datum.active;
 editForm.languageId = datum.languageId;
+editLanguageName = datum.languageName;
 ******
 
 *** Controller props ***

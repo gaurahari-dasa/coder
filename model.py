@@ -38,7 +38,7 @@ class Model:
         if bools:
             bools_csv = "\n".join([f"'{b}' => 'boolean'," for b in bools])
             print(
-                rf"""
+                f"""
 
     protected function casts(): array
     {{

@@ -219,7 +219,7 @@ class SelectData:
                         print(f"$item->{alias},", file=output)
                     case "file":
                         print(
-                            f"$item->{alias} ? Storage::url($item->{alias}) : '/img/no-photo.svg',",
+                            f"Utils::asset($item->{alias}),",
                             file=output,
                         )
                     case "date-only":
@@ -280,7 +280,7 @@ class SelectData:
     def generate_sort_by_id(self):
         output = io.StringIO()
         print(
-            rf"""if ($sortField === 'id') {{
+            f"""if ($sortField === 'id') {{
                 $sortField = '{self.primary_key}';
         }}
             """,
@@ -313,6 +313,14 @@ class SelectData:
             self.output.write(ui_code.getvalue())
         return self.output
 
+    def has_field(self, name: str):
+        for table, fields in self.tables.items():
+            for field in fields:
+                field_name = field.alias if field.alias else field.name
+                if field_name == name:
+                    return table
+        return None
+
     def declare_cntxt_variable(self):
         # output = io.StringIO()
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
@@ -334,14 +342,14 @@ class SelectData:
     def cntxt_route_param_store(self):
         if not self.cntxt_table:
             return ""
-        return rf"""[
+        return f"""[
             '{utils.first_char_lower(self.model.cntxt_name)}' => request('{self.cntxt_id()}')
         ]"""
 
     def cntxt_route_param_update(self):
         if not self.cntxt_table:
             return ""
-        return rf"""[
+        return f"""[
             '{utils.first_char_lower(self.model.cntxt_name)}' => {self.ui.model_varname()}->{self.foreign_key}
         ]"""
 
@@ -385,7 +393,7 @@ class SelectData:
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_variable(),
             "model_view_folder": utils.title_case(self.model_table).capitalize(),
-            "menu_route": f', \'{self.menu_route_name()}\'',
+            "menu_route": f", '{self.menu_route_name()}'",
             "controller_props": self.ui.generate_controller_props().getvalue(),
             "validation_fields": self.ui.generate_controller_validation().getvalue(),
             "model_varname": self.ui.model_varname(),

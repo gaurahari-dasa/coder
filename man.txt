@@ -50,14 +50,14 @@ language_name as mother_tongue_name
 
 Where do I add the i-spec?
 --------------------------
-As of now we can add the i-spec either to the language_id column specs described above or to a separate language_id column described in it's own owning table section like so:
+As of now we can add the i-spec either to the language_id column specs described above or to a separate language_id column described in it's own (owning) table section like so:
 ** languages **
 language_id: i(select; Language; languages)
 name as language_name
 
-But the latter practice is deprecated and bound to be removed in the future. The correct practice is to provide the i-spec to the language_id column described in the section on guides.
+But the latter practice is deprecated and bound to be removed in the future. The correct practice is to provide the i-spec to the language_id column described in the section on guides because that's where the data will be persisted.
 
 
 Which data will be selected for (sent to) the grid?
 ---------------------------------------------------
-All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the grid specs #() are applied. Apart from this, the primary key will be selected even without being explicitly mentioned in the SelectData section.
+All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the output specs #() are applied. Apart from this, the primary key will be selected even without being explicitly mentioned in the SelectData section. However only those that have output specs (#()) will be displayed in the grid. The rest are hidden in JavaScript objects!

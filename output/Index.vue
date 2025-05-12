@@ -46,7 +46,7 @@
               v-model="editForm.dob" :error="editForm.errors.dob" />
 <FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
-              v-model="editForm.languageId" :error="editForm.errors.languageId" />
+              v-model="editForm.languageId" :noMatchValue="editLanguageName" :error="editForm.errors.languageId" />
                     </div>
                     <div class="relative lg:mt-8 lg:gap-x-8 sm:mt-6 sm:gap-x-6 mt-2 gap-x-2 flex justify-center">
                         <ToastMessage message="Saved Successfully, Haribol!" :show="editForm.recentlySuccessful" />
@@ -153,6 +153,7 @@ function addEntity() {
 }
 
 var editId = null;
+var editLanguageName;
 
 function editRow(id) {
     const datum = props.guides.data.find(v => v.id === id);
@@ -163,6 +164,7 @@ editForm.mobile = datum.mobile;
 editForm.dob = datum.dob;
 editForm.active = datum.active;
 editForm.languageId = datum.languageId;
+editLanguageName = datum.languageName;
     showEditForm.value = true;
     showAddForm.value = false;
 }

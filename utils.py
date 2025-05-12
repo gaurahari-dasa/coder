@@ -41,8 +41,12 @@ def nullishIndex(ar: list, ix: int):
     except IndexError:
         return None
 
+def uncamel_case(name: str):
+    return re.sub('([A-Z])', lambda v: '_' + v.group(1).lower(), name)
 
 def camel_case(name: str):
+    if re.search('[A-Z]', name):
+        warn('Capital case characters found in string', name)
     return re.sub("_(.)", lambda v: v.group(1).upper(), name)
 
 
@@ -58,12 +62,21 @@ def first_char_lower(name: str):
     return name[0].lower() + name[1:] if name else name
 
 
+def first_char_upper(name: str):
+    return name[0].upper() + name[1:] if name else name
+
+
 def find(pred, elems: iter):
     return next((elem for elem in elems if pred(elem)), None)
 
 
 def strip_last_newline(s: str):
     return s[:-1] if s.endswith("\n") else s
+
+
+# variable used for noMatchValue attribute in FormSelect Vue component, Haribol
+def no_match_var(match_value: str):
+    return "edit" + first_char_upper(match_value)
 
 
 def hydrate(line: str, args: dict):
