@@ -93,7 +93,7 @@ class UserInput:
             print(
                 f"""
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
-                backUrl={self.routes.cntxt_url} />""",
+                :backUrl="`${{baseUrl}}{self.routes.cntxt_url}`" />""",
                 file=output,
             )
         return output
@@ -146,7 +146,8 @@ class UserInput:
             "import FormCheckBox from '../../components/FormCheckBox.vue';"
         )
         print(
-            f"""<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}" v-model="{self.form_obj}.{field.name}" />""",
+            f"""<FormCheckBox class="mt-4" id="{field.name}" title="{field.title}"
+              :error="{self.form_obj}.errors.{field.name}" v-model="{self.form_obj}.{field.name}" />""",
             file=output,
         )
 

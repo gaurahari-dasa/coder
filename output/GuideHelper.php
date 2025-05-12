@@ -57,7 +57,7 @@ use ContactContext;
 'name' => $item->name,
 'email' => $item->email,
 'mobile' => $item->mobile,
-'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
+'photoPath' => Utils::asset($item->photo_path),
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,

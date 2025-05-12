@@ -53,7 +53,7 @@ LogAccessHelper::log(Guide::class, $searchKey);
 'name' => $item->name,
 'email' => $item->email,
 'mobile' => $item->mobile,
-'photoPath' => $item->photo_path ? Storage::url($item->photo_path) : '/img/no-photo.svg',
+'photoPath' => Utils::asset($item->photo_path),
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
@@ -63,7 +63,7 @@ LogAccessHelper::log(Guide::class, $searchKey);
 *** Avatar Heading ***
 
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
-                backUrl=/contacts />
+                :backUrl="`${baseUrl}/contacts`" />
 ******
 
 *** UI: addForm ***
@@ -77,7 +77,8 @@ LogAccessHelper::log(Guide::class, $searchKey);
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"
               v-model="addForm.dob" :error="addForm.errors.dob" />
-<FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+<FormCheckBox class="mt-4" id="active" title="Active"
+              :error="addForm.errors.active" v-model="addForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="addForm.languageId" :error="addForm.errors.languageId" />
 ******
@@ -93,7 +94,8 @@ LogAccessHelper::log(Guide::class, $searchKey);
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"
               v-model="editForm.dob" :error="editForm.errors.dob" />
-<FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+<FormCheckBox class="mt-4" id="active" title="Active"
+              :error="editForm.errors.active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="editForm.languageId" :noMatchValue="editLanguageName" :error="editForm.errors.languageId" />
 ******

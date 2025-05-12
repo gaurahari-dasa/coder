@@ -2,7 +2,7 @@
     <Layout :menus :auth>
         <div class="flex flex-col gap-2 sm:gap-6 lg:gap-8">
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="contact" backLabel="Back to what (parent) ???"
-                backUrl=/contacts />
+                :backUrl="`${baseUrl}/contacts`" />
             <EntityCard class="px-4 sm:px-6 lg:px-8" :show="showAddForm">
                 <h3 class="text-lg font-semibold text-slate-800">Add what (entity) ???</h3>
                 <form class="relative" @submit.prevent="addEntity">
@@ -18,7 +18,8 @@
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"
               v-model="addForm.dob" :error="addForm.errors.dob" />
-<FormCheckBox class="mt-4" id="active" title="Active" v-model="addForm.active" />
+<FormCheckBox class="mt-4" id="active" title="Active"
+              :error="addForm.errors.active" v-model="addForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="addForm.languageId" :error="addForm.errors.languageId" />
                         </div>
@@ -44,7 +45,8 @@
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"
               v-model="editForm.dob" :error="editForm.errors.dob" />
-<FormCheckBox class="mt-4" id="active" title="Active" v-model="editForm.active" />
+<FormCheckBox class="mt-4" id="active" title="Active"
+              :error="editForm.errors.active" v-model="editForm.active" />
 <FormSelect class="mt-4" id="languageId" title="Language" :options="languages"
               v-model="editForm.languageId" :noMatchValue="editLanguageName" :error="editForm.errors.languageId" />
                     </div>
@@ -92,6 +94,7 @@ import { PencilSquareIcon } from '@heroicons/vue/24/outline';
 const props = defineProps({
     menus: Array,
     auth: Object,
+    baseUrl: String,
     privileges: Array,
     guides: Object,
 contactId: Number,
@@ -143,7 +146,7 @@ function closeEditForm() {
 }
 
 function addEntity() {
-    addForm.post('/guides', {
+    addForm.post(`${props.baseUrl}/guides`, {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -170,7 +173,7 @@ editLanguageName = datum.languageName;
 }
 
 function updateEntity() {
-    editForm.patch(`/guides/${editId}`, {
+    editForm.patch(`${props.baseUrl}/guides/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });

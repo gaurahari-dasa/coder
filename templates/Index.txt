@@ -54,6 +54,7 @@ import { PencilSquareIcon } from '@heroicons/vue/24/outline';
 const props = defineProps({
     menus: Array,
     auth: Object,
+    baseUrl: String,
     privileges: Array,
     @@@ model_props @@@: Object,@@@ vue_props @@@
     searchKey: String,
@@ -93,7 +94,7 @@ function closeEditForm() {
 }
 
 function addEntity() {
-    addForm.post('@@@ model_route @@@', {
+    addForm.post(`${props.baseUrl}@@@ model_route @@@`, {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -112,7 +113,7 @@ function editRow(id) {
 }
 
 function updateEntity() {
-    editForm.patch(`@@@ model_route @@@/${editId}`, {
+    editForm.patch(`${props.baseUrl}@@@ model_route @@@/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });
