@@ -13,7 +13,7 @@
 <FormInput type="email" class="mt-4" id="email" title="Email"
               v-model="addForm.email" :error="addForm.errors.email" />
 <FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
-              v-model="addForm.mobile" :error="addForm.errors.mobile" />
+              :maxLength="10" v-model="addForm.mobile" :error="addForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => addForm.photoPath = file" :error="addForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"
@@ -40,7 +40,7 @@
 <FormInput type="email" class="mt-4" id="email" title="Email"
               v-model="editForm.email" :error="editForm.errors.email" />
 <FormInput type="text" class="mt-4" id="mobile" title="Mobile" required
-              v-model="editForm.mobile" :error="editForm.errors.mobile" />
+              :maxLength="10" v-model="editForm.mobile" :error="editForm.errors.mobile" />
 <FormFileUpload class="mt-4" id="photoPath" title="Photo"
               @pick="file => editForm.photoPath = file" :error="editForm.errors.photoPath" />
 <FormInput type="date" class="mt-4" id="dob" title="DOB"

@@ -104,21 +104,27 @@ class UserInput:
     def tackRequired(self, field):
         return " required" if field.required else ""
 
-    def generate_typed_input(self, field, output, type="text"):
+    def generate_typed_input(self, field: Field, output, type="text"):
         self.vue_imports.add("import FormInput from '../../components/FormInput.vue';")
+        mx_len_attr = ""
+        if field.type == 'text':
+            if not field.options:
+                utils.warn("Missing maxLength option for FormInput component", field.name)
+            else:
+                mx_len_attr = f':maxLength="{field.options}" '
         print(
             f"""<FormInput type="{type}" class="mt-4" id="{field.name}" title="{field.title}"{self.tackFocus(field) + self.tackRequired(field)}
-              v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
+              {mx_len_attr}v-model="{self.form_obj}.{field.name}" :error="{self.form_obj}.errors.{field.name}" />""",
             file=output,
         )
 
-    def generate_text_input(self, field, output):
+    def generate_text_input(self, field: Field, output):
         self.generate_typed_input(field, output, type="text")
 
-    def generate_email_input(self, field, output):
+    def generate_email_input(self, field: Field, output):
         self.generate_typed_input(field, output, type="email")
 
-    def generate_date_input(self, field, output):
+    def generate_date_input(self, field: Field, output):
         self.generate_typed_input(field, output, type="date")
 
     def generate_select_input(self, field: Field, output):
@@ -141,7 +147,7 @@ class UserInput:
             file=output,
         )
 
-    def generate_checkbox_input(self, field, output):
+    def generate_checkbox_input(self, field: Field, output):
         self.vue_imports.add(
             "import FormCheckBox from '../../components/FormCheckBox.vue';"
         )
@@ -151,7 +157,7 @@ class UserInput:
             file=output,
         )
 
-    def generate_file_upload(self, field, output):
+    def generate_file_upload(self, field: Field, output):
         self.vue_imports.add(
             "import FormFileUpload from '../../components/FormFileUpload.vue';"
         )
@@ -161,7 +167,7 @@ class UserInput:
             file=output,
         )
 
-    def generate_autocomplete(self, field, output):
+    def generate_autocomplete(self, field: Field, output):
         self.lookup_props.add(field.options)
         self.vue_imports.add(
             "import FormAutoComplete from '../../components/FormAutoComplete.vue';"
@@ -172,7 +178,7 @@ class UserInput:
             file=output,
         )
 
-    def generate_control(self, field, output):
+    def generate_control(self, field: Field, output):
         match field.type:
             case "text":
                 self.generate_text_input(field, output)

@@ -15,7 +15,7 @@
 guide_id
 name: i (text; Name; )@*, #1(DataColumn; Name; )?^0
 email: i (email; Email), #2(DataColumn; Email; )?^
-mobile: i (text; Mobile)*, #3(DataColumn; Mobile; )?^
+mobile: i (text; Mobile; 10)*, #3(DataColumn; Mobile; )?^
 photo_path: i (file; Photo), #4(ImageColumn; ;)?^, ~(file)
 dob: i (date; DOB), ~(date-only)
 active: i (checkbox; Active; false), #6(ActiveColumn; Active; )
