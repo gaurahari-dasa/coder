@@ -1,3 +1,7 @@
+<script setup>
+defineProps(['id', 'caption'])
+</script>
+
 <template>
     <div>
         <label :for="id" class="block text-sm/6 font-medium text-gray-900">{{ caption }}</label>
@@ -8,7 +12,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-defineProps(['id', 'caption'])
-</script>

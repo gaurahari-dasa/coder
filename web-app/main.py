@@ -36,20 +36,21 @@ def read_sections():
         spec.close()
 
 
-read_sections()
+#read_sections()
 
-output = open(
-    "output/output.txt",
-    "wt",
-)
+def generate():
+    output = open(
+        "output/output.txt",
+        "wt",
+    )
+    if gen := sections.ix("SelectData").generate():
+        output.write(gen.getvalue())
+    if gen := sections.ix("Model").generate():
+        output.write(gen.getvalue())
 
-if gen := sections.ix("SelectData").generate():
-    output.write(gen.getvalue())
-if gen := sections.ix("Model").generate():
-    output.write(gen.getvalue())
-
-for section in sections.iterator():
-    section.hydrate()
+def hydrate():
+    for section in sections.iterator():
+        section.hydrate()
 
 utils.diagnostics()
 # for section in sections:
