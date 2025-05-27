@@ -9,12 +9,12 @@ class Routes:
         self.lines = []
         self.actions = []
         specs = [s.strip() for s in specs.split(",")]
-        if not (m := re.match("(.*?)\((.*)\)", specs[0])):
+        if not (m := re.match(r"(.*?)\((.*)\)", specs[0])):
             utils.error("Route definition is improper", specs[0])
         self.url = m.group(1)
         self.name = m.group(2)
         cntxt_specs:str = utils.nullishIndex(specs, 1)
-        if cntxt_specs and not (m := re.match("(.*?)\((.*)\)", cntxt_specs)):
+        if cntxt_specs and not (m := re.match(r"(.*?)\((.*)\)", cntxt_specs)):
             utils.error("Context route definition is improper", cntxt_specs)
         self.cntxt_url = m.group(1) if cntxt_specs else None
         self.cntxt_name = m.group(2) if cntxt_specs else None
@@ -45,3 +45,11 @@ class Routes:
         # template.close()
         # output.close()
         pass
+
+    def jsonify(self):
+        return {
+            'entityUrl': self.url,
+            'entityRouteName': self.name,
+            'cntxtUrl': self.cntxt_url,
+            'cntxtRouteName': self.cntxt_name,
+        }

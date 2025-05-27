@@ -36,7 +36,8 @@ def read_sections():
         spec.close()
 
 
-#read_sections()
+# read_sections()
+
 
 def generate():
     output = open(
@@ -47,12 +48,14 @@ def generate():
         output.write(gen.getvalue())
     if gen := sections.ix("Model").generate():
         output.write(gen.getvalue())
+    utils.diagnostics()
+
 
 def hydrate():
     for section in sections.iterator():
         section.hydrate()
 
-utils.diagnostics()
+
 # for section in sections:
 #     if gen := section.generate():
 #         output.write(gen.getvalue())

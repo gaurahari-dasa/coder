@@ -79,3 +79,9 @@ class Model:
             print(hydrated, end="", file=output)
         template.close()
         output.close()
+
+    def jsonify(self):
+        return {
+            'name': self.name,
+            'cntxtName': self.cntxt_name
+        }

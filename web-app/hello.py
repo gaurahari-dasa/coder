@@ -1,6 +1,7 @@
 from flask import Flask
-import main
 from flask_cors import CORS
+import main
+import sections
 
 app = Flask(__name__)
 CORS(app)
@@ -12,4 +13,7 @@ def hello_world():
 @app.post('/read-spec',)
 def read_spec():
     main.read_sections()
-    return "Haribol, reading done!"
+    return {
+        'model': sections.ix('Model').jsonify(),
+        'routes': sections.ix('Routes').jsonify(),
+    }
