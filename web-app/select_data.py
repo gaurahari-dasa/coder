@@ -411,3 +411,29 @@ class SelectData:
         self.hydrateHelper()
         self.hydrateController()
         self.ui.hydrate()
+
+    def jsonify(self):
+        return {
+            "entityTableName": self.model_table,
+            "entityTablePrimaryKey": self.primary_key,
+            "cntxtTableName": self.cntxt_table,
+            "cntxtTablePrimaryKey": self.foreign_key,
+            "tables": [
+                {
+                    "name": table,
+                    "fields": [
+                        {
+                            "name": field.name,
+                            "alias": field.alias,
+                            "morphSpecs": field.specs,
+                            "foreign": field.foreign,
+                            "fillable": field.fillable,
+                            "searchable": field.searchable,
+                            "sortOrdinal": field.sortOrdinal,
+                        }
+                        for field in fields
+                    ],
+                }
+                for table, fields in self.tables.items()
+            ],
+        }

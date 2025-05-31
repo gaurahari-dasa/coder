@@ -20,4 +20,5 @@ def read_spec():
     return {
         "model": sections.ix("Model").jsonify(),
         "routes": sections.ix("Routes").jsonify(),
+        "selectData": sections.ix("SelectData").jsonify(),
     }

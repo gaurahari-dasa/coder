@@ -14,19 +14,27 @@ const routes = ref({
   entityRouteName: null,
   cntxtUrl: null,
   cntxtRouteName: null,
-})
-class Column {
+});
+const selectData = ref({
+  entityTableName: null,
+  entityTablePrimaryKey: null,
+  cntxtTableName: null,
+  cntxtTablePrimaryKey: null
+});
+class Field {
   name = null;
   alias = null;
-  inputSpec = {};
+  morphSpecs = null;
+  foreign = null;
+  fillable = null;
+  searchable = null;
+  sortOrdinal = null;
 };
 class Table {
   name = null;
-  columns
+  fields = [];
 };
-const tables = [{
-  name: null,
-}];
+const tables = ref([]);
 function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
     'method': 'POST'
@@ -37,6 +45,27 @@ function loadSpec() {
     routes.value.entityRouteName = t.routes.entityRouteName;
     routes.value.cntxtUrl = t.routes.cntxtUrl;
     routes.value.cntxtRouteName = t.routes.cntxtRouteName;
+    selectData.value.entityTableName = t.selectData.entityTableName;
+    selectData.value.entityTablePrimaryKey = t.selectData.entityTablePrimaryKey;
+    selectData.value.cntxtTableName = t.selectData.cntxtTableName;
+    selectData.value.cntxtTablePrimaryKey = t.selectData.cntxtTablePrimaryKey;
+    tables.length = 0; // Clear existing tables, Haribol
+    t.selectData.tables.forEach(table => {
+      const newTable = new Table();
+      newTable.name = table.name;
+      table.fields.forEach(field => {
+        const newField = new Field();
+        newField.name = field.name;
+        newField.alias = field.alias;
+        newField.morphSpecs = field.morphSpecs;
+        newField.foreign = field.foreign;
+        newField.fillable = field.fillable;
+        newField.searchable = field.searchable;
+        newField.sortOrdinal = field.sortOrdinal;
+        newTable.fields.push(newField);
+      })
+      tables.value.push(newTable);
+    });
   });
 }
 </script>
@@ -57,11 +86,25 @@ function loadSpec() {
     </div>
     <h3 class="mt-4 font-bold text-lg">Select Data</h3>
     <div class="grid grid-cols-4 gap-4">
-      <FormInput caption="Entity Table name" id="entity-table-name" />
-      <FormInput caption="Entity Table primary_key" id="entity-table-pk" />
-      <FormInput caption="Context Table name" id="ctxt-table-name" />
-      <FormInput caption="Context Table primary_key" id="ctxt-table-pk" />
+      <FormInput caption="Entity Table name" id="entity-table-name" v-model="selectData.entityTableName" />
+      <FormInput caption="Entity Table primary_key" id="entity-table-pk" v-model="selectData.entityTablePrimaryKey" />
+      <FormInput caption="Context Table name" id="ctxt-table-name" v-model="selectData.cntxtTableName" />
+      <FormInput caption="Context Table primary_key" id="ctxt-table-pk" v-model="selectData.cntxtTablePrimaryKey" />
     </div>
-    <FormButton caption="Add Table" @click="loadSpec()" />
+    <h4 class="mt-4 font-semibold">Tables</h4>
+    <div v-for="(table, ix) in tables">
+      <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}</h5>
+      <FormInput caption="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
+      <div v-for="field in table.fields" class="mt-4 grid grid-cols-7 gap-4">
+        <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
+        <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
+        <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+        <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
+        <FormInput caption="Fillable" :id="`fillable-${ix}-${field.name}`" v-model="field.fillable" />
+        <FormInput caption="Searchable" :id="`searchable-${ix}-${field.name}`" v-model="field.searchable" />
+        <FormInput caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`" v-model="field.sortOrdinal" />
+      </div>
+    </div>
+    <FormButton caption="Load Spec" @click="loadSpec()" />
   </div>
 </template>
