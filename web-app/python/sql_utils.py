@@ -3,9 +3,9 @@ import mysql.connector
 import utils
 import json
 
-cfg_file = open('sql.json')
+cfg_file = open("sql.json")
 config = json.loads(cfg_file.read())
-disable = config['disable']
+disable = config["disable"]
 
 
 cnx = mysql.connector.connect(

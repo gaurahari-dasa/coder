@@ -41,12 +41,14 @@ def nullishIndex(ar: list, ix: int):
     except IndexError:
         return None
 
+
 def uncamel_case(name: str):
-    return re.sub('([A-Z])', lambda v: '_' + v.group(1).lower(), name)
+    return re.sub("([A-Z])", lambda v: "_" + v.group(1).lower(), name)
+
 
 def camel_case(name: str):
-    if re.search('[A-Z]', name):
-        warn('Capital case characters found in string', name)
+    if re.search("[A-Z]", name):
+        warn("Capital case characters found in string", name)
     return re.sub("_(.)", lambda v: v.group(1).upper(), name)
 
 
