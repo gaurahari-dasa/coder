@@ -107,9 +107,11 @@ class UserInput:
     def generate_typed_input(self, field: Field, output, type="text"):
         self.vue_imports.add("import FormInput from '../../components/FormInput.vue';")
         mx_len_attr = ""
-        if field.type == 'text':
+        if field.type == "text":
             if not field.options:
-                utils.warn("Missing maxLength option for FormInput component", field.name)
+                utils.warn(
+                    "Missing maxLength option for FormInput component", field.name
+                )
             else:
                 mx_len_attr = f':maxLength="{field.options}" '
         print(

@@ -81,7 +81,4 @@ class Model:
         output.close()
 
     def jsonify(self):
-        return {
-            'name': self.name,
-            'cntxtName': self.cntxt_name
-        }
+        return {"name": self.name, "cntxtName": self.cntxt_name}
