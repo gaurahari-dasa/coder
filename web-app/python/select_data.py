@@ -412,6 +412,11 @@ class SelectData:
         self.hydrateController()
         self.ui.hydrate()
 
+    def sortable(self, field: Field):
+        return self.ui.sortable(
+            utils.camel_case(field.alias if field.alias else field.name)
+        )
+
     def jsonify(self):
         return {
             "entityTableName": self.model_table,
@@ -429,6 +434,7 @@ class SelectData:
                             "foreign": field.foreign,
                             "fillable": field.fillable,
                             "searchable": field.searchable,
+                            "sortable": self.sortable(field),
                             "sortOrdinal": field.sortOrdinal,
                         }
                         for field in fields

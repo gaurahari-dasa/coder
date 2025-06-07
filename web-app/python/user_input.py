@@ -14,7 +14,6 @@ class UserInput:
     ForeignKey = namedtuple("ForeignKey", ["name", "base_name", "prop"])
 
     class Field:
-        sort_symbol = "^"
         focus_symbol = "@"
         required_symbol = "*"
 
@@ -47,12 +46,17 @@ class UserInput:
             self.required = self.required_symbol in qualities
 
     class GridColumn:
+        sort_symbol = "^"
+
         def __init__(self, name: str, specs: str, qualities: str):
             self.name = name
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
             self.type = utils.nullishIndex(specs, 0)
             self.title = utils.nullishIndex(specs, 1)
             self.qualities = qualities
+
+        def sortable(self):
+            return self.sort_symbol in self.qualities
 
     def __init__(self, model_table: str):
         self.fields: list[UserInput.Field] = []
@@ -236,7 +240,8 @@ class UserInput:
                 [
                     f"'{col.name}'"
                     for col in filter(
-                        lambda v: "^" in v.qualities, self.grid_columns.values()
+                        lambda v: v.sortable(),
+                        self.grid_columns.values(),
                     )
                 ]
             )
@@ -452,3 +457,8 @@ import FormGuard from '../../components/FormGuard.vue';""",
             print(hydrated, end="", file=output)
         template.close()
         output.close()
+
+    def sortable(self, grid_column: str):
+        return grid_column in map(
+            lambda v: v.name, filter(lambda v: v.sortable(), self.grid_columns.values())
+        )

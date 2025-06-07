@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import HelloWorld from './components/HelloWorld.vue'
 import FormInput from './components/FormInput.vue';
 import FormButton from './components/FormButton.vue';
+import FormCheckbox from './components/FormCheckbox.vue';
 
 const model = ref({
   name: null,
@@ -28,6 +29,7 @@ class Field {
   foreign = null;
   fillable = null;
   searchable = null;
+  sortable = null;
   sortOrdinal = null;
 };
 class Table {
@@ -35,6 +37,7 @@ class Table {
   fields = [];
 };
 const tables = ref([]);
+
 function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
     'method': 'POST'
@@ -61,12 +64,20 @@ function loadSpec() {
         newField.foreign = field.foreign;
         newField.fillable = field.fillable;
         newField.searchable = field.searchable;
+        newField.sortable = field.sortable;
         newField.sortOrdinal = field.sortOrdinal;
         newTable.fields.push(newField);
       })
       tables.value.push(newTable);
     });
   });
+}
+
+function generate() {
+  fetch('http://localhost:5000/generate', {
+    'method': 'POST'
+  }).then(resp => alert('Generated'))
+    .catch(rea => alert('Not generated: ' + rea));
 }
 </script>
 
@@ -95,16 +106,18 @@ function loadSpec() {
     <div v-for="(table, ix) in tables">
       <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}</h5>
       <FormInput caption="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
-      <div v-for="field in table.fields" class="mt-4 grid grid-cols-7 gap-4">
+      <div v-for="field in table.fields" class="mt-4 grid grid-cols-8 gap-4">
         <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
         <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
         <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
         <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
-        <FormInput caption="Fillable" :id="`fillable-${ix}-${field.name}`" v-model="field.fillable" />
-        <FormInput caption="Searchable" :id="`searchable-${ix}-${field.name}`" v-model="field.searchable" />
-        <FormInput caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`" v-model="field.sortOrdinal" />
+        <FormCheckbox caption="Fillable" :id="`fillable-${ix}-${field.name}`" v-model="field.fillable" />
+        <FormCheckbox caption="Searchable" :id="`searchable-${ix}-${field.name}`" v-model="field.searchable" />
+        <FormCheckbox caption="Sortable" :id="`sortable-${ix}-${field.name}`" v-model="field.sortable" />
+        <FormInput inputType="number" :min="0" caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`" v-model="field.sortOrdinal" />
       </div>
     </div>
     <FormButton caption="Load Spec" @click="loadSpec()" />
+    <FormButton caption="Generate" @click="generate()" />
   </div>
 </template>

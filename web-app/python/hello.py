@@ -22,3 +22,8 @@ def read_spec():
         "routes": sections.ix("Routes").jsonify(),
         "selectData": sections.ix("SelectData").jsonify(),
     }
+
+@app.post('/generate')
+def generate():
+    main.generate()
+    return ''
