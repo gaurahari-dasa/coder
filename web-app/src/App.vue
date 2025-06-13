@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 
 import HelloWorld from './components/HelloWorld.vue'
 import FormInput from './components/FormInput.vue';
@@ -24,6 +24,7 @@ const selectData = ref({
 });
 class Field {
   name = null;
+  duplicateName = null;
   alias = null;
   morphSpecs = null;
   foreign = null;
@@ -37,6 +38,22 @@ class Table {
   fields = [];
 };
 const tables = ref([]);
+const duplicateName = computed(() => {
+  const fieldNames = new Set();
+  for (const table of tables.value) {
+    if (isPrimaryTable(table.name)) {
+      for (const field of table.fields) {
+        const name = field.alias?.length > 0 ? field.alias : field.name;
+        if (fieldNames.has(name)) {
+          return field.name;
+        }
+        fieldNames.add(name);
+      }
+      break;
+    }
+  }
+  return null;
+});
 
 function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
@@ -52,7 +69,7 @@ function loadSpec() {
     selectData.value.entityTablePrimaryKey = t.selectData.entityTablePrimaryKey;
     selectData.value.cntxtTableName = t.selectData.cntxtTableName;
     selectData.value.cntxtTablePrimaryKey = t.selectData.cntxtTablePrimaryKey;
-    tables.length = 0; // Clear existing tables, Haribol
+    tables.value.length = 0; // Clear existing tables, Haribol
     t.selectData.tables.forEach(table => {
       const newTable = new Table();
       newTable.name = table.name;
@@ -128,5 +145,6 @@ function isPrimaryTable(tblname) {
     </div>
     <FormButton caption="Load Spec" @click="loadSpec()" />
     <FormButton caption="Generate" @click="generate()" />
+    <h3 v-if="duplicateName">Duplicate field: {{ duplicateName }}</h3>
   </div>
 </template>
