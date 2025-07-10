@@ -26,4 +26,5 @@ def read_spec():
 @app.post('/generate')
 def generate():
     main.generate()
+    main.hydrate()
     return ''

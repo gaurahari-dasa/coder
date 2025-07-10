@@ -392,7 +392,7 @@ class SelectData:
             "declare_cntxt": self.generate_declare_cntxt().getvalue(),
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_variable(),
-            "model_view_folder": utils.title_case(self.model_table).capitalize(),
+            "model_view_folder": utils.first_char_upper(utils.title_case(self.model_table)),
             "menu_route": f", '{self.menu_route_name()}'",
             "controller_props": self.ui.generate_controller_props().getvalue(),
             "validation_fields": self.ui.generate_controller_validation().getvalue(),

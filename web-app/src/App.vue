@@ -24,8 +24,8 @@ const selectData = ref({
 });
 class Field {
   name = null;
-  duplicateName = null;
   alias = null;
+  duped = null;
   morphSpecs = null;
   foreign = null;
   fillable = null;
@@ -38,21 +38,15 @@ class Table {
   fields = [];
 };
 const tables = ref([]);
-const duplicateName = computed(() => {
-  const fieldNames = new Set();
+watchEffect(() => {
   for (const table of tables.value) {
-    if (isPrimaryTable(table.name)) {
-      for (const field of table.fields) {
-        const name = field.alias?.length > 0 ? field.alias : field.name;
-        if (fieldNames.has(name)) {
-          return field.name;
-        }
-        fieldNames.add(name);
-      }
-      break;
+    const fieldNames = new Set();
+    for (const field of table.fields) {
+      const name = field.alias?.length > 0 ? field.alias : field.name;
+      field.duped = fieldNames.has(name);
+      fieldNames.add(name);
     }
   }
-  return null;
 });
 
 function loadSpec() {
@@ -129,7 +123,10 @@ function isPrimaryTable(tblname) {
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
       <FormInput caption="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
       <div v-for="field in table.fields" class="mt-4 grid grid-cols-8 gap-4">
-        <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
+        <div class="relative">
+          <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
+          <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
+        </div>
         <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
         <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
         <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
@@ -145,6 +142,6 @@ function isPrimaryTable(tblname) {
     </div>
     <FormButton caption="Load Spec" @click="loadSpec()" />
     <FormButton caption="Generate" @click="generate()" />
-    <h3 v-if="duplicateName">Duplicate field: {{ duplicateName }}</h3>
+    <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->
   </div>
 </template>
