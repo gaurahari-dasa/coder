@@ -51,7 +51,7 @@ watchEffect(() => {
 
 function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
-    'method': 'POST'
+    'method': 'GET'
   }).then(resp => resp.json()).then(t => {
     model.value.name = t.model.name;
     model.value.cntxtName = t.model.cntxtName;
@@ -74,6 +74,7 @@ function loadSpec() {
         newField.morphSpecs = field.morphSpecs;
         newField.foreign = field.foreign;
         newField.fillable = field.fillable;
+        newField.inputSpecs = field.inputSpecs;
         newField.searchable = field.searchable;
         newField.sortable = field.sortable;
         newField.sortOrdinal = field.sortOrdinal;
@@ -101,7 +102,10 @@ function isPrimaryTable(tblname) {
     <h3 class="font-bold text-lg">Model</h3>
     <div class="grid grid-cols-4 gap-4">
       <FormInput caption="Model Class" id="model" v-model="model.name" />
-      <FormInput caption="Context Class" id="ctxt" v-model="model.cntxtName" />
+      <div class="relative">
+        <FormInput caption="Context Class" id="ctxt" v-model="model.cntxtName" />
+        <p class="text-xs absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
+      </div>
     </div>
     <h3 class="mt-4 font-bold text-lg">Routes</h3>
     <div class="grid grid-cols-4 gap-4">

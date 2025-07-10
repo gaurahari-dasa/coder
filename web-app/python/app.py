@@ -12,9 +12,7 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-@app.post(
-    "/read-spec",
-)
+@app.route("/read-spec")
 def read_spec():
     main.read_sections()
     return {

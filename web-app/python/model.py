@@ -32,7 +32,7 @@ class Model:
         output = io.StringIO()
         fields = sections.ix("SelectData").ui.fields
         bools = []
-        for field in fields:
+        for field in fields.values():
             if field.type == "checkbox":
                 bools.append(field.base_name)
         if bools:

@@ -59,7 +59,7 @@ class UserInput:
             return self.sort_symbol in self.qualities
 
     def __init__(self, model_table: str):
-        self.fields: list[UserInput.Field] = []
+        self.fields: dict[str, UserInput.Field] = {}
         self.no_match_vars = set()
         self.grid_sources = {}
         self.grid_columns = {}
@@ -73,7 +73,7 @@ class UserInput:
         self.output = io.StringIO()
 
     def append_field(self, name, base_name, specs, qualities):
-        self.fields.append(self.Field(name, base_name, specs, qualities))
+        self.fields[name] = self.Field(name, base_name, specs, qualities)
 
     def append_grid_source(self, name: str, grid_source: str):
         self.grid_sources[name] = grid_source
@@ -206,7 +206,7 @@ class UserInput:
     def generate_form_elements(self, form_type: str):
         output = io.StringIO()
         self.form_obj = form_type + "Form"
-        for field in self.fields:
+        for field in self.fields.values():
             self.generate_control(field, output)
         return output
 
@@ -274,7 +274,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
 
     def generate_blanked(self):
         output = io.StringIO()
-        for field in self.fields:
+        for field in self.fields.values():
             if field.type == "checkbox":
                 if field.options:
                     value = field.options
@@ -318,7 +318,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
     editId = id;""",
             file=output,
         )
-        for field in self.fields:
+        for field in self.fields.values():
             if field.type == "file":
                 continue  # cannot edit file contents on server, Haribol
             source = self.grid_sources.get(field.name, field.name)
@@ -360,14 +360,14 @@ import FormGuard from '../../components/FormGuard.vue';""",
 
     def generate_controller_validation(self):
         output = io.StringIO()
-        for field in self.fields:
+        for field in self.fields.values():
             print(f"'{field.name}' => '',", file=output)
         return output
 
     def generate_store_data(self):
         output = io.StringIO()
         print(f"return {self.model.name}::create([", file=output)
-        for field in self.fields:
+        for field in self.fields.values():
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"'{field.base_name}' =>", end=" ", file=output)
@@ -389,7 +389,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
     def generate_update_data(self):
         output = io.StringIO()
         varname = self.model_varname()
-        for field in self.fields:
+        for field in self.fields.values():
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=output)
@@ -462,3 +462,13 @@ import FormGuard from '../../components/FormGuard.vue';""",
         return grid_column in map(
             lambda v: v.name, filter(lambda v: v.sortable(), self.grid_columns.values())
         )
+
+    def field_specs(self, name: str):
+        field = self.fields[name]
+        return {
+            'type': field.type,
+            'title': field.title,
+            'options': field.options,
+            'focus': field.focus,
+            'required': field.required,
+        }

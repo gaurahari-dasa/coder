@@ -29,6 +29,9 @@ class SelectData:
             )
             self.searchable = self.search_symbol in qualities if qualities else None
 
+        def camelCasedNameForUi(self):
+            return utils.camel_case(self.alias if self.alias else self.name)
+
     def __parse_foreign_specs(self, foreign_specs: list[str]):
         if not foreign_specs:
             self.cntxt_table, self.foreign_key = (None, None)
@@ -392,7 +395,9 @@ class SelectData:
             "declare_cntxt": self.generate_declare_cntxt().getvalue(),
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_variable(),
-            "model_view_folder": utils.first_char_upper(utils.title_case(self.model_table)),
+            "model_view_folder": utils.first_char_upper(
+                utils.title_case(self.model_table)
+            ),
             "menu_route": f", '{self.menu_route_name()}'",
             "controller_props": self.ui.generate_controller_props().getvalue(),
             "validation_fields": self.ui.generate_controller_validation().getvalue(),
@@ -433,6 +438,11 @@ class SelectData:
                             "morphSpecs": field.specs,
                             "foreign": field.foreign,
                             "fillable": field.fillable,
+                            "inputSpecs": (
+                                self.ui.field_specs(field.camelCasedNameForUi())
+                                if field.fillable
+                                else None
+                            ),
                             "searchable": field.searchable,
                             "sortable": self.sortable(field),
                             "sortOrdinal": field.sortOrdinal,
