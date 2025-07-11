@@ -33,6 +33,17 @@ class Field {
   searchable = null;
   sortable = null;
   sortOrdinal = null;
+  tabs = [
+    { name: 'Morphing', href: '#', current: true },
+    { name: 'Referring', href: '#', current: false },
+    { name: 'Input', href: '#', current: false },
+    { name: 'Display', href: '#', current: false },
+  ];
+  selectTab(tabName) {
+    for (const tab of this.tabs) {
+      tab.current = tab.name === tabName;
+    }
+  }
 };
 class Table {
   name = null;
@@ -127,23 +138,35 @@ function isPrimaryTable(tblname) {
       <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}<span class="italic ml-1"
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
       <FormInput caption="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
-      <div v-for="field in table.fields" class="mt-4 grid grid-cols-8 gap-4">
+      <div class="mt-8 space-y-8">
+      <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
         <div class="relative">
           <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
           <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
         </div>
         <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
-        <FormTabs />
-        <!-- <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
-        <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
-        <FormCheckbox caption="Fillable" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
-          v-model="field.fillable" />
-        <FormCheckbox caption="Searchable" :id="`searchable-${ix}-${field.name}`"
-          :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-        <FormCheckbox caption="Sortable" :id="`sortable-${ix}-${field.name}`"
-          :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
-        <FormInput inputType="number" :min="0" caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
-          :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" /> -->
+        <div class="col-start-3 col-end-9">
+          <FormTabs :tabs="field.tabs" @tabbed="field.selectTab($event.tab.name)" class="mb-1" />
+          <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
+            <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+          </div>
+          <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
+            <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
+          </div>
+          <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
+            <FormCheckbox caption="Fillable" :id="`fillable-${ix}-${field.name}`"
+              :disabled="!isPrimaryTable(table.name)" v-model="field.fillable" />
+          </div>
+          <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
+            <FormCheckbox caption="Searchable" :id="`searchable-${ix}-${field.name}`"
+              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
+            <FormCheckbox caption="Sortable" :id="`sortable-${ix}-${field.name}`"
+              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+            <FormInput inputType="number" :min="0" caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
+              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+          </div>
+        </div>
+      </div>
       </div>
     </div>
     <FormButton caption="Load Spec" @click="loadSpec()" />
