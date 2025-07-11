@@ -5,6 +5,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import FormInput from './components/FormInput.vue';
 import FormButton from './components/FormButton.vue';
 import FormCheckbox from './components/FormCheckbox.vue';
+import FormTabs from './components/FormTabs.vue';
 
 const model = ref({
   name: null,
@@ -132,7 +133,8 @@ function isPrimaryTable(tblname) {
           <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
         </div>
         <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
-        <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+        <FormTabs />
+        <!-- <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
         <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
         <FormCheckbox caption="Fillable" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
           v-model="field.fillable" />
@@ -141,7 +143,7 @@ function isPrimaryTable(tblname) {
         <FormCheckbox caption="Sortable" :id="`sortable-${ix}-${field.name}`"
           :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
         <FormInput inputType="number" :min="0" caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
-          :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+          :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" /> -->
       </div>
     </div>
     <FormButton caption="Load Spec" @click="loadSpec()" />
