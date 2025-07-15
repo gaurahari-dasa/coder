@@ -15,7 +15,7 @@ defineEmits(['input']);
 </script>
 
 <template>
-    <div>
+    <div v-show="title">
         <label :for="id" class="block text-sm/6 font-medium text-gray-900">{{ title }}</label>
         <div class="mt-2">
             <input

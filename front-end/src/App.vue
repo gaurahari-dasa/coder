@@ -6,6 +6,7 @@ import FormInput from './components/FormInput.vue';
 import FormButton from './components/FormButton.vue';
 import FormCheckbox from './components/FormCheckbox.vue';
 import FormTabs from './components/FormTabs.vue';
+import FormSelect from './components/FormSelect.vue';
 
 const model = ref({
   name: null,
@@ -112,6 +113,23 @@ function generate() {
 function isPrimaryTable(tblname) {
   return tblname == selectData.value.entityTableName;
 }
+
+function fillable(field, checked) {
+  if (!checked) {
+    field.inputSpecs = {};
+  }
+}
+
+function optionTitle(field) {
+  switch (field.inputSpecs.type) {
+    case 'checkbox': return 'Default Value';
+    case 'text': return 'Max Length';
+    case 'select': case 'auto': return 'Options Variable';
+    default:
+      field.inputSpecs.options = null;
+      return undefined;
+  }
+}
 </script>
 
 <template>
@@ -144,34 +162,45 @@ function isPrimaryTable(tblname) {
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
       <FormInput title="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
       <div class="mt-8 space-y-8">
-      <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
-        <div class="relative">
-          <FormInput title="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
-          <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
+        <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
+          <div class="relative">
+            <FormInput title="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
+            <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
+          </div>
+          <FormInput title="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
+          <div class="col-start-3 col-end-9">
+            <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
+            <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
+              <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+            </div>
+            <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
+              <FormInput title="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
+            </div>
+            <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
+              <div class="grid grid-cols-3">
+                <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
+                  v-model="field.fillable" @changed="fillable(field, $event.checked)" />
+                <FormCheckbox title="Reqd" :id="`inputspec-required-${ix}-${field.name}`" :disabled="!field.fillable"
+                  v-model="field.inputSpecs.required" />
+              </div>
+              <FormSelect title="Type" :id="`inputspec-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
+                :options="[null, 'text', 'email', 'date', 'select', 'checkbox', 'file', 'auto']"
+                :disabled="!field.fillable" />
+              <FormInput title="Title" :id="`inputspec-title-${ix}-${field.name}`" v-model="field.inputSpecs.title"
+                :disabled="!field.fillable" />
+              <FormInput :title="optionTitle(field)" :id="`inputspec-options-${ix}-${field.name}`"
+                v-model="field.inputSpecs.options" />
+            </div>
+            <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
+              <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
+                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
+              <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
+                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+              <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
+                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+            </div>
+          </div>
         </div>
-        <FormInput title="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
-        <div class="col-start-3 col-end-9">
-          <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
-          <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
-            <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
-          </div>
-          <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
-            <FormInput title="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
-          </div>
-          <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
-            <FormCheckbox title="Fillable" :id="`fillable-${ix}-${field.name}`"
-              :disabled="!isPrimaryTable(table.name)" v-model="field.fillable" />
-          </div>
-          <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
-            <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
-              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-            <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
-              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
-            <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
-              :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
-          </div>
-        </div>
-      </div>
       </div>
     </div>
     <FormButton title="Load Spec" @click="loadSpec()" />

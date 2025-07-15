@@ -38,9 +38,13 @@ class UserInput:
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
             self.type = specs[0]
             self.title = utils.nullishIndex(specs, 1)
+            # Haribol: options is used for the following purpose
+            # Default value of checkbox
+            # maxLength attribute of FormInput
+            # options attribute of FormSelect and FormAutoComplete
             self.options = utils.nullishIndex(
                 specs, 2
-            )  # doubles up as the default value of checkbox, Haribol
+            )
             self.match_value: str = utils.nullishIndex(specs, 3)
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
