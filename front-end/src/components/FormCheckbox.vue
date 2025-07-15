@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
     id: String,
-    caption: String,
+    title: String,
     disabled: Boolean,
 });
 const model = defineModel();
@@ -9,7 +9,7 @@ const model = defineModel();
 
 <template>
     <div>
-        <label :for="id" class="block text-sm/6 font-medium text-gray-900">{{ caption }}</label>
+        <label :for="id" class="block text-sm/6 font-medium text-gray-900">{{ title }}</label>
         <div class="mt-2">
             <input type="checkbox" v-model="model" :id :disabled />
         </div>

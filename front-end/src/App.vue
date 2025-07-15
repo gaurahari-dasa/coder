@@ -34,8 +34,8 @@ class Field {
   sortable = null;
   sortOrdinal = null;
   tabs = [
-    { name: 'Morphing', href: '#', current: true },
-    { name: 'Referring', href: '#', current: false },
+    { name: 'Morph', href: '#', current: true },
+    { name: 'Refer', href: '#', current: false },
     { name: 'Input', href: '#', current: false },
     { name: 'Display', href: '#', current: false },
   ];
@@ -48,6 +48,11 @@ class Field {
 class Table {
   name = null;
   fields = [];
+  selectTabs(tabName) {
+    for (const field of this.fields) {
+      field.selectTab(tabName);
+    }
+  }
 };
 const tables = ref([]);
 watchEffect(() => {
@@ -113,64 +118,64 @@ function isPrimaryTable(tblname) {
   <div class="container p-4">
     <h3 class="font-bold text-lg">Model</h3>
     <div class="grid grid-cols-4 gap-4">
-      <FormInput caption="Model Class" id="model" v-model="model.name" />
+      <FormInput title="Model Class" id="model" v-model="model.name" />
       <div class="relative">
-        <FormInput caption="Context Class" id="ctxt" v-model="model.cntxtName" />
+        <FormInput title="Context Class" id="ctxt" v-model="model.cntxtName" />
         <p class="text-xs absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
       </div>
     </div>
     <h3 class="mt-4 font-bold text-lg">Routes</h3>
     <div class="grid grid-cols-4 gap-4">
-      <FormInput caption="Entity Route URL" id="entity-route-url" v-model="routes.entityUrl" />
-      <FormInput caption="Entity Route Name" id="entity-route-name" v-model="routes.entityRouteName" />
-      <FormInput caption="Context Route URL" id="ctxt-route-url" v-model="routes.cntxtUrl" />
-      <FormInput caption="Context Route Name" id="ctxt-route-name" v-model="routes.cntxtRouteName" />
+      <FormInput title="Entity Route URL" id="entity-route-url" v-model="routes.entityUrl" />
+      <FormInput title="Entity Route Name" id="entity-route-name" v-model="routes.entityRouteName" />
+      <FormInput title="Context Route URL" id="ctxt-route-url" v-model="routes.cntxtUrl" />
+      <FormInput title="Context Route Name" id="ctxt-route-name" v-model="routes.cntxtRouteName" />
     </div>
     <h3 class="mt-4 font-bold text-lg">Select Data</h3>
     <div class="grid grid-cols-4 gap-4">
-      <FormInput caption="Entity Table name" id="entity-table-name" v-model="selectData.entityTableName" />
-      <FormInput caption="Entity Table primary_key" id="entity-table-pk" v-model="selectData.entityTablePrimaryKey" />
-      <FormInput caption="Context Table name" id="ctxt-table-name" v-model="selectData.cntxtTableName" />
-      <FormInput caption="Context Table primary_key" id="ctxt-table-pk" v-model="selectData.cntxtTablePrimaryKey" />
+      <FormInput title="Entity Table name" id="entity-table-name" v-model="selectData.entityTableName" />
+      <FormInput title="Entity Table primary_key" id="entity-table-pk" v-model="selectData.entityTablePrimaryKey" />
+      <FormInput title="Context Table name" id="ctxt-table-name" v-model="selectData.cntxtTableName" />
+      <FormInput title="Context Table primary_key" id="ctxt-table-pk" v-model="selectData.cntxtTablePrimaryKey" />
     </div>
     <h4 class="mt-4 font-semibold">Tables</h4>
     <div v-for="(table, ix) in tables">
       <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}<span class="italic ml-1"
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
-      <FormInput caption="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
+      <FormInput title="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
       <div class="mt-8 space-y-8">
       <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
         <div class="relative">
-          <FormInput caption="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
+          <FormInput title="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
           <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
         </div>
-        <FormInput caption="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
+        <FormInput title="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
         <div class="col-start-3 col-end-9">
-          <FormTabs :tabs="field.tabs" @tabbed="field.selectTab($event.tab.name)" class="mb-1" />
+          <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
           <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
-            <FormInput caption="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+            <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
           </div>
           <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
-            <FormInput caption="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
+            <FormInput title="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
           </div>
           <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
-            <FormCheckbox caption="Fillable" :id="`fillable-${ix}-${field.name}`"
+            <FormCheckbox title="Fillable" :id="`fillable-${ix}-${field.name}`"
               :disabled="!isPrimaryTable(table.name)" v-model="field.fillable" />
           </div>
           <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
-            <FormCheckbox caption="Searchable" :id="`searchable-${ix}-${field.name}`"
+            <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
               :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-            <FormCheckbox caption="Sortable" :id="`sortable-${ix}-${field.name}`"
+            <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
               :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
-            <FormInput inputType="number" :min="0" caption="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
+            <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
               :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
           </div>
         </div>
       </div>
       </div>
     </div>
-    <FormButton caption="Load Spec" @click="loadSpec()" />
-    <FormButton caption="Generate" @click="generate()" />
+    <FormButton title="Load Spec" @click="loadSpec()" />
+    <FormButton title="Generate" @click="generate()" />
     <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->
   </div>
 </template>
