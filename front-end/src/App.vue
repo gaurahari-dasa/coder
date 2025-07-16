@@ -7,6 +7,7 @@ import FormButton from './components/FormButton.vue';
 import FormCheckbox from './components/FormCheckbox.vue';
 import FormTabs from './components/FormTabs.vue';
 import FormSelect from './components/FormSelect.vue';
+import FormRadio from './components/FormRadio.vue';
 
 const model = ref({
   name: null,
@@ -114,19 +115,17 @@ function isPrimaryTable(tblname) {
   return tblname == selectData.value.entityTableName;
 }
 
-function fillable(field, checked) {
-  if (!checked) {
-    field.inputSpecs = {};
-  }
+function makeFillable(field, checked) {
+  field.inputSpecs = checked ? {} : null;
 }
 
 function optionTitle(field) {
   switch (field.inputSpecs.type) {
     case 'checkbox': return 'Default Value';
     case 'text': return 'Max Length';
-    case 'select': case 'auto': return 'Options Variable';
+    case 'select': case 'auto': return 'Options Prop';
     default:
-      field.inputSpecs.options = null;
+      // field.inputSpecs.options = null;
       return undefined;
   }
 }
@@ -160,7 +159,7 @@ function optionTitle(field) {
     <div v-for="(table, ix) in tables">
       <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}<span class="italic ml-1"
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
-      <FormInput title="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
+      <FormInput title="Table Name" :id="`${table.name}-${ix}`" v-model="table.name" />
       <div class="mt-8 space-y-8">
         <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
           <div class="relative">
@@ -179,17 +178,21 @@ function optionTitle(field) {
             <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
-                  v-model="field.fillable" @changed="fillable(field, $event.checked)" />
-                <FormCheckbox title="Reqd" :id="`inputspec-required-${ix}-${field.name}`" :disabled="!field.fillable"
-                  v-model="field.inputSpecs.required" />
+                  v-model="field.fillable" @changed="makeFillable(field, $event.checked)" />
+                <template v-if="field.inputSpecs">
+                  <FormCheckbox title="Reqd" :id="`inputspec-required-${ix}-${field.name}`"
+                    v-model="field.inputSpecs.required" />
+                  <FormRadio title="Focus" :id="`inputspec-focus-${ix}-${field.name}`" :name="`${table.name}-focus`"
+                    :checked="field.inputSpecs.focus" />
+                </template>
               </div>
-              <FormSelect title="Type" :id="`inputspec-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
-                :options="[null, 'text', 'email', 'date', 'select', 'checkbox', 'file', 'auto']"
-                :disabled="!field.fillable" />
-              <FormInput title="Title" :id="`inputspec-title-${ix}-${field.name}`" v-model="field.inputSpecs.title"
-                :disabled="!field.fillable" />
-              <FormInput :title="optionTitle(field)" :id="`inputspec-options-${ix}-${field.name}`"
-                v-model="field.inputSpecs.options" />
+              <template v-if="field.inputSpecs">
+                <FormSelect title="Type" :id="`inputspec-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
+                  :options="[null, 'text', 'email', 'date', 'select', 'checkbox', 'file', 'auto']" />
+                <FormInput title="Title" :id="`inputspec-title-${ix}-${field.name}`" v-model="field.inputSpecs.title" />
+                <FormInput :title="optionTitle(field)" :id="`inputspec-options-${ix}-${field.name}`"
+                  v-model="field.inputSpecs.options" />
+              </template>
             </div>
             <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
               <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"

@@ -441,7 +441,7 @@ class SelectData:
                             "inputSpecs": (
                                 self.ui.field_specs(field.camelCasedNameForUi())
                                 if field.fillable
-                                else {}
+                                else None
                             ),
                             "searchable": field.searchable,
                             "sortable": self.sortable(field),
