@@ -12,12 +12,13 @@ use Illuminate\Http\Request;
 
 class GuideController extends Controller
 {
-    public function index(Contact $contactId)
+    public function index(int $contactId)
     {
         return inertia('Guides/Index', [
             'menus' => MenuHelper::list(),
             'privileges' => UserHelper::privileges(request()->user(), 'contacts'),
-            'contactId' => $contact->contact_id,
+            'guides' => GuideHelper::paginate($contactId),
+'contactId' => $contactId,
     'contact' => GuideHelper::contactDetails(),
 'languages' => HelperClass::list()->get(),
             'searchKey' => request('search-key'),

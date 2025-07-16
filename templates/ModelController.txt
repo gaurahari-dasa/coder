@@ -16,8 +16,8 @@ class @@@ model @@@Controller extends Controller
         return inertia('@@@ model_view_folder @@@/Index', [
             'menus' => MenuHelper::list(),
             'privileges' => UserHelper::privileges(request()->user()@@@ menu_route @@@),
-            @@@ controller_props @@@
-            'searchKey' => request('search-key'),
+            @@@ model_props @@@
+            @@@ controller_props @@@'searchKey' => request('search-key'),
             'sortField' => request('sort-field'),
             'sortDir' => request('sort'),
         ]);

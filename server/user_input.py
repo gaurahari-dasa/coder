@@ -42,9 +42,7 @@ class UserInput:
             # Default value of checkbox
             # maxLength attribute of FormInput
             # options attribute of FormSelect and FormAutoComplete
-            self.options = utils.nullishIndex(
-                specs, 2
-            )
+            self.options = utils.nullishIndex(specs, 2)
             self.match_value: str = utils.nullishIndex(specs, 3)
             self.focus = self.focus_symbol in qualities
             self.required = self.required_symbol in qualities
@@ -354,7 +352,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
         output = io.StringIO()
         if self.foreign_key:
             print(
-                f"""'{self.foreign_key.name}' => ${self.foreign_key.prop}->{self.foreign_key.base_name},
+                f"""'{self.foreign_key.name}' => ${self.foreign_key.name},
     '{self.foreign_key.prop}' => {self.model.name}Helper::{self.foreign_key.prop}Details(),""",
                 file=output,
             )
@@ -470,9 +468,10 @@ import FormGuard from '../../components/FormGuard.vue';""",
     def field_specs(self, name: str):
         field = self.fields[name]
         return {
-            'type': field.type,
-            'title': field.title,
-            'options': field.options,
-            'focus': field.focus,
-            'required': field.required,
+            "type": field.type,
+            "title": field.title,
+            "options": field.options,
+            "matchValue": field.match_value,
+            "focus": field.focus,
+            "required": field.required,
         }

@@ -168,7 +168,7 @@ editLanguageName = datum.languageName;
 ******
 
 *** Controller props ***
-'contactId' => $contact->contact_id,
+'contactId' => $contactId,
     'contact' => GuideHelper::contactDetails(),
 'languages' => HelperClass::list()->get(),
 ******

@@ -6,13 +6,12 @@ use App\Models\@@@ model @@@;
 @@@ declare_cntxt_trait @@@
 class @@@ model_helper @@@
 {@@@ use_cntxt_trait @@@
-    public static function listAll($sortField = null, $sortDir = null)
+    public static function listAll(?string $sortField = null, ?string $sortDir = null)
     {
         @@@ if_sort_by_id @@@
         return @@@ model @@@
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
-            @@@ join_clause @@@
-            ->select(
+            @@@ join_clause @@@->select(
                 @@@ select_data @@@
             );
     }
@@ -44,7 +43,7 @@ class @@@ model_helper @@@
             ->appends(['sort' => $sortDir]);
     }
 
-    public static function addEntity($validated)
+    public static function addEntity(array $validated)
     {
         return LogActivityHelper::create(function () use ($validated) {
             @@@ store_data @@@

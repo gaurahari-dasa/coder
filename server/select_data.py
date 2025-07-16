@@ -32,6 +32,9 @@ class SelectData:
         def camelCasedNameForUi(self):
             return utils.camel_case(self.alias if self.alias else self.name)
 
+    def cntxt_id(self):
+        return utils.camel_case(self.foreign_key)
+
     def __parse_foreign_specs(self, foreign_specs: list[str]):
         if not foreign_specs:
             self.cntxt_table, self.foreign_key = (None, None)
@@ -42,7 +45,7 @@ class SelectData:
         sql_utils.check_table(self.cntxt_table)
         sql_utils.check_column(self.cntxt_table, self.foreign_key)
         self.ui.assign_foreign_key(
-            utils.camel_case(self.foreign_key), self.foreign_key, self.model.cntxt_name
+            self.cntxt_id(), self.foreign_key, self.model.cntxt_name
         )
         return
 
@@ -324,15 +327,12 @@ class SelectData:
                     return table
         return None
 
-    def declare_cntxt_variable(self):
+    def declare_cntxt_id_variable(self):
         # output = io.StringIO()
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        return f"{self.model.cntxt_name} ${utils.camel_case(self.foreign_key)}"
+        return f"int ${self.cntxt_id()}"
         # return output
-
-    def cntxt_id(self):
-        return utils.camel_case(self.foreign_key)
 
     def cntxt_filter(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
@@ -341,6 +341,15 @@ class SelectData:
 
     def menu_route_name(self):
         return self.routes.cntxt_name if self.routes.cntxt_name else self.routes.name
+
+    def generate_model_props(self):
+        output = io.StringIO()
+        arg = "" if not self.cntxt_table else "$" + self.cntxt_id()  # same as checking 'not self.foreign_key', Haribol
+        print(
+            f"'{self.ui.model_props}' => {self.model.name}Helper::paginate({arg}),",
+            file=output,
+        )
+        return output
 
     def cntxt_route_param_store(self):
         if not self.cntxt_table:
@@ -365,7 +374,7 @@ class SelectData:
             "declare_cntxt_trait": self.generate_declare_cntxt_trait().getvalue(),
             "use_cntxt_trait": self.generate_use_cntxt_trait().getvalue(),
             "model_helper": model_helper,
-            "declare_cntxt_var": self.declare_cntxt_variable(),
+            "declare_cntxt_var": self.declare_cntxt_id_variable(),
             "default_sort_field": self.default_sort_field(),
             "join_clause": self.generate_join_clause().getvalue(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
@@ -394,11 +403,12 @@ class SelectData:
             "model": self.model.name,
             "declare_cntxt": self.generate_declare_cntxt().getvalue(),
             "model_helper": model_helper,
-            "declare_cntxt_var": self.declare_cntxt_variable(),
+            "declare_cntxt_var": self.declare_cntxt_id_variable(),
             "model_view_folder": utils.first_char_upper(
                 utils.title_case(self.model_table)
             ),
             "menu_route": f", '{self.menu_route_name()}'",
+            "model_props": self.generate_model_props().getvalue(),
             "controller_props": self.ui.generate_controller_props().getvalue(),
             "validation_fields": self.ui.generate_controller_validation().getvalue(),
             "model_varname": self.ui.model_varname(),

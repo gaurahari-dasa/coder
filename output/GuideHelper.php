@@ -31,7 +31,7 @@ use ContactContext;
             );
     }
 
-    public static function paginate(Contact $contactId)
+    public static function paginate(int $contactId)
     {
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');

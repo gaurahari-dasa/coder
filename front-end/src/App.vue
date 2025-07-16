@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watchEffect } from 'vue';
 
-import HelloWorld from './components/HelloWorld.vue'
 import FormInput from './components/FormInput.vue';
 import FormButton from './components/FormButton.vue';
 import FormCheckbox from './components/FormCheckbox.vue';
@@ -129,6 +128,15 @@ function optionTitle(field) {
       return undefined;
   }
 }
+
+function matchTitle(field) {
+  switch (field.inputSpecs.type) {
+    case 'select': case 'auto': return 'Match Variable';
+    default:
+      // field.inputSpecs.options = null;
+      return undefined;
+  }
+}
 </script>
 
 <template>
@@ -173,25 +181,28 @@ function optionTitle(field) {
               <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
             </div>
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
-              <FormInput title="Foreign Key" :id="`foreign-key-${ix}-${field.name}`" v-model="field.foreign" />
+              <FormInput title="Foreign Key" :id="`foreign-${ix}-${field.name}`" v-model="field.foreign" />
             </div>
             <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
                   v-model="field.fillable" @changed="makeFillable(field, $event.checked)" />
                 <template v-if="field.inputSpecs">
-                  <FormCheckbox title="Reqd" :id="`inputspec-required-${ix}-${field.name}`"
+                  <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${field.name}`"
                     v-model="field.inputSpecs.required" />
-                  <FormRadio title="Focus" :id="`inputspec-focus-${ix}-${field.name}`" :name="`${table.name}-focus`"
+                  <FormRadio title="Focus" :id="`inputspecs-focus-${ix}-${field.name}`" :name="`${table.name}-focus`"
                     :checked="field.inputSpecs.focus" />
                 </template>
               </div>
               <template v-if="field.inputSpecs">
-                <FormSelect title="Type" :id="`inputspec-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
+                <FormSelect title="Type" :id="`inputspecs-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
                   :options="[null, 'text', 'email', 'date', 'select', 'checkbox', 'file', 'auto']" />
-                <FormInput title="Title" :id="`inputspec-title-${ix}-${field.name}`" v-model="field.inputSpecs.title" />
-                <FormInput :title="optionTitle(field)" :id="`inputspec-options-${ix}-${field.name}`"
+                <FormInput title="Title" :id="`inputspecs-title-${ix}-${field.name}`"
+                  v-model="field.inputSpecs.title" />
+                <FormInput :title="optionTitle(field)" :id="`inputspecs-options-${ix}-${field.name}`"
                   v-model="field.inputSpecs.options" />
+                <FormInput :title="matchTitle(field)" :id="`inputspecs-match-value-${ix}-${field.name}`"
+                  v-model="field.inputSpecs.matchValue" />
               </template>
             </div>
             <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
