@@ -50,7 +50,8 @@ class UserInput:
     class GridColumn:
         sort_symbol = "^"
 
-        def __init__(self, name: str, specs: str, qualities: str):
+        def __init__(self, index: int, name: str, specs: str, qualities: str):
+            self.index = index
             self.name = name
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
             self.type = utils.nullishIndex(specs, 0)
@@ -64,7 +65,7 @@ class UserInput:
         self.fields: dict[str, UserInput.Field] = {}
         self.no_match_vars = set()
         self.grid_sources = {}
-        self.grid_columns = {}
+        self.grid_columns: dict[str, UserInput.GridColumn] = {}
         self.lookup_props = set()
         self.foreign_key = None
         self.model: Model = sections.ix("Model")
@@ -81,9 +82,9 @@ class UserInput:
         self.grid_sources[name] = grid_source
 
     def append_grid_column(self, index: int, name: str, spec: str, qualities: str):
-        if index in self.grid_columns:
-            utils.error("Grid column index is not unique, Haribol!")
-        self.grid_columns[index] = self.GridColumn(name, spec, qualities)
+        # if index in self.grid_columns:
+        #     utils.error("Grid column index is not unique, Haribol!")
+        self.grid_columns[name] = self.GridColumn(index, name, spec, qualities)
 
     def assign_foreign_key(self, name, base_name, model_name):
         self.foreign_key = self.ForeignKey(
@@ -422,7 +423,9 @@ import FormGuard from '../../components/FormGuard.vue';""",
     ]
 
     def generate(self):
-        self.grid_columns = dict(sorted(self.grid_columns.items()))
+        self.grid_columns = dict(
+            sorted(self.grid_columns.items(), key=lambda x: x[1].index)
+        )
         for func in self.funcs:
             print(func[0], file=self.output)
             try:
@@ -465,7 +468,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             lambda v: v.name, filter(lambda v: v.sortable(), self.grid_columns.values())
         )
 
-    def field_specs(self, name: str):
+    def input_specs(self, name: str):
         field = self.fields[name]
         return {
             "type": field.type,
@@ -474,4 +477,13 @@ import FormGuard from '../../components/FormGuard.vue';""",
             "matchValue": field.match_value,
             "focus": field.focus,
             "required": field.required,
+        }
+
+    def output_specs(self, name: str):
+        col = self.grid_columns[name]
+        return {
+            "name": col.name,
+            "type": col.type,
+            "title": col.title,
+            "index": col.index,
         }

@@ -7,6 +7,7 @@ import FormCheckbox from './components/FormCheckbox.vue';
 import FormTabs from './components/FormTabs.vue';
 import FormSelect from './components/FormSelect.vue';
 import FormRadio from './components/FormRadio.vue';
+import CardArray from './components/CardArray.vue';
 
 const model = ref({
   name: null,
@@ -35,10 +36,10 @@ class Field {
   sortable = null;
   sortOrdinal = null;
   tabs = [
-    { name: 'Morph', href: '#', current: true },
     { name: 'Refer', href: '#', current: false },
-    { name: 'Input', href: '#', current: false },
+    { name: 'Input', href: '#', current: true },
     { name: 'Display', href: '#', current: false },
+    { name: 'Morph', href: '#', current: false },
   ];
   selectTab(tabName) {
     for (const tab of this.tabs) {
@@ -67,6 +68,8 @@ watchEffect(() => {
   }
 });
 
+const cards = ref([]);
+
 function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
     'method': 'GET'
@@ -81,7 +84,8 @@ function loadSpec() {
     selectData.value.entityTablePrimaryKey = t.selectData.entityTablePrimaryKey;
     selectData.value.cntxtTableName = t.selectData.cntxtTableName;
     selectData.value.cntxtTablePrimaryKey = t.selectData.cntxtTablePrimaryKey;
-    tables.value.length = 0; // Clear existing tables, Haribol
+    tables.value.length = 0; // clear existing tables, Haribol
+    cards.value.length = 0; // clear column display card array, Haribol
     t.selectData.tables.forEach(table => {
       const newTable = new Table();
       newTable.name = table.name;
@@ -97,6 +101,12 @@ function loadSpec() {
         newField.sortable = field.sortable;
         newField.sortOrdinal = field.sortOrdinal;
         newTable.fields.push(newField);
+        if (field.outputted) {
+          cards.value.push({
+            name: field.outputSpecs.name,
+            index: field.outputSpecs.index,
+          });
+        }
       })
       tables.value.push(newTable);
     });
@@ -178,12 +188,9 @@ function matchTitle(field) {
           <div class="col-start-3 col-end-9">
             <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
             <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
-              <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
-            </div>
-            <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <FormInput title="Foreign Key" :id="`foreign-${ix}-${field.name}`" v-model="field.foreign" />
             </div>
-            <div v-show="field.tabs[2].current" class="grid grid-cols-6 gap-4">
+            <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
                   v-model="field.fillable" @changed="makeFillable(field, $event.checked)" />
@@ -205,18 +212,25 @@ function matchTitle(field) {
                   v-model="field.inputSpecs.matchValue" />
               </template>
             </div>
-            <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
-              <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
-                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-              <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
-                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+            <div v-show="field.tabs[2].current" class="grid grid-cols-5 gap-4">
+              <div class="grid grid-cols-2">
+                <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
+                  :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
+                <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
+                  :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+              </div>
               <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
                 :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+            </div>
+            <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
+              <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
             </div>
           </div>
         </div>
       </div>
     </div>
+    <h3 class="mt-8 font-bold text-lg">Display Column Ordering</h3>
+    <CardArray class="mt-4" :cards />
     <FormButton title="Load Spec" @click="loadSpec()" />
     <FormButton title="Generate" @click="generate()" />
     <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->

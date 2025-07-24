@@ -5,8 +5,8 @@ import json
 
 cfg_file = open("sql.json")
 config = json.loads(cfg_file.read())
+cfg_file.close()
 disable = config["disable"]
-
 
 cnx = mysql.connector.connect(
     user="root", password="", host="127.0.0.1", database="krishna_life"

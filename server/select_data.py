@@ -13,11 +13,11 @@ class SelectData:
     class Field:
         search_symbol = "?"
 
-        def __init__(self, name: str, alias: str, specs: tuple[str, str, bool, str]):
+        def __init__(self, name: str, alias: str, specs: tuple[str, str, bool, str, bool]):
             self.name = name
             self.alias = alias
-            self.specs, qualities, self.fillable, self.foreign = (
-                specs if specs else (None, None, False, None)
+            self.specs, qualities, self.fillable, self.foreign, self.outputted = (
+                specs if specs else (None, None, False, None, False)
             )
             # self.sortable = (
             #     UserInput.Field.sort_symbol in qualities if qualities else None
@@ -82,6 +82,7 @@ class SelectData:
         qualities = None  # search / sort, Haribol
         fillable = False  # mass assignable, Haribol
         foreign = None  # specifies foreign table, Haribol
+        outputted = False # is value displayed in the UI?
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
             matched = re.match(r"[ ]*(i|#[0-9]+|\$|~)[ ]*\((.*)\)(.*)", spec)
@@ -106,7 +107,7 @@ class SelectData:
                     case _:
                         spec_type = matched.group(1)
                         if spec_type[0] == "#":
-                            # morph_specs = morph(matched.group(2))
+                            outputted = True
                             qualities = matched.group(3)
                             self.ui.append_grid_column(
                                 int(spec_type[1:]),
@@ -120,7 +121,7 @@ class SelectData:
             fillable and model_owned
         ):  # TODO: disallow non-model field specs in the future - and remove the model_owned condition
             self.model.append_field(field_name)
-        return (morph_specs, qualities, fillable, foreign)
+        return (morph_specs, qualities, fillable, foreign, outputted)
 
     def append(self, line: str):
         if not (line := line.strip()):
@@ -449,8 +450,14 @@ class SelectData:
                             "foreign": field.foreign,
                             "fillable": field.fillable,
                             "inputSpecs": (
-                                self.ui.field_specs(field.camelCasedNameForUi())
+                                self.ui.input_specs(field.camelCasedNameForUi())
                                 if field.fillable
+                                else None
+                            ),
+                            "outputted": field.outputted,
+                            "outputSpecs": (
+                                self.ui.output_specs(field.camelCasedNameForUi())
+                                if field.outputted
                                 else None
                             ),
                             "searchable": field.searchable,
