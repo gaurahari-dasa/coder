@@ -13,7 +13,9 @@ class SelectData:
     class Field:
         search_symbol = "?"
 
-        def __init__(self, name: str, alias: str, specs: tuple[str, str, bool, str, bool]):
+        def __init__(
+            self, name: str, alias: str, specs: tuple[str, str, bool, str, bool]
+        ):
             self.name = name
             self.alias = alias
             self.specs, qualities, self.fillable, self.foreign, self.outputted = (
@@ -82,7 +84,7 @@ class SelectData:
         qualities = None  # search / sort, Haribol
         fillable = False  # mass assignable, Haribol
         foreign = None  # specifies foreign table, Haribol
-        outputted = False # is value displayed in the UI?
+        outputted = False  # is value displayed in the UI?
         specs = [s.strip() for s in (specs.split(",") if specs else [])]
         for spec in specs:
             matched = re.match(r"[ ]*(i|#[0-9]+|\$|~)[ ]*\((.*)\)(.*)", spec)
@@ -206,43 +208,49 @@ class SelectData:
         return output
 
     def generate_pagination_data(self):
+        def print_field(name):
+            print(
+                f"'{name}'",
+                "=>",
+                end=" ",
+                file=output,
+            )
+            match field.specs:
+                case None:
+                    print(f"$item->{alias},", file=output)
+                case "file":
+                    print(
+                        f"Utils::asset($item->{alias}),",
+                        file=output,
+                    )
+                case "date-only":
+                    print(
+                        f"Utils::formatDateJs($item->{alias}, DateFormatJs::OnlyDate),",
+                        file=output,
+                    )
+                case "date-time":
+                    print(
+                        f"Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),",
+                        file=output,
+                    )
+                case _:
+                    print(file=output)
+                    utils.warn("Unknown transformation type, Haribol", field.specs)
+
         output = io.StringIO()
         for table in self.tables:
             for field in self.tables[table]:
-                if field.foreign:
-                    continue
+                # if field.foreign:
+                #     continue
                 alias = field.alias if field.alias else field.name
-                print(
-                    (
-                        "'id'"
-                        if table == self.model_table and field.name == self.primary_key
-                        else f"'{utils.camel_case(alias)}'"
-                    ),
-                    "=>",
-                    end=" ",
-                    file=output,
-                )
-                match field.specs:
-                    case None:
-                        print(f"$item->{alias},", file=output)
-                    case "file":
-                        print(
-                            f"Utils::asset($item->{alias}),",
-                            file=output,
+                if table == self.model_table and field.name == self.primary_key:
+                    if field.fillable and field.name == "id":
+                        utils.error(
+                            "Inputting primary key field 'id' is not supported, Haribol!"
                         )
-                    case "date-only":
-                        print(
-                            f"Utils::formatDateJs($item->{alias}, DateFormatJs::OnlyDate),",
-                            file=output,
-                        )
-                    case "date-time":
-                        print(
-                            f"Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),",
-                            file=output,
-                        )
-                    case _:
-                        print(file=output)
-                        utils.warn("Unknown transformation type, Haribol", field.specs)
+                    print_field("id")
+                if field.fillable or field.outputted:
+                    print_field(utils.camel_case(alias))
         return output
 
     def generate_log_access(self):
@@ -346,7 +354,9 @@ class SelectData:
 
     def generate_model_props(self):
         output = io.StringIO()
-        arg = "" if not self.cntxt_table else "$" + self.cntxt_id()  # same as checking 'not self.foreign_key', Haribol
+        arg = (
+            "" if not self.cntxt_table else "$" + self.cntxt_id()
+        )  # same as checking 'not self.foreign_key', Haribol
         print(
             f"'{self.ui.model_props}' => {self.model.name}Helper::paginate({arg}),",
             file=output,
@@ -414,6 +424,9 @@ class SelectData:
             "controller_props": self.ui.generate_controller_props().getvalue(),
             "validation_fields": self.ui.generate_controller_validation().getvalue(),
             "model_varname": self.ui.model_varname(),
+            "cntxt_request": (
+                f"request('{self.cntxt_id()}')" if self.foreign_key else ""
+            ),
             "model_route": f"'{self.routes.name}'",
             "cntxt_route_param_store": self.cntxt_route_param_store(),
             "cntxt_route_param_update": self.cntxt_route_param_update(),

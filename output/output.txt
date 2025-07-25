@@ -58,7 +58,6 @@ LogAccessHelper::log(Guide::class, $searchKey);
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
-'languageName' => $item->language_name,
 ******
 
 *** Avatar Heading ***
@@ -194,7 +193,7 @@ return Guide::create([
 'dob' => Utils::parseDate($validated['dob']),
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
-'contact_id' => request('contactId'),
+'contact_id' => $contactId,
 ]);
 ******
 

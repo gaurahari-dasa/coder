@@ -381,7 +381,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
                 print(f"$validated['{field.name}'],", file=output)
         if self.foreign_key:
             print(
-                f"'{self.foreign_key.base_name}' => request('{self.foreign_key.name}'),",
+                f"'{self.foreign_key.base_name}' => ${self.foreign_key.name},",
                 file=output,
             )
         print("]);", file=output)

@@ -28,7 +28,7 @@ class @@@ model @@@Controller extends Controller
         $validated = request()->validate([
             @@@ validation_fields @@@
         ]);
-        @@@ model_helper @@@::addEntity($validated);
+        @@@ model_helper @@@::addEntity($validated, @@@ cntxt_request @@@);
 
         return to_route(@@@ model_route @@@, @@@ cntxt_route_param_store @@@);
     }

@@ -43,7 +43,7 @@ class @@@ model_helper @@@
             ->appends(['sort' => $sortDir]);
     }
 
-    public static function addEntity(array $validated)
+    public static function addEntity(array $validated, @@@ declare_cntxt_var @@@)
     {
         return LogActivityHelper::create(function () use ($validated) {
             @@@ store_data @@@

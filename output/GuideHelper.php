@@ -61,7 +61,6 @@ use ContactContext;
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
-'languageName' => $item->language_name,
                 ];
             })
             ->appends(['row-count' => $rowCount])
@@ -70,7 +69,7 @@ use ContactContext;
             ->appends(['sort' => $sortDir]);
     }
 
-    public static function addEntity(array $validated)
+    public static function addEntity(array $validated, int $contactId)
     {
         return LogActivityHelper::create(function () use ($validated) {
             return Guide::create([
@@ -81,7 +80,7 @@ use ContactContext;
 'dob' => Utils::parseDate($validated['dob']),
 'active' => $validated['active'],
 'language_id' => $validated['languageId'],
-'contact_id' => request('contactId'),
+'contact_id' => $contactId,
 ]);
         });
     }

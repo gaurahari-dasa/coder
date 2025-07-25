@@ -38,7 +38,7 @@ class GuideController extends Controller
 'active' => '',
 'languageId' => '',
         ]);
-        GuideHelper::addEntity($validated);
+        GuideHelper::addEntity($validated, request('contactId'));
 
         return to_route('guides', [
             'contact' => request('contactId')
