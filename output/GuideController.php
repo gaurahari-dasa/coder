@@ -18,10 +18,10 @@ class GuideController extends Controller
             'menus' => MenuHelper::list(),
             'privileges' => UserHelper::privileges(request()->user(), 'contacts'),
             'guides' => GuideHelper::paginate($contactId),
-'contactId' => $contactId,
+            'contactId' => $contactId,
     'contact' => GuideHelper::contactDetails(),
 'languages' => HelperClass::list()->get(),
-            'searchKey' => request('search-key'),
+'searchKey' => request('search-key'),
             'sortField' => request('sort-field'),
             'sortDir' => request('sort'),
         ]);

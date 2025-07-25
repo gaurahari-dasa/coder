@@ -359,6 +359,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             )
         for lookup in self.lookup_props:
             print(f"'{lookup}' => HelperClass::list()->get(),", file=output)
+        print(file=output)
         return output
 
     def generate_controller_validation(self):

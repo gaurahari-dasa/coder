@@ -9,7 +9,7 @@ class GuideHelper
 {
 use ContactContext;
 
-    public static function listAll($sortField = null, $sortDir = null)
+    public static function listAll(?string $sortField = null, ?string $sortDir = null)
     {
         if ($sortField === 'id') {
                 $sortField = 'guide_id';
@@ -18,7 +18,7 @@ use ContactContext;
         return Guide
             ::orderBy($sortField ?? 'guides.name', $sortDir ?? 'asc')
             ->join('languages', 'guides.language_id', '=', 'languages.language_id')
-            ->select(
+->select(
                 'guides.guide_id',
 'guides.name',
 'guides.email',
@@ -70,7 +70,7 @@ use ContactContext;
             ->appends(['sort' => $sortDir]);
     }
 
-    public static function addEntity($validated)
+    public static function addEntity(array $validated)
     {
         return LogActivityHelper::create(function () use ($validated) {
             return Guide::create([

@@ -187,6 +187,7 @@ class SelectData:
                     f"->join('{foreign_table}', '{self.model_table}.{field.name}', '=', '{foreign_table}.{ref_key}')",
                     file=output,
                 )
+        print(file=output)
         return output
 
     def generate_select_data(self):
