@@ -100,6 +100,7 @@ function loadSpec() {
         newField.searchable = field.searchable;
         newField.sortable = field.sortable;
         newField.sortOrdinal = field.sortOrdinal;
+        newField.outputSpecs = field.outputSpecs;
         newTable.fields.push(newField);
         if (field.outputted) {
           cards.value.push({
@@ -221,6 +222,11 @@ function matchTitle(field) {
               </div>
               <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
                 :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+              <template v-if="field.outputSpecs">
+                <FormInput title="Type" :id="`outputSpecs-type-${ix}-${field.name}`" v-model="field.outputSpecs.type" />
+                <FormInput title="Title" :id="`outputSpecs-title-${ix}-${field.name}`"
+                  v-model="field.outputSpecs.title" />
+              </template>
             </div>
             <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
               <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
