@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask import request
 import main
 import sections
 
@@ -23,6 +24,7 @@ def read_spec():
 
 @app.post('/generate')
 def generate():
+    #main.save(request.json)
     main.generate()
     main.hydrate()
     return ''

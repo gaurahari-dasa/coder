@@ -21,11 +21,11 @@ def read_sections():
             if matched:
                 match (matched.group(1)):
                     case "SelectData":
-                        sections.set(SelectData(matched.group(2)), "SelectData")
+                        sections.set(SelectData(matched.group(2)))
                     case "Model":
-                        sections.set(Model(matched.group(2)), "Model")
+                        sections.set(Model(matched.group(2)))
                     case "Routes":
-                        sections.set(Routes(matched.group(2)), "Routes")
+                        sections.set(Routes(matched.group(2)))
                     case _:
                         print("section: <", matched.group(1), ">", sep="")
                         continue
@@ -56,6 +56,6 @@ def hydrate():
         section.hydrate()
 
 
-# for section in sections:
-#     if gen := section.generate():
-#         output.write(gen.getvalue())
+def save(json):
+    model = json['model']
+    sections.set(Model(f'{model['name']}, {model['cntxtName']}'))

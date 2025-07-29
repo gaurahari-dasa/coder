@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import FormInput from './components/FormInput.vue';
 import FormButton from './components/FormButton.vue';
@@ -32,9 +32,12 @@ class Field {
   morphSpecs = null;
   foreign = null;
   fillable = null;
+  inputSpecs = null;
   searchable = null;
   sortable = null;
   sortOrdinal = null;
+  outputted = null;
+  outputSpecs = null;
   tabs = [
     { name: 'Refer', href: '#', current: false },
     { name: 'Input', href: '#', current: true },
@@ -56,17 +59,20 @@ class Table {
     }
   }
 };
-const tables = ref([]);
-watchEffect(() => {
-  for (const table of tables.value) {
-    const fieldNames = new Set();
-    for (const field of table.fields) {
-      const name = field.alias?.length > 0 ? field.alias : field.name;
-      field.duped = fieldNames.has(name);
-      fieldNames.add(name);
-    }
-  }
-});
+function addTable() {
+  selectData.value.tables.push(new Table());
+}
+let tables = [];
+// watchEffect(() => {
+//   for (const table of tables.value) {
+//     const fieldNames = new Set();
+//     for (const field of table.fields) {
+//       const name = field.alias?.length > 0 ? field.alias : field.name;
+//       field.duped = fieldNames.has(name);
+//       fieldNames.add(name);
+//     }
+//   }
+// });
 
 const cards = ref([]);
 
@@ -74,59 +80,50 @@ function loadSpec() {
   fetch('http://localhost:5000/read-spec', {
     'method': 'GET'
   }).then(resp => resp.json()).then(t => {
-    model.value.name = t.model.name;
-    model.value.cntxtName = t.model.cntxtName;
-    routes.value.entityUrl = t.routes.entityUrl;
-    routes.value.entityRouteName = t.routes.entityRouteName;
-    routes.value.cntxtUrl = t.routes.cntxtUrl;
-    routes.value.cntxtRouteName = t.routes.cntxtRouteName;
-    selectData.value.entityTableName = t.selectData.entityTableName;
-    selectData.value.entityTablePrimaryKey = t.selectData.entityTablePrimaryKey;
-    selectData.value.cntxtTableName = t.selectData.cntxtTableName;
-    selectData.value.cntxtTablePrimaryKey = t.selectData.cntxtTablePrimaryKey;
-    tables.value.length = 0; // clear existing tables, Haribol
+    model.value = t.model;
+    routes.value = t.routes;
+    selectData.value = t.selectData;
+    tables = selectData.value.tables;
     cards.value.length = 0; // clear column display card array, Haribol
     t.selectData.tables.forEach(table => {
-      const newTable = new Table();
-      newTable.name = table.name;
+      table.selectTabs = Table.prototype.selectTabs;
       table.fields.forEach(field => {
-        const newField = new Field();
-        newField.name = field.name;
-        newField.alias = field.alias;
-        newField.morphSpecs = field.morphSpecs;
-        newField.foreign = field.foreign;
-        newField.fillable = field.fillable;
-        newField.inputSpecs = field.inputSpecs;
-        newField.searchable = field.searchable;
-        newField.sortable = field.sortable;
-        newField.sortOrdinal = field.sortOrdinal;
-        newField.outputSpecs = field.outputSpecs;
-        newTable.fields.push(newField);
         if (field.outputted) {
           cards.value.push({
             name: field.outputSpecs.name,
             index: field.outputSpecs.index,
           });
         }
-      })
-      tables.value.push(newTable);
+        field.tabs = [
+          { name: 'Refer', href: '#', current: false },
+          { name: 'Input', href: '#', current: true },
+          { name: 'Display', href: '#', current: false },
+          { name: 'Morph', href: '#', current: false },
+        ];
+        field.selectTab = Field.prototype.selectTab;
+      });
     });
   });
 }
 
 function generate() {
+  //TODO: send column display order.
   fetch('http://localhost:5000/generate', {
-    'method': 'POST'
+    method: 'POST',
+    body: JSON.stringify({
+      model: model.value,
+      routes: routes.value,
+      selectData: selectData.value,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   }).then(resp => alert('Generated'))
     .catch(rea => alert('Not generated: ' + rea));
 }
 
 function isPrimaryTable(tblname) {
   return tblname == selectData.value.entityTableName;
-}
-
-function makeFillable(field, checked) {
-  field.inputSpecs = checked ? {} : null;
 }
 
 function optionTitle(field) {
@@ -194,7 +191,7 @@ function matchTitle(field) {
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
-                  v-model="field.fillable" @changed="makeFillable(field, $event.checked)" />
+                  v-model="field.fillable" @changed="field.inputSpecs = $event.checked ? {} : null" />
                 <template v-if="field.inputSpecs">
                   <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${field.name}`"
                     v-model="field.inputSpecs.required" />
@@ -214,16 +211,22 @@ function matchTitle(field) {
               </template>
             </div>
             <div v-show="field.tabs[2].current" class="grid grid-cols-5 gap-4">
-              <div class="grid grid-cols-2">
-                <FormCheckbox title="Searchable" :id="`searchable-${ix}-${field.name}`"
-                  :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-                <FormCheckbox title="Sortable" :id="`sortable-${ix}-${field.name}`"
-                  :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+              <div class="grid grid-cols-3">
+                <FormCheckbox title="Show" :id="`outputted-${ix}-${field.name}`" v-model="field.outputted"
+                  @changed="field.outputSpecs = $event.checked ? {} : null" />
+                <div class="grid grid-cols-2 col-span-2" v-show="field.outputted">
+                  <FormCheckbox title="Search" :id="`searchable-${ix}-${field.name}`"
+                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
+                  <FormCheckbox title="Sort" :id="`sortable-${ix}-${field.name}`"
+                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+                </div>
               </div>
-              <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`sort-ordinal-${ix}-${field.name}`"
+              <FormInput v-show="field.outputted" inputType="number" :min="0" title="Sort Ordinal"
+                :id="`sort-ordinal-${ix}-${field.name}`"
                 :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
               <template v-if="field.outputSpecs">
-                <FormInput title="Type" :id="`outputSpecs-type-${ix}-${field.name}`" v-model="field.outputSpecs.type" />
+                <FormSelect title="Type" :id="`outputSpecs-type-${ix}-${field.name}`" v-model="field.outputSpecs.type"
+                  :options="[null, 'ActiveColumn', 'CurrencyColumn', 'DataColumn', 'DateColumn', 'ImageColumn']" />
                 <FormInput title="Title" :id="`outputSpecs-title-${ix}-${field.name}`"
                   v-model="field.outputSpecs.title" />
               </template>
@@ -239,6 +242,7 @@ function matchTitle(field) {
     <CardArray class="mt-4" :cards />
     <FormButton title="Load Spec" @click="loadSpec()" />
     <FormButton title="Generate" @click="generate()" />
+    <FormButton title="Add" @click="addTable()" />
     <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->
   </div>
 </template>
