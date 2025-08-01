@@ -249,7 +249,7 @@ class SelectData:
                             "Inputting primary key field 'id' is not supported, Haribol!"
                         )
                     print_field("id")
-                if field.fillable or field.outputted:
+                if field.fillable or field.outputted or self.ui.refers(utils.camel_case(alias)):
                     print_field(utils.camel_case(alias))
         return output
 

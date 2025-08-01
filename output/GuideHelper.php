@@ -61,6 +61,7 @@ use ContactContext;
 'dob' => Utils::formatDateJs($item->dob, DateFormatJs::OnlyDate),
 'active' => $item->active,
 'languageId' => $item->language_id,
+'languageName' => $item->language_name,
                 ];
             })
             ->appends(['row-count' => $rowCount])

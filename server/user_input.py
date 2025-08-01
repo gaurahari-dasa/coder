@@ -189,12 +189,8 @@ class UserInput:
 
     def generate_control(self, field: Field, output):
         match field.type:
-            case "text":
-                self.generate_text_input(field, output)
-            case "email":
-                self.generate_email_input(field, output)
-            case "date":
-                self.generate_date_input(field, output)
+            case "text" | "email" | "date" | "datetime-local":
+                self.generate_typed_input(field, output, field.type)
             case "select":
                 self.generate_select_input(field, output)
             case "checkbox":
@@ -468,6 +464,9 @@ import FormGuard from '../../components/FormGuard.vue';""",
         return grid_column in map(
             lambda v: v.name, filter(lambda v: v.sortable(), self.grid_columns.values())
         )
+
+    def refers(self, name: str):
+        return any((lambda x: x.match_value == name)(x) for x in self.fields.values())
 
     def input_specs(self, name: str):
         field = self.fields[name]

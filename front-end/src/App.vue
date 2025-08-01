@@ -63,6 +63,12 @@ function addTable() {
   selectData.value.tables.push(new Table());
 }
 let tables = [];
+function listColumns() {
+  const params = new URLSearchParams();
+  params.append('name', 'workshop_registrations');
+  params.append('cntxt_name', 'contacts');
+  fetch(`http://localhost:5000/list-columns?${params}`).then(resp => resp.json()).then(json => console.log(json))
+}
 // watchEffect(() => {
 //   for (const table of tables.value) {
 //     const fieldNames = new Set();
@@ -201,7 +207,7 @@ function matchTitle(field) {
               </div>
               <template v-if="field.inputSpecs">
                 <FormSelect title="Type" :id="`inputspecs-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
-                  :options="[null, 'text', 'email', 'date', 'select', 'checkbox', 'file', 'auto']" />
+                  :options="[null, 'text', 'email', 'date', 'datetime-local', 'select', 'checkbox', 'file', 'auto']" />
                 <FormInput title="Title" :id="`inputspecs-title-${ix}-${field.name}`"
                   v-model="field.inputSpecs.title" />
                 <FormInput :title="optionTitle(field)" :id="`inputspecs-options-${ix}-${field.name}`"
@@ -243,6 +249,7 @@ function matchTitle(field) {
     <FormButton title="Load Spec" @click="loadSpec()" />
     <FormButton title="Generate" @click="generate()" />
     <FormButton title="Add" @click="addTable()" />
+    <FormButton title="List Columns" @click="listColumns()" />
     <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->
   </div>
 </template>

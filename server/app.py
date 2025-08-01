@@ -22,9 +22,15 @@ def read_spec():
         "selectData": sections.ix("SelectData").jsonify(),
     }
 
-@app.post('/generate')
+
+@app.route("/list-columns")
+def list_columns():
+    return main.list_columns(request.args["name"], request.args["cntxt_name"])
+
+
+@app.post("/generate")
 def generate():
-    #main.save(request.json)
+    # main.save(request.json)
     main.generate()
     main.hydrate()
-    return ''
+    return ""
