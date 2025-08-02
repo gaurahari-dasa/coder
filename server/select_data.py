@@ -249,7 +249,11 @@ class SelectData:
                             "Inputting primary key field 'id' is not supported, Haribol!"
                         )
                     print_field("id")
-                if field.fillable or field.outputted or self.ui.refers(utils.camel_case(alias)):
+                if (
+                    field.fillable
+                    or field.outputted
+                    or self.ui.refers(utils.camel_case(alias))
+                ):
                     print_field(utils.camel_case(alias))
         return output
 
@@ -355,7 +359,7 @@ class SelectData:
     def generate_model_props(self):
         output = io.StringIO()
         arg = (
-            "" if not self.cntxt_table else "$" + self.cntxt_id()
+            "" if not self.cntxt_table else f"${self.cntxt_id()}"
         )  # same as checking 'not self.foreign_key', Haribol
         print(
             f"'{self.ui.model_props}' => {self.model.name}Helper::paginate({arg}),",
@@ -387,6 +391,7 @@ class SelectData:
             "use_cntxt_trait": self.generate_use_cntxt_trait().getvalue(),
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_id_variable(),
+            "cntxt_var": f"${self.cntxt_id()}",
             "default_sort_field": self.default_sort_field(),
             "join_clause": self.generate_join_clause().getvalue(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),

@@ -45,7 +45,7 @@ class @@@ model_helper @@@
 
     public static function addEntity(array $validated, @@@ declare_cntxt_var @@@)
     {
-        return LogActivityHelper::create(function () use ($validated) {
+        return LogActivityHelper::create(function () use ($validated, @@@ cntxt_var @@@) {
             @@@ store_data @@@
         });
     }
