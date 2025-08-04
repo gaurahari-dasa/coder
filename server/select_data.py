@@ -7,6 +7,7 @@ import sql_utils
 from model import Model
 from user_input import UserInput
 from routes import Routes
+from validation_error import ValidationError
 
 
 class SelectData:
@@ -185,6 +186,12 @@ class SelectData:
         for field in self.tables[self.model_table]:
             if field.foreign:
                 foreign_table, ref_key = self.find_foreign_table(field.foreign)
+                if not foreign_table:  # equivalent to: not ref_key
+                    raise ValidationError(
+                        "Failed to find referred column, Haribo!",
+                        self.model_table,
+                        field.name,
+                    )
                 print(
                     f"->join('{foreign_table}', '{self.model_table}.{field.name}', '=', '{foreign_table}.{ref_key}')",
                     file=output,

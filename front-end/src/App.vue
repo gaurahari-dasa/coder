@@ -69,16 +69,6 @@ function listColumns() {
   params.append('cntxt_name', 'contacts');
   fetch(`http://localhost:5000/list-columns?${params}`).then(resp => resp.json()).then(json => console.log(json))
 }
-// watchEffect(() => {
-//   for (const table of tables.value) {
-//     const fieldNames = new Set();
-//     for (const field of table.fields) {
-//       const name = field.alias?.length > 0 ? field.alias : field.name;
-//       field.duped = fieldNames.has(name);
-//       fieldNames.add(name);
-//     }
-//   }
-// });
 
 const cards = ref([]);
 
@@ -108,6 +98,20 @@ function loadSpec() {
         ];
         field.selectTab = Field.prototype.selectTab;
       });
+    });
+    watchEffect(() => {
+      const fieldNames = new Set();
+      for (const table of tables) {
+        for (const field of table.fields) {
+          const name = field.alias?.length > 0 ? field.alias : field.name;
+          if (field.fillable || field.outputted) {
+            field.duped = fieldNames.has(name);
+            fieldNames.add(name);
+          } else {
+            field.duped = false;
+          }
+        }
+      }
     });
   });
 }

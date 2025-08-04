@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask import request
 import main
 import sections
+from validation_error import ValidationError
 
 app = Flask(__name__)
 CORS(app)
@@ -34,3 +35,17 @@ def generate():
     main.generate()
     main.hydrate()
     return ""
+
+
+@app.errorhandler(ValidationError)
+def handle_validation_error(error: ValidationError):
+    response = jsonify(
+        {
+            "message": error.message,
+            "table_name": error.table_name,
+            "back_name": error.back_name,
+            "field_name": error.field_name,
+        }
+    )
+    response.status_code = 422
+    return response
