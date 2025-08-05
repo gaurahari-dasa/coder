@@ -188,7 +188,7 @@ class SelectData:
                 foreign_table, ref_key = self.find_foreign_table(field.foreign)
                 if not foreign_table:  # equivalent to: not ref_key
                     raise ValidationError(
-                        "Failed to find referred column, Haribo!",
+                        "Failed to find referred column, Haribol!",
                         self.model_table,
                         field.name,
                     )

@@ -28,7 +28,6 @@ const selectData = ref({
 class Field {
   name = null;
   alias = null;
-  duped = null;
   morphSpecs = null;
   foreign = null;
   fillable = null;
@@ -67,7 +66,8 @@ function listColumns() {
   const params = new URLSearchParams();
   params.append('name', 'workshop_registrations');
   params.append('cntxt_name', 'contacts');
-  fetch(`http://localhost:5000/list-columns?${params}`).then(resp => resp.json()).then(json => console.log(json))
+  fetch(`http://localhost:5000/list-columns?${params}`).
+    then(resp => resp.json()).then(json => console.log(json))
 }
 
 const cards = ref([]);
@@ -105,15 +105,26 @@ function loadSpec() {
         for (const field of table.fields) {
           const name = field.alias?.length > 0 ? field.alias : field.name;
           if (field.fillable || field.outputted) {
-            field.duped = fieldNames.has(name);
+            field.error = fieldNames.has(name) ? 'Duplicated!' : null;
             fieldNames.add(name);
           } else {
-            field.duped = false;
+            field.error = null;
           }
         }
       }
     });
   });
+}
+
+function setError(error) {
+  for (var table of tables) {
+    if (table.name == error.table_name) {
+      for (var field of table.fields) {
+        field.error = field.name === error.back_name ? error.message : '';
+      }
+    }
+  }
+  console.error(error);
 }
 
 function generate() {
@@ -128,7 +139,16 @@ function generate() {
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then(resp => alert('Generated'))
+  }).then(resp => {
+    if (resp.ok) {
+      alert('Generated');
+    } else {
+      if (resp.status == 422) {
+        resp.json().then(j => setError(j));
+        alert('There were errors, Haribol!');
+      }
+    }
+  })
     .catch(rea => alert('Not generated: ' + rea));
 }
 
@@ -185,66 +205,63 @@ function matchTitle(field) {
     <div v-for="(table, ix) in tables">
       <h5 class="mt-8 font-semibold">Table {{ ix + 1 }}<span class="italic ml-1"
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
-      <FormInput title="Table Name" :id="`${table.name}-${ix}`" v-model="table.name" />
+      <FormInput title="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
       <div class="mt-8 space-y-8">
-        <div v-for="field in table.fields" class="grid grid-cols-8 gap-4">
-          <div class="relative">
-            <FormInput title="Field Name" :id="`field-name-${ix}-${field.name}`" v-model="field.name" />
-            <span v-if="field.duped" class="bg-red-500 absolute top-1 right-1 text-xs text-gray-100 p-0.5">duped</span>
-          </div>
-          <FormInput title="Field Alias" :id="`field-alias-${ix}-${field.name}`" v-model="field.alias" />
+        <div v-for="(field, iy) in table.fields" class="relative grid grid-cols-8 gap-x-4">
+          <FormInput title="Field Name" :id="`field-name-${ix}-${iy}`" v-model="field.name" />
+          <FormInput title="Field Alias" :id="`field-alias-${ix}-${iy}`" v-model="field.alias" />
           <div class="col-start-3 col-end-9">
             <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
             <div v-show="field.tabs[0].current" class="grid grid-cols-6 gap-4">
-              <FormInput title="Foreign Key" :id="`foreign-${ix}-${field.name}`" v-model="field.foreign" />
+              <FormInput title="Foreign Key" :id="`foreign-${ix}-${iy}`" v-model="field.foreign" />
             </div>
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
-                <FormCheckbox title="Fill" :id="`fillable-${ix}-${field.name}`" :disabled="!isPrimaryTable(table.name)"
+                <FormCheckbox title="Fill" :id="`fillable-${ix}-${iy}`" :disabled="!isPrimaryTable(table.name)"
                   v-model="field.fillable" @changed="field.inputSpecs = $event.checked ? {} : null" />
                 <template v-if="field.inputSpecs">
-                  <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${field.name}`"
+                  <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${iy}`"
                     v-model="field.inputSpecs.required" />
-                  <FormRadio title="Focus" :id="`inputspecs-focus-${ix}-${field.name}`" :name="`${table.name}-focus`"
+                  <FormRadio title="Focus" :id="`inputspecs-focus-${ix}-${iy}`" :name="`${table.name}-focus`"
                     :checked="field.inputSpecs.focus" />
                 </template>
               </div>
               <template v-if="field.inputSpecs">
-                <FormSelect title="Type" :id="`inputspecs-type-${ix}-${field.name}`" v-model="field.inputSpecs.type"
+                <FormSelect title="Type" :id="`inputspecs-type-${ix}-${iy}`" v-model="field.inputSpecs.type"
                   :options="[null, 'text', 'email', 'date', 'datetime-local', 'select', 'checkbox', 'file', 'auto']" />
-                <FormInput title="Title" :id="`inputspecs-title-${ix}-${field.name}`"
-                  v-model="field.inputSpecs.title" />
-                <FormInput :title="optionTitle(field)" :id="`inputspecs-options-${ix}-${field.name}`"
+                <FormInput title="Title" :id="`inputspecs-title-${ix}-${iy}`" v-model="field.inputSpecs.title" />
+                <FormInput :title="optionTitle(field)" :id="`inputspecs-options-${ix}-${iy}`"
                   v-model="field.inputSpecs.options" />
-                <FormInput :title="matchTitle(field)" :id="`inputspecs-match-value-${ix}-${field.name}`"
+                <FormInput :title="matchTitle(field)" :id="`inputspecs-match-value-${ix}-${iy}`"
                   v-model="field.inputSpecs.matchValue" />
               </template>
             </div>
             <div v-show="field.tabs[2].current" class="grid grid-cols-5 gap-4">
               <div class="grid grid-cols-3">
-                <FormCheckbox title="Show" :id="`outputted-${ix}-${field.name}`" v-model="field.outputted"
+                <FormCheckbox title="Show" :id="`outputted-${ix}-${iy}`" v-model="field.outputted"
                   @changed="field.outputSpecs = $event.checked ? {} : null" />
                 <div class="grid grid-cols-2 col-span-2" v-show="field.outputted">
-                  <FormCheckbox title="Search" :id="`searchable-${ix}-${field.name}`"
+                  <FormCheckbox title="Search" :id="`searchable-${ix}-${iy}`"
                     :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-                  <FormCheckbox title="Sort" :id="`sortable-${ix}-${field.name}`"
+                  <FormCheckbox title="Sort" :id="`sortable-${ix}-${iy}`"
                     :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
                 </div>
               </div>
               <FormInput v-show="field.outputted" inputType="number" :min="0" title="Sort Ordinal"
-                :id="`sort-ordinal-${ix}-${field.name}`"
-                :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortOrdinal" />
+                :id="`sort-ordinal-${ix}-${iy}`" :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)"
+                v-model="field.sortOrdinal" />
               <template v-if="field.outputSpecs">
-                <FormSelect title="Type" :id="`outputSpecs-type-${ix}-${field.name}`" v-model="field.outputSpecs.type"
+                <FormSelect title="Type" :id="`outputSpecs-type-${ix}-${iy}`" v-model="field.outputSpecs.type"
                   :options="[null, 'ActiveColumn', 'CurrencyColumn', 'DataColumn', 'DateColumn', 'ImageColumn']" />
-                <FormInput title="Title" :id="`outputSpecs-title-${ix}-${field.name}`"
-                  v-model="field.outputSpecs.title" />
+                <FormInput title="Title" :id="`outputSpecs-title-${ix}-${iy}`" v-model="field.outputSpecs.title" />
               </template>
             </div>
             <div v-show="field.tabs[3].current" class="grid grid-cols-6 gap-4">
-              <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${field.name}`" v-model="field.morphSpecs" />
+              <FormInput title="Morph Specs" :id="`morph-specs-${ix}-${iy}`" v-model="field.morphSpecs" />
             </div>
           </div>
+          <span v-show="field.error" class="col-span-2 bg-red-500 text-gray-100 p-0.5 text-xs absolute bottom-0 left-0"
+            :id="`error-field-name-${ix}-${iy}`">{{ field.error }}</span>
         </div>
       </div>
     </div>
