@@ -9,6 +9,8 @@ import FormSelect from './components/FormSelect.vue';
 import FormRadio from './components/FormRadio.vue';
 import CardArray from './components/CardArray.vue';
 
+const baseUrl = 'http://localhost:5000';
+
 const model = ref({
   name: null,
   cntxtName: null
@@ -62,18 +64,18 @@ function addTable() {
   selectData.value.tables.push(new Table());
 }
 let tables = [];
-function listColumns() {
-  const params = new URLSearchParams();
-  params.append('name', 'workshop_registrations');
-  params.append('cntxt_name', 'contacts');
-  fetch(`http://localhost:5000/list-columns?${params}`).
-    then(resp => resp.json()).then(json => console.log(json))
-}
+// function listColumns() {
+//   const params = new URLSearchParams();
+//   params.append('name', 'workshop_registrations');
+//   params.append('cntxt_name', 'contacts');
+//   fetch(`${baseUrl}/list-columns?${params}`).
+//     then(resp => resp.json()).then(json => console.log(json))
+// }
 
 const cards = ref([]);
 
 function loadSpec() {
-  fetch('http://localhost:5000/read-spec', {
+  fetch(`${baseUrl}/read-spec`, {
     'method': 'GET'
   }).then(resp => resp.json()).then(t => {
     model.value = t.model;
@@ -116,6 +118,44 @@ function loadSpec() {
   });
 }
 
+function reflectContextTable() {
+  const cntxtModel = model.value.cntxtName?.trim();
+  if (cntxtModel) {
+    const params = new URLSearchParams();
+    params.append('name', cntxtModel)
+    fetch(`${baseUrl}/reflect/table?${params}`)
+      .then(resp => {
+        if (resp.ok) {
+          resp.json().then(t => {
+            // if (resp.status == 200) {
+            selectData.value.cntxtTableName = t.table;
+            selectData.value.cntxtTablePrimaryKey = t.primaryKey;
+            // }
+          });
+        } else {
+          resp.json().then(t => alert(t.message));
+        }
+      }).catch(e => console.error(e));
+  }
+}
+
+function reflect() {
+  reflectContextTable();
+  const params = new URLSearchParams();
+  params.append('name', model.value.name);
+  fetch(`${baseUrl}/reflect/fields?${params}`).
+    then(resp => {
+      if (resp.ok) {
+        resp.json().then(t => {
+          selectData.value.entityTableName = t.table;
+          selectData.value.entityTablePrimaryKey = t.primaryKey;
+        });
+      } else {
+        resp.json().then(t => alert(t.message));
+      }
+    }).catch(e => console.error(e));
+}
+
 function setError(error) {
   for (var table of tables) {
     if (table.name == error.table_name) {
@@ -129,7 +169,7 @@ function setError(error) {
 
 function generate() {
   //TODO: send column display order.
-  fetch('http://localhost:5000/generate', {
+  fetch(`${baseUrl}/generate`, {
     method: 'POST',
     body: JSON.stringify({
       model: model.value,
@@ -186,6 +226,7 @@ function matchTitle(field) {
         <FormInput title="Context Class" id="ctxt" v-model="model.cntxtName" />
         <p class="text-xs absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
       </div>
+      <FormButton title="Fetch" @click="reflect" />
     </div>
     <h3 class="mt-4 font-bold text-lg">Routes</h3>
     <div class="grid grid-cols-4 gap-4">

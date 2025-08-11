@@ -1,12 +1,20 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-from flask import request
 import main
+import json
 import sections
+import requests
+
+# import schema_server
 from validation_error import ValidationError
 
 app = Flask(__name__)
 CORS(app)
+with open("sql.json") as f:
+    config = json.load(f)
+
+
+# schema_port = schema_server.run()
 
 
 @app.route("/")
@@ -49,3 +57,33 @@ def handle_validation_error(error: ValidationError):
     )
     response.status_code = 422
     return response
+
+
+@app.route("/reflect/table")
+def reflect_table():
+    # resp = requests.get(f"http://localhost:{schema_port}")
+    table = requests.get(
+        url=f"{config['reflectorUrl']}/api/v1/reflect/table/{request.args["name"]}",
+        headers={"Accept": "application/json"},
+    )
+    return Response(
+        response=table.content,
+        status=table.status_code,
+        content_type="application/json",
+    )
+
+
+@app.route("/reflect/fields")
+def reflect_fields():
+    # resp = requests.get(f"http://localhost:{schema_port}")
+    params = {"table": request.args.get("table")}
+    fields = requests.get(
+        url=f"{config['reflectorUrl']}/api/v1/reflect/fields/{request.args["name"]}",
+        headers={"Accept": "application/json"},
+        params={key: value for key, value in params.items() if key is not None},
+    )
+    return Response(
+        response=fields.content,
+        status=fields.status_code,
+        content_type="application/json",
+    )
