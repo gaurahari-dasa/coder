@@ -80,7 +80,7 @@ def reflect_fields():
     fields = requests.get(
         url=f"{config['reflectorUrl']}/api/v1/reflect/fields/{request.args["name"]}",
         headers={"Accept": "application/json"},
-        params={key: value for key, value in params.items() if key is not None},
+        params={key: value for key, value in params.items() if value is not None},
     )
     return Response(
         response=fields.content,

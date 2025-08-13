@@ -25,9 +25,12 @@ const selectData = ref({
   entityTableName: null,
   entityTablePrimaryKey: null,
   cntxtTableName: null,
-  cntxtTablePrimaryKey: null
+  cntxtTablePrimaryKey: null,
 });
 class Field {
+  constructor(name = null) {
+    this.name = name;
+  }
   name = null;
   alias = null;
   morphSpecs = null;
@@ -52,6 +55,9 @@ class Field {
   }
 };
 class Table {
+  constructor(name = null) {
+    this.name = name;
+  }
   name = null;
   fields = [];
   selectTabs(tabName) {
@@ -80,9 +86,6 @@ function loadSpec() {
   }).then(resp => resp.json()).then(t => {
     model.value = t.model;
     routes.value = t.routes;
-    selectData.value = t.selectData;
-    tables = selectData.value.tables;
-    cards.value.length = 0; // clear column display card array, Haribol
     t.selectData.tables.forEach(table => {
       table.selectTabs = Table.prototype.selectTabs;
       table.fields.forEach(field => {
@@ -100,6 +103,9 @@ function loadSpec() {
         ];
         field.selectTab = Field.prototype.selectTab;
       });
+      selectData.value = t.selectData;
+      tables = selectData.value.tables;
+      cards.value.length = 0; // clear column display card array, Haribol
     });
     watchEffect(() => {
       const fieldNames = new Set();
@@ -118,37 +124,65 @@ function loadSpec() {
   });
 }
 
-function reflectContextTable() {
+async function reflectContextTable() {
   const cntxtModel = model.value.cntxtName?.trim();
   if (cntxtModel) {
     const params = new URLSearchParams();
     params.append('name', cntxtModel)
-    fetch(`${baseUrl}/reflect/table?${params}`)
-      .then(resp => {
-        if (resp.ok) {
-          resp.json().then(t => {
-            // if (resp.status == 200) {
-            selectData.value.cntxtTableName = t.table;
-            selectData.value.cntxtTablePrimaryKey = t.primaryKey;
-            // }
-          });
-        } else {
-          resp.json().then(t => alert(t.message));
-        }
-      }).catch(e => console.error(e));
+    try {
+      const resp = await fetch(`${baseUrl}/reflect/table?${params}`);
+      if (resp.ok) {
+        const t = await resp.json();
+        selectData.value.cntxtTableName = t.table;
+        selectData.value.cntxtTablePrimaryKey = t.primaryKey;
+      } else {
+        resp.json().then(t => alert(t.message));
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 
-function reflect() {
-  reflectContextTable();
+async function reflectTable() {
+  await reflectContextTable();
+  reflectFields();
+}
+
+function fillTables(fields) {
+  selectData.value.tables = []; // clear array, Haribol
+  tables = selectData.value.tables;
+  const tableMap = new Map();
+  for (const field of fields) {
+    const [key, value] = field.split('.');
+    if (key == selectData.value.cntxtTableName) {
+      continue;
+    }
+    let table = null;
+    if (!tableMap.has(key)) {
+      table = new Table(key);
+      tables.push(table);
+      tableMap.set(key, table);
+    } else {
+      table = tableMap.get(key);
+    }
+    table.fields.push(new Field(value));
+  }
+}
+
+function reflectFields() {
   const params = new URLSearchParams();
   params.append('name', model.value.name);
+  if (selectData.value.entityTableName) {
+    params.append('table', selectData.value.entityTableName);
+  }
   fetch(`${baseUrl}/reflect/fields?${params}`).
     then(resp => {
       if (resp.ok) {
         resp.json().then(t => {
           selectData.value.entityTableName = t.table;
           selectData.value.entityTablePrimaryKey = t.primaryKey;
+          fillTables(t.fields);
         });
       } else {
         resp.json().then(t => alert(t.message));
@@ -226,7 +260,7 @@ function matchTitle(field) {
         <FormInput title="Context Class" id="ctxt" v-model="model.cntxtName" />
         <p class="text-xs absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
       </div>
-      <FormButton title="Fetch" @click="reflect" />
+      <FormButton title="Fetch" @click="reflectTable" />
     </div>
     <h3 class="mt-4 font-bold text-lg">Routes</h3>
     <div class="grid grid-cols-4 gap-4">
@@ -237,7 +271,10 @@ function matchTitle(field) {
     </div>
     <h3 class="mt-4 font-bold text-lg">Select Data</h3>
     <div class="grid grid-cols-4 gap-4">
-      <FormInput title="Entity Table name" id="entity-table-name" v-model="selectData.entityTableName" />
+      <div>
+        <FormInput title="Entity Table name" id="entity-table-name" v-model="selectData.entityTableName" />
+        <FormButton title="Fetch" @click="reflectFields" />
+      </div>
       <FormInput title="Entity Table primary_key" id="entity-table-pk" v-model="selectData.entityTablePrimaryKey" />
       <FormInput title="Context Table name" id="ctxt-table-name" v-model="selectData.cntxtTableName" />
       <FormInput title="Context Table primary_key" id="ctxt-table-pk" v-model="selectData.cntxtTablePrimaryKey" />
@@ -259,7 +296,7 @@ function matchTitle(field) {
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${iy}`" :disabled="!isPrimaryTable(table.name)"
-                  v-model="field.fillable" @changed="field.inputSpecs = $event.checked ? {} : null" />
+                  v-model="field.fillable" @changed="field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)" />
                 <template v-if="field.inputSpecs">
                   <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${iy}`"
                     v-model="field.inputSpecs.required" />
