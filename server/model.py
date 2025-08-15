@@ -3,6 +3,7 @@ import io
 
 import utils
 import sections
+import config
 
 
 class Model:
@@ -56,6 +57,20 @@ class Model:
         ("*** Model: casts method ***", generate_casts_method),
     ]
 
+    def generate_assign_table_keys(self):
+        output = io.StringIO()
+        key = config.model["created_at"]
+        if key != "created_at":
+            print(f"const CREATED_AT = '{key}';", file=output)
+        key = config.model["updated_at"]
+        if key != "updated_at":
+            print(f"const UPDATED_AT = '{key}';", file=output)
+        if self.primary_key != "id":
+            if output.getvalue():
+                print()
+            print(f"protected $primaryKey = '{self.primary_key}';\n", file=output)
+        return output
+
     def generate(self):
         for func in self.funcs:
             print(func[0], file=self.output)
@@ -71,7 +86,7 @@ class Model:
         output = open(f"output/{self.name}.php", "wt")
         repo = {
             "model": self.name,
-            "primary_key": self.primary_key,
+            "assign_table_keys": self.generate_assign_table_keys().getvalue(),
             "fillable": self.generate_fillable().getvalue(),
             "casts_method": self.generate_casts_method().getvalue(),
         }

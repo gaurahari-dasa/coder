@@ -7,8 +7,7 @@ use App\Models\@@@ model @@@;
 class @@@ model_helper @@@
 {@@@ use_cntxt_trait @@@
     public static function listAll(?string $sortField = null, ?string $sortDir = null)
-    {
-        @@@ if_sort_by_id @@@
+    {@@@ if_sort_by_id @@@
         return @@@ model @@@
             ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
             @@@ join_clause @@@->select(

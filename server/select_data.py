@@ -79,7 +79,10 @@ class SelectData:
         self.routes: Routes = sections.ix("Routes")
 
     def parse_specs(
-        self, field_name: str, back_name: str, specs: str, model_owned: bool
+        self,
+        field_name: str,
+        back_name: str,
+        specs: str,
     ):
         morph_specs = None
         qualities = None  # search / sort, Haribol
@@ -120,10 +123,8 @@ class SelectData:
                             )
                         else:
                             utils.warn("Unheard specs type, Haribol")
-        if (
-            fillable and model_owned
-        ):  # TODO: disallow non-model field specs in the future - and remove the model_owned condition
-            self.model.append_field(field_name)
+        if fillable:
+            self.model.append_field(back_name)
         return (morph_specs, qualities, fillable, foreign, outputted)
 
     def append(self, line: str):
@@ -156,7 +157,6 @@ class SelectData:
                         alias if alias else name,
                         name,
                         matched.group(3),
-                        self.cur_table == self.model_table,
                     ),
                 )
             )
@@ -306,13 +306,15 @@ class SelectData:
 
     def generate_sort_by_id(self):
         output = io.StringIO()
-        print(
-            f"""if ($sortField === 'id') {{
-                $sortField = '{self.primary_key}';
-        }}
-            """,
-            file=output,
-        )
+        if self.primary_key != "id":
+            print(
+                f"""
+                if ($sortField === 'id') {{
+                    $sortField = '{self.primary_key}';
+                }}
+                """,
+                file=output,
+            )
         return output
 
     funcs = [
@@ -398,7 +400,7 @@ class SelectData:
             "use_cntxt_trait": self.generate_use_cntxt_trait().getvalue(),
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_id_variable(),
-            "cntxt_var": f"${self.cntxt_id()}",
+            "cntxt_var": f"${self.cntxt_id()}" if self.cntxt_table else "",
             "default_sort_field": self.default_sort_field(),
             "join_clause": self.generate_join_clause().getvalue(),
             "if_sort_by_id": self.generate_sort_by_id().getvalue(),
