@@ -26,12 +26,12 @@ class Routes:
 
     def generate(self):
         output = io.StringIO()
-        print("*** Model: fillable ***", file=output)
-        try:
-            output.write(self.generate_fillable().getvalue())
-        except Exception as ex:
-            utils.warn(ex)
-        print("******\n", file=output)
+        # print("*** Model: fillable ***", file=output)
+        # try:
+        #     output.write(self.generate_fillable().getvalue())
+        # except Exception as ex:
+        #     utils.warn(ex)
+        # print("******\n", file=output)
         return output
 
     def hydrate(self):

@@ -3,10 +3,10 @@ import mysql.connector
 import utils
 from config import connect, config
 
-disable = config["disable"]
+check_db = config["check_db"]
 # connect = config["connect"]
 
-if not disable:
+if check_db:
     cnx = mysql.connector.connect(
         user=connect["user"],
         password=connect["password"],
@@ -33,7 +33,7 @@ def check_table(name):
 
 
 def check_column(table, column):
-    if disable:
+    if not check_db:
         return
     if not _query(f"SELECT {column} from {table} LIMIT 1"):
         if column == "*":

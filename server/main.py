@@ -1,12 +1,12 @@
 import re
-import json
+import io
+
 import utils
 import sections
-
 from select_data import SelectData
 from model import Model
 from routes import Routes
-import db_inspect
+from save_spec import save_model, save_routes
 
 cur_sect = None
 
@@ -42,17 +42,6 @@ def read_sections():
         spec.close()
 
 
-def list_columns(name, cntxt_name):
-    with open("sql.json") as f:
-        db_config = json.loads(f.read())["connect"]
-        return db_inspect.get_columns_with_foreign_keys(
-            db_config,
-            name,
-            [cntxt_name],
-            ["created_by", "created_on", "modified_by", "modified_on"],
-        )
-
-
 def generate():
     output = open(
         "output/output.txt",
@@ -70,6 +59,6 @@ def hydrate():
         section.hydrate()
 
 
-def save(json):
-    model = json["model"]
-    sections.set(Model(f"{model['name']}, {model['cntxtName']}"))
+def save(payload):
+    save_model(payload["model"])
+    save_routes(payload["routes"])

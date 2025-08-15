@@ -27,6 +27,7 @@ const selectData = ref({
   cntxtTableName: null,
   cntxtTablePrimaryKey: null,
 });
+
 class Field {
   constructor(name = null) {
     this.name = name;
@@ -54,6 +55,7 @@ class Field {
     }
   }
 };
+
 class Table {
   constructor(name = null) {
     this.name = name;
@@ -66,18 +68,12 @@ class Table {
     }
   }
 };
+
 function addTable() {
   selectData.value.tables.push(new Table());
 }
-let tables = [];
-// function listColumns() {
-//   const params = new URLSearchParams();
-//   params.append('name', 'workshop_registrations');
-//   params.append('cntxt_name', 'contacts');
-//   fetch(`${baseUrl}/list-columns?${params}`).
-//     then(resp => resp.json()).then(json => console.log(json))
-// }
 
+let tables = [];
 const cards = ref([]);
 
 function loadSpec() {
@@ -296,7 +292,8 @@ function matchTitle(field) {
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${iy}`" :disabled="!isPrimaryTable(table.name)"
-                  v-model="field.fillable" @changed="field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)" />
+                  v-model="field.fillable"
+                  @changed="field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)" />
                 <template v-if="field.inputSpecs">
                   <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${iy}`"
                     v-model="field.inputSpecs.required" />
@@ -348,7 +345,6 @@ function matchTitle(field) {
     <FormButton title="Load Spec" @click="loadSpec()" />
     <FormButton title="Generate" @click="generate()" />
     <FormButton title="Add" @click="addTable()" />
-    <FormButton title="List Columns" @click="listColumns()" />
     <!-- <h3 v-if="duplicateField">Duplicate field: {{ duplicateField }}</h3> -->
   </div>
 </template>

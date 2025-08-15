@@ -1,0 +1,17 @@
+{
+    "check_db": true,
+    "connect": {
+        "host": "localhost",
+        "user": "root",
+        "password": "",
+        "database": "basil_woods"
+    },
+    "model": {
+        "created_at": "created_at",
+        "updated_at": "updated_at"
+    },
+    "reflect": {
+        "skip": ["created_by", "modified_by"]
+    },
+    "reflectorUrl": "http://localhost:8000"
+}

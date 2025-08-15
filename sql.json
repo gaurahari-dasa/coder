@@ -1,9 +1,0 @@
-{
-    "disable": false,
-    "connect": {
-        "host": "localhost",
-        "user": "root",
-        "password": "",
-        "database": "krishna_life"
-    }
-}
