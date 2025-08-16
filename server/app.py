@@ -30,6 +30,7 @@ def read_spec():
 @app.post("/generate")
 def generate():
     main.save(request.json)
+    main.read_sections()
     main.generate()
     main.hydrate()
     return ""

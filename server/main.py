@@ -6,7 +6,7 @@ import sections
 from select_data import SelectData
 from model import Model
 from routes import Routes
-from save_spec import save_model, save_routes
+import coder_spec
 
 cur_sect = None
 
@@ -31,7 +31,7 @@ def build_section(line: str):
 
 
 def read_sections():
-    spec = open("templates/input.spec")
+    spec = open("input.spec")
     try:
         while line := spec.readline():
             line = line.strip()
@@ -60,5 +60,9 @@ def hydrate():
 
 
 def save(payload):
-    save_model(payload["model"])
-    save_routes(payload["routes"])
+    output = io.StringIO()
+    coder_spec.save_model(payload["model"], output)
+    coder_spec.save_routes(payload["routes"], output)
+    coder_spec.save_select_data(payload['selectData'], output)
+    with open('input.spec', 'w') as f:
+        f.write(output.getvalue())

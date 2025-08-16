@@ -26,6 +26,23 @@ const selectData = ref({
   entityTablePrimaryKey: null,
   cntxtTableName: null,
   cntxtTablePrimaryKey: null,
+  tables: [],
+});
+
+watchEffect(() => {
+  const fieldNames = new Set();
+  for (const table of selectData.value.tables) {
+    for (const field of table.fields) {
+      // const name = field.alias?.length > 0 ? field.alias : field.name;
+      const name = field.alias ?? field.name;
+      if (field.fillable || field.outputted) {
+        field.error = fieldNames.has(name) ? 'Duplicated!' : null;
+        fieldNames.add(name);
+      } else {
+        field.error = null;
+      }
+    }
+  }
 });
 
 class Field {
@@ -73,7 +90,22 @@ function addTable() {
   selectData.value.tables.push(new Table());
 }
 
-let tables = [];
+function displayField(field, show) {
+  if (show) {
+    field.outputSpecs = {
+      index: cards.value.length,
+    };
+    cards.value.push(field);
+  } else {
+    field.outputSpecs = null;
+    let ix = cards.value.findIndex((v) => v.name == field.name);
+    cards.value.splice(ix, 1);
+    for (; ix < cards.value.length; ++ix) {
+      --cards.value[ix].index;
+    }
+  }
+}
+let tables = selectData.value.tables; // an alias, Haribol
 const cards = ref([]);
 
 function loadSpec() {
@@ -82,14 +114,13 @@ function loadSpec() {
   }).then(resp => resp.json()).then(t => {
     model.value = t.model;
     routes.value = t.routes;
-    t.selectData.tables.forEach(table => {
+    selectData.value = t.selectData;
+    tables = selectData.value.tables;
+    tables.forEach(table => {
       table.selectTabs = Table.prototype.selectTabs;
       table.fields.forEach(field => {
         if (field.outputted) {
-          cards.value.push({
-            name: field.outputSpecs.name,
-            index: field.outputSpecs.index,
-          });
+          cards.value.push(field);
         }
         field.tabs = [
           { name: 'Refer', href: '#', current: false },
@@ -99,23 +130,7 @@ function loadSpec() {
         ];
         field.selectTab = Field.prototype.selectTab;
       });
-      selectData.value = t.selectData;
-      tables = selectData.value.tables;
-      cards.value.length = 0; // clear column display card array, Haribol
-    });
-    watchEffect(() => {
-      const fieldNames = new Set();
-      for (const table of tables) {
-        for (const field of table.fields) {
-          const name = field.alias?.length > 0 ? field.alias : field.name;
-          if (field.fillable || field.outputted) {
-            field.error = fieldNames.has(name) ? 'Duplicated!' : null;
-            fieldNames.add(name);
-          } else {
-            field.error = null;
-          }
-        }
-      }
+      // cards.value.length = 0; // clear column display card array, Haribol
     });
   });
 }
@@ -140,19 +155,13 @@ async function reflectContextTable() {
   }
 }
 
-async function reflectTable() {
-  await reflectContextTable();
-  reflectFields();
-}
-
 function fillTables(fields) {
-  selectData.value.tables = []; // clear array, Haribol
-  tables = selectData.value.tables;
+  selectData.value.tables.length = 0; // clear array, Haribol
   const tableMap = new Map();
   for (const field of fields) {
     const [key, value] = field.split('.');
     if (key == selectData.value.cntxtTableName) {
-      continue;
+      continue; // skip context table fields, Haribol
     }
     let table = null;
     if (!tableMap.has(key)) {
@@ -186,6 +195,11 @@ function reflectFields() {
     }).catch(e => console.error(e));
 }
 
+async function reflectTable() {
+  await reflectContextTable();
+  reflectFields();
+}
+
 function setError(error) {
   for (var table of tables) {
     if (table.name == error.table_name) {
@@ -198,7 +212,6 @@ function setError(error) {
 }
 
 function generate() {
-  //TODO: send column display order.
   fetch(`${baseUrl}/generate`, {
     method: 'POST',
     body: JSON.stringify({
@@ -254,7 +267,7 @@ function matchTitle(field) {
       <FormInput title="Model Class" id="model" v-model="model.name" />
       <div class="relative">
         <FormInput title="Context Class" id="ctxt" v-model="model.cntxtName" />
-        <p class="text-xs absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
+        <p class="text-[0.5rem] absolute top-1 right-0">(Leave blank if not applicable, Haribol!)</p>
       </div>
       <FormButton title="Fetch" @click="reflectTable" />
     </div>
@@ -314,7 +327,7 @@ function matchTitle(field) {
             <div v-show="field.tabs[2].current" class="grid grid-cols-5 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Show" :id="`outputted-${ix}-${iy}`" v-model="field.outputted"
-                  @changed="field.outputSpecs = $event.checked ? {} : null" />
+                  @changed="displayField(field, $event.checked)" />
                 <div class="grid grid-cols-2 col-span-2" v-show="field.outputted">
                   <FormCheckbox title="Search" :id="`searchable-${ix}-${iy}`"
                     :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
