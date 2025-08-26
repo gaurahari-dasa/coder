@@ -55,9 +55,9 @@ class Field {
   foreign = null;
   fillable = null;
   inputSpecs = null;
-  searchable = null;
-  sortable = null;
-  sortOrdinal = null;
+  // searchable = null;
+  // sortable = null;
+  // sortOrdinal = null;
   outputted = null;
   outputSpecs = null;
   tabs = [
@@ -328,17 +328,19 @@ function matchTitle(field) {
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Show" :id="`outputted-${ix}-${iy}`" v-model="field.outputted"
                   @changed="displayField(field, $event.checked)" />
-                <div class="grid grid-cols-2 col-span-2" v-show="field.outputted">
-                  <FormCheckbox title="Search" :id="`searchable-${ix}-${iy}`"
-                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.searchable" />
-                  <FormCheckbox title="Sort" :id="`sortable-${ix}-${iy}`"
-                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)" v-model="field.sortable" />
+                <div class="grid grid-cols-2 col-span-2" v-if="field.outputSpecs">
+                  <FormCheckbox title="Search" :id="`outputSpecs-searchable-${ix}-${iy}`"
+                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)"
+                    v-model="field.outputSpecs.searchable" />
+                  <FormCheckbox title="Sort" :id="`outputSpecs-sortable-${ix}-${iy}`"
+                    :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)"
+                    v-model="field.outputSpecs.sortable" />
                 </div>
               </div>
-              <FormInput v-show="field.outputted" inputType="number" :min="0" title="Sort Ordinal"
-                :id="`sort-ordinal-${ix}-${iy}`" :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)"
-                v-model="field.sortOrdinal" />
               <template v-if="field.outputSpecs">
+                <FormInput inputType="number" :min="0" title="Sort Ordinal" :id="`outputSpecs-sort-ordinal-${ix}-${iy}`"
+                  :disabled="field.foreign?.length > 0 && isPrimaryTable(table.name)"
+                  v-model="field.outputSpecs.sortOrdinal" />
                 <FormSelect title="Type" :id="`outputSpecs-type-${ix}-${iy}`" v-model="field.outputSpecs.type"
                   :options="[null, 'ActiveColumn', 'CurrencyColumn', 'DataColumn', 'DateColumn', 'ImageColumn']" />
                 <FormInput title="Title" :id="`outputSpecs-title-${ix}-${iy}`" v-model="field.outputSpecs.title" />

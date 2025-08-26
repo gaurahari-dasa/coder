@@ -25,11 +25,11 @@ class SelectData:
             # self.sortable = (
             #     UserInput.Field.sort_symbol in qualities if qualities else None
             # )
-            self.sortOrdinal = (
-                (int(m.group(1)) if m.group(1) else None)
-                if qualities and (m := re.search(r"\^([0-9]*)", qualities))
-                else None
-            )
+            # self.sortOrdinal = (
+            #     (int(m.group(1)) if m.group(1) else None)
+            #     if qualities and (m := re.search(r"\^([0-9]*)", qualities))
+            #     else None
+            # )
             self.searchable = self.search_symbol in qualities if qualities else None
 
         def camelCasedNameForUi(self):
@@ -202,7 +202,6 @@ class SelectData:
     def generate_select_data(self):
         output = io.StringIO()
         self.ensure_primary_key_pagination()
-        # self.ensure_foreign_key_cntxt()
 
         if self.foreign_key:
             self.model.append_field(self.foreign_key)
@@ -282,8 +281,9 @@ class SelectData:
     def default_sort_field(self):
         for table in self.tables:
             for field in self.tables[table]:
-                if field.sortOrdinal == 0:
+                if self.ui.sort_ordinal(field.camelCasedNameForUi()) == 1:
                     return f"'{table}.{field.name}'"
+        utils.warn('No field has been made as the default sort field, Haribol')
         return f"'{self.model_table}.{self.primary_key}'"
 
     def generate_declare_cntxt(self):
@@ -456,11 +456,6 @@ class SelectData:
         self.hydrateController()
         self.ui.hydrate()
 
-    def sortable(self, field: Field):
-        return self.ui.sortable(
-            utils.camel_case(field.alias if field.alias else field.name)
-        )
-
     def jsonify(self):
         return {
             "entityTableName": self.model_table,
@@ -484,13 +479,10 @@ class SelectData:
                             ),
                             "outputted": field.outputted,
                             "outputSpecs": (
-                                self.ui.output_specs(field.camelCasedNameForUi())
+                                self.ui.output_specs(field.camelCasedNameForUi(), field.searchable)
                                 if field.outputted
                                 else None
                             ),
-                            "searchable": field.searchable,
-                            "sortable": self.sortable(field),
-                            "sortOrdinal": field.sortOrdinal,
                         }
                         for field in fields
                     ],

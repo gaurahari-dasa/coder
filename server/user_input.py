@@ -1,12 +1,15 @@
 import re
 import io
 from collections import namedtuple
+from dataclasses import asdict
 
 import utils
 import sections
 from model import Model
 from routes import Routes
 from OrderedSet import OrderedSet
+from InputSpecs import InputSpecs
+from OutputSpecs import OutputSpecs
 
 
 class UserInput:
@@ -36,16 +39,16 @@ class UserInput:
             self.name = name
             self.base_name = base_name  # name in database, Haribol
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
-            self.type = specs[0]
-            self.title = utils.nullishIndex(specs, 1)
+            self.type: str = specs[0]
+            self.title: str | None = utils.nullishIndex(specs, 1)
             # Haribol: options is used for the following purpose
             # Default value of checkbox
             # maxLength attribute of FormInput
             # options attribute of FormSelect and FormAutoComplete
-            self.options = utils.nullishIndex(specs, 2)
-            self.match_value: str = utils.nullishIndex(specs, 3)
-            self.focus = self.focus_symbol in qualities
-            self.required = self.required_symbol in qualities
+            self.options: str | None = utils.nullishIndex(specs, 2)
+            self.match_value: str | None = utils.nullishIndex(specs, 3)
+            self.focus: bool = self.focus_symbol in qualities
+            self.required: bool = self.required_symbol in qualities
 
     class GridColumn:
         sort_symbol = "^"
@@ -57,9 +60,14 @@ class UserInput:
             self.type = utils.nullishIndex(specs, 0)
             self.title = utils.nullishIndex(specs, 1)
             self.qualities = qualities
+            self.sort_ordinal = (
+                (int(m.group(1)) if m.group(1) else 0)
+                if qualities and (m := re.search(r"\^([0-9]*)", qualities))
+                else None
+            )
 
         def sortable(self):
-            return self.sort_symbol in self.qualities
+            return self.sort_ordinal != None
 
     def __init__(self, model_table: str):
         self.fields: dict[str, UserInput.Field] = {}
@@ -465,25 +473,39 @@ import FormGuard from '../../components/FormGuard.vue';""",
             lambda v: v.name, filter(lambda v: v.sortable(), self.grid_columns.values())
         )
 
+    def sort_ordinal(self, grid_column: str):
+        return (
+            self.grid_columns[grid_column].sort_ordinal
+            if self.sortable(grid_column)
+            else None
+        )
+
     def refers(self, name: str):
         return any((lambda x: x.match_value == name)(x) for x in self.fields.values())
 
     def input_specs(self, name: str):
         field = self.fields[name]
-        return {
-            "type": field.type,
-            "title": field.title,
-            "options": field.options,
-            "matchValue": field.match_value,
-            "focus": field.focus,
-            "required": field.required,
-        }
+        return asdict(
+            InputSpecs(
+                type=field.type,
+                title=field.title,
+                options=field.options,
+                matchValue=field.match_value,
+                focus=field.focus,
+                required=field.required,
+            )
+        )
 
-    def output_specs(self, name: str):
+    def output_specs(self, name: str, searchable: bool):
         col = self.grid_columns[name]
-        return {
-            "name": col.name,
-            "type": col.type,
-            "title": col.title,
-            "index": col.index,
-        }
+        return asdict(
+            OutputSpecs(
+                name=col.name,
+                type=col.type,
+                title=col.title,
+                index=col.index,
+                searchable=searchable,
+                sortable=col.sortable(),
+                sortOrdinal=col.sort_ordinal,
+            )
+        )

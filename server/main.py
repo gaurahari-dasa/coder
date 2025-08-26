@@ -6,7 +6,7 @@ import sections
 from select_data import SelectData
 from model import Model
 from routes import Routes
-import coder_spec
+import code_spec
 
 cur_sect = None
 
@@ -61,8 +61,8 @@ def hydrate():
 
 def save(payload):
     output = io.StringIO()
-    coder_spec.save_model(payload["model"], output)
-    coder_spec.save_routes(payload["routes"], output)
-    coder_spec.save_select_data(payload['selectData'], output)
-    with open('input.spec', 'w') as f:
+    code_spec.save_model(payload["model"], output)
+    code_spec.save_routes(payload["routes"], output)
+    code_spec.save_select_data(payload["selectData"], output)
+    with open("input.spec", "w") as f:
         f.write(output.getvalue())

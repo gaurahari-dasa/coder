@@ -1,4 +1,6 @@
 import io
+from InputSpecs import InputSpecs
+from OutputSpecs import OutputSpecs
 
 
 def save_model(model, output: io.StringIO):
@@ -21,19 +23,29 @@ def _save_field(field, output: io.StringIO):
     name = field["name"]
     alias_part = f" as {field['alias']}" if field["alias"] else ""
     name_part = name + alias_part
-    morph_specs = field["morphSpecs"] if field["morphSpecs"] else ""
-    foreign = field["foreign"] if field["foreign"] else ""
+    foreign = f'$({field["foreign"]})' if field["foreign"] else None
     fillable = field["fillable"]
-    input_specs = field["inputSpecs"] if fillable else None
-    searchable = field["searchable"]
-    sortable = field["sortable"]
-    sort_ordinal = field["sortOrdinal"]
+    input_specs = InputSpecs(**field["inputSpecs"]).__repr__() if fillable else None
     outputted = field["outputted"]
-    output_specs = (
-        "; ".join(s for s in field["outputSpecs"].values()) if outputted else None
+    output_specs = OutputSpecs(**field["outputSpecs"]).__repr__() if outputted else None
+    morph_specs = f'~({field["morphSpecs"]})' if field["morphSpecs"] else None
+    spec_str = ", ".join(
+        filter(
+            lambda x: x,
+            [
+                foreign,
+                input_specs,
+                output_specs,
+                morph_specs,
+            ],
+        )
     )
-    if morph_specs or foreign or input_specs or output_specs:
-        print(f"{name_part}: #1({output_specs})")  # TODO: get the order
+    spec_part = f": {spec_str}" if spec_str else ""
+    # if morph_specs or foreign or input_specs or output_specs:
+    print(
+        f"{name_part}{spec_part}",
+        file=output,
+    )
 
 
 _primary_key = None
@@ -47,7 +59,7 @@ def _save_fields(fields, output: io.StringIO):
 
 def _save_tables(tables, output: io.StringIO):
     for table in tables:
-        print(f"** {table['name']} **\n", file=output)
+        print(f"\n** {table['name']} **", file=output)
         _save_fields(table["fields"], output)
 
 
@@ -60,5 +72,5 @@ def save_select_data(select_data, output: io.StringIO):
         if select_data["cntxtTablePrimaryKey"]
         else ""
     )
-    print(f"*** SelectData: {model_table}{cntxt_part} ***\n", file=output)
+    print(f"*** SelectData: {model_table}{cntxt_part} ***", file=output)
     _save_tables(select_data["tables"], output)
