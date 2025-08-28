@@ -5,4 +5,19 @@ with open("config.json") as cfg_file:
 
 connect = config["connect"]
 model = config["model"]
-skip_reflect = list(config["model"].values()) + config["reflect"]["skip"]
+
+
+def lower_each(xt):
+    return map(lambda x: x.lower(), xt)
+
+
+def upper_each(xt):
+    return map(lambda x: x.upper(), xt)
+
+
+skip_reflect = (
+    list(lower_each(config["model"].values()))
+    + list(upper_each(config["model"].values()))
+    + list(lower_each(config["reflect"]["skip"]))
+    + list(upper_each(config["reflect"]["skip"]))
+)

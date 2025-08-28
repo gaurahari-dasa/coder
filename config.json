@@ -7,11 +7,11 @@
         "database": "basil_woods"
     },
     "model": {
-        "created_at": "created_at",
-        "updated_at": "updated_at"
+        "created_at": "CREATED_AT",
+        "updated_at": "UPDATED_AT"
     },
     "reflect": {
-        "skip": ["created_by", "modified_by"]
+        "skip": ["CREATED_BY", "MODIFIED_BY"]
     },
     "reflectorUrl": "http://localhost:8000"
 }

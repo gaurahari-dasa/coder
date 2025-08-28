@@ -152,7 +152,7 @@ class UserInput:
         if not sections.ix("SelectData").has_field(
             utils.uncamel_case(field.match_value)
         ):
-            utils.error("No source column for match_value, Haribol")
+            utils.warn("No source column for match_value, Haribol")
         no_match_var = utils.no_match_var(field.match_value)
         self.no_match_vars.add(no_match_var)
         no_match_attr = (

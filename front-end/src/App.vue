@@ -89,11 +89,29 @@ class Table {
 function addTable() {
   selectData.value.tables.push(new Table());
 }
-
+function makeInputtable(field, make) {
+  if (make) {
+    // field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)
+    field.inputSpecs = {
+      type: null,
+      title: null,
+      options: null,
+      matchValue: null,
+      focus: null,
+      required: null,
+    }
+  }
+}
 function displayField(field, show) {
   if (show) {
     field.outputSpecs = {
+      name: null,
+      type: null,
+      title: null,
       index: cards.value.length,
+      searchable: null,
+      sortable: null,
+      sortOrdinal: null
     };
     cards.value.push(field);
   } else {
@@ -258,6 +276,10 @@ function matchTitle(field) {
       return undefined;
   }
 }
+
+function deleteField(fields, iy) {
+  fields.splice(iy, 1);
+}
 </script>
 
 <template>
@@ -294,8 +316,11 @@ function matchTitle(field) {
           v-show="isPrimaryTable(table.name)">(Primary)</span></h5>
       <FormInput title="Table Name" :id="`table-name-${ix}`" v-model="table.name" />
       <div class="mt-8 space-y-8">
-        <div v-for="(field, iy) in table.fields" class="relative grid grid-cols-8 gap-x-4">
-          <FormInput title="Field Name" :id="`field-name-${ix}-${iy}`" v-model="field.name" />
+        <div v-for="(field, iy) in table.fields" :key="field.name" class="relative grid grid-cols-8 gap-x-4">
+          <div>
+            <button @click="deleteField(table.fields, iy)">Del</button>
+            <FormInput title="Field Name" :id="`field-name-${ix}-${iy}`" v-model="field.name" />
+          </div>
           <FormInput title="Field Alias" :id="`field-alias-${ix}-${iy}`" v-model="field.alias" />
           <div class="col-start-3 col-end-9">
             <FormTabs :tabs="field.tabs" @tabbed="table.selectTabs($event.tab.name)" class="mb-1" />
@@ -305,8 +330,7 @@ function matchTitle(field) {
             <div v-show="field.tabs[1].current" class="grid grid-cols-6 gap-4">
               <div class="grid grid-cols-3">
                 <FormCheckbox title="Fill" :id="`fillable-${ix}-${iy}`" :disabled="!isPrimaryTable(table.name)"
-                  v-model="field.fillable"
-                  @changed="field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)" />
+                  v-model="field.fillable" @changed="makeInputtable(field, $event.checked)" />
                 <template v-if="field.inputSpecs">
                   <FormCheckbox title="Reqd" :id="`inputspecs-required-${ix}-${iy}`"
                     v-model="field.inputSpecs.required" />
