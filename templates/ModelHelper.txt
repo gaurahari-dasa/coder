@@ -15,19 +15,42 @@ class @@@ model_helper @@@
             );
     }
 
+    private static function applySearch($items, $searchKey)
+    {
+        @@@ log_access @@@
+        $items->whereAny([
+                @@@ search_clause @@@
+            ], 'like', "%{$searchKey}%");
+    }
+
+    private static function applyFilter($items, $fltr)
+    {
+        LogAccessHelper::log(Contact::class, $fltr);
+        $filters = [];
+        parse_str($fltr, $filters);
+        foreach ($filters as $key => $value) {
+            switch ($key) {
+                // add cases here, Haribol
+                break;
+            }
+        }
+    }
+
     public static function paginate(@@@ declare_cntxt_var @@@)
     {
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');
         $sortField = request('sort-field');
         $sortDir = request('sort');
+        $filters = request('filters');
         $items = self::listAll(Utils::snakeCase($sortField), $sortDir)@@@ cntxt_filter @@@;
 
         if ($searchKey) {
-            @@@ log_access @@@
-            $items = $items->whereAny([
-                @@@ search_clause @@@
-            ], 'like', "%{$searchKey}%");
+            self::applySearch($items, $searchKey);
+        }
+
+        if ($filters) {
+            self::applyFilter($items, $filters);
         }
 
         return $items->paginate($rowCount)
@@ -39,7 +62,8 @@ class @@@ model_helper @@@
             ->appends(['row-count' => $rowCount])
             ->appends(['search-key' => $searchKey])
             ->appends(['sort-field' => $sortField])
-            ->appends(['sort' => $sortDir]);
+            ->appends(['sort' => $sortDir])
+            ->appends(['filters' => $filters]);
     }
 
     public static function addEntity(array $validated, @@@ declare_cntxt_var @@@)

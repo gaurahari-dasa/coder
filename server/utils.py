@@ -43,14 +43,11 @@ def nullishIndex(ar: list, ix: int):
 
 
 def uncamel_case(name: str):
-    return re.sub("([A-Z])", lambda v: "_" + v.group(1).lower(), name) #TODO: make this upper based on convention
+    return re.sub("([A-Z])", lambda v: "_" + v.group(1).lower(), name)
 
 
 def camel_case(name: str):
-    # if re.search("[A-Z]", name):
-    #     # this will cause issue when we uncamel_case the result, Haribol
-    #     warn("Capital case characters found in string", name)
-    return re.sub("_(.)", lambda v: v.group(1).upper(), name.lower()) #TODO: make everthing else lower case
+    return re.sub("_(.)", lambda v: v.group(1).upper(), name.lower())
 
 
 def kebab_case(name: str):
