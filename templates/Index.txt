@@ -34,7 +34,7 @@
                 description="A list of all the what ???, Haribol"
                 :headings=@@@ grid_headings @@@ :pageData="@@@ model_props @@@"
                 :columns=@@@ grid_column_types @@@
-                :fields=@@@ grid_fields @@@ :searchKey
+                :fields=@@@ grid_fields @@@
                 :sortableFields=@@@ grid_sortable_fields @@@ :sortField :sortDir
                 @table-add="showAddForm = true; showEditForm = false;" @row-act="editRow" focusSearch :actionIcons />
         </div>
@@ -48,7 +48,7 @@ import PaginatedDataTable from '../../components/PaginatedDataTable.vue';
 import { filterActions } from '../../utils';
 
 import { computed, ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { PencilSquareIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -57,7 +57,6 @@ const props = defineProps({
     baseUrl: String,
     privileges: Array,
     @@@ model_props @@@: Object,@@@ vue_props @@@
-    searchKey: String,
     sortField: String,
     sortDir: String,
 });
@@ -79,6 +78,7 @@ const blanked = {
 const addForm = useForm(@@@ add_form @@@);
 const editForm = useForm(@@@ edit_form @@@);
 const formSaved = ref(false);
+const page = usePage();
 
 function closeAddForm() {
     showAddForm.value = false;
@@ -94,7 +94,13 @@ function closeEditForm() {
 }
 
 function addEntity() {
-    addForm.post(`${props.baseUrl}@@@ model_route @@@`, {
+    const queryParams = new URL(page.url, location).searchParams.toString();
+    addForm
+        .transform((x) => ({
+            ...x,
+            queryParams,
+        }))
+        .post(`${props.baseUrl}@@@ model_route @@@`, {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -113,7 +119,13 @@ function editRow(id) {
 }
 
 function updateEntity() {
-    editForm.patch(`${props.baseUrl}@@@ model_route @@@/${editId}`, {
+    const queryParams = new URL(page.url, location).searchParams.toString();
+    editForm
+        .transform((x) => ({
+            ...x,
+            queryParams,
+        }))
+        .patch(`${props.baseUrl}@@@ model_route @@@/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });
