@@ -35,7 +35,7 @@
                 :headings=@@@ grid_headings @@@ :pageData="@@@ model_props @@@"
                 :columns=@@@ grid_column_types @@@
                 :fields=@@@ grid_fields @@@
-                :sortableFields=@@@ grid_sortable_fields @@@ :sortField :sortDir
+                :sortableFields=@@@ grid_sortable_fields @@@
                 @table-add="showAddForm = true; showEditForm = false;" @row-act="editRow" focusSearch :actionIcons />
         </div>
     </Layout>
@@ -57,8 +57,6 @@ const props = defineProps({
     baseUrl: String,
     privileges: Array,
     @@@ model_props @@@: Object,@@@ vue_props @@@
-    sortField: String,
-    sortDir: String,
 });
 
 const actionIcons = computed(() => filterActions(props.privileges, {

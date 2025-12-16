@@ -17,8 +17,7 @@ class @@@ model @@@Controller extends Controller
             'menus' => MenuHelper::list(),
             'privileges' => UserHelper::privileges(request()->user()@@@ menu_route @@@),
             @@@ model_props @@@
-            @@@ controller_props @@@'sortField' => request('sort-field'),
-            'sortDir' => request('sort'),
+            @@@ controller_props @@@
         ]);
     }
 

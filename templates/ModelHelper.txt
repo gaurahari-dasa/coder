@@ -6,10 +6,10 @@ use App\Models\@@@ model @@@;
 @@@ declare_cntxt_trait @@@
 class @@@ model_helper @@@
 {@@@ use_cntxt_trait @@@
-    public static function listAll(?string $sortField = null, ?string $sortDir = null)
+    public static function listAll(string $sortField, string $sortDir)
     {@@@ if_sort_by_id @@@
         return @@@ model @@@
-            ::orderBy($sortField ?? @@@ default_sort_field @@@, $sortDir ?? 'asc')
+            ::orderBy($sortField, $sortDir)
             @@@ join_clause @@@->select(
                 @@@ select_data @@@
             );
@@ -40,8 +40,8 @@ class @@@ model_helper @@@
     {
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');
-        $sortField = request('sort-field');
-        $sortDir = request('sort');
+        $sortField = request('sort-field') ?? @@@ default_sort_field @@@;
+        $sortDir = request('sort') ?? 'asc';
         $filters = request('filters');
         $items = self::listAll(Utils::snakeCase($sortField), $sortDir)@@@ cntxt_filter @@@;
 
@@ -53,17 +53,24 @@ class @@@ model_helper @@@
             self::applyFilter($items, $filters);
         }
 
-        return $items->paginate($rowCount)
-            ->through(function ($item) {
-                return [
-                    @@@ pagination_data @@@
-                ];
-            })
-            ->appends(['row-count' => $rowCount])
-            ->appends(['search-key' => $searchKey])
-            ->appends(['sort-field' => $sortField])
-            ->appends(['sort' => $sortDir])
-            ->appends(['filters' => $filters]);
+        return array_merge(
+            $items->paginate($rowCount)
+                ->through(function ($item) {
+                    return [
+                        @@@ pagination_data @@@
+                    ];
+                })
+                ->appends(['row-count' => $rowCount])
+                ->appends(['search-key' => $searchKey])
+                ->appends(['sort-field' => $sortField])
+                ->appends(['sort-dir' => $sortDir])
+                ->appends(['filters' => $filters])
+                ->toArray(),
+            [
+                'sort_field' => $sortField,
+                'sort_dir' => $sortDir,
+            ]
+        );
     }
 
     public static function addEntity(array $validated, @@@ declare_cntxt_var @@@)
