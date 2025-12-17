@@ -14,7 +14,7 @@ CORS(app)
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return "<p>To open the web-app, you must browse to the front-end URL that's powered by NodeJS (most probably: <a href='http://localhost:5174'>this one</a>)</p>"
 
 
 @app.route("/read-spec")
@@ -73,9 +73,9 @@ def reflect_fields():
     )
     if resp.ok:
         table = resp.json()
-        table["fields"] = list(filter(
-            lambda x: x.split(".")[1] not in skip_reflect, table["fields"]
-        ))
+        table["fields"] = list(
+            filter(lambda x: x.split(".")[1] not in skip_reflect, table["fields"])
+        )
         return table
 
     return Response(
