@@ -369,11 +369,7 @@ function skipField(fields, iy) {
         v-model="table.name"
       />
       <div class="mt-8 space-y-8">
-        <div
-          v-for="(field, iy) in table.fields"
-          :key="field.name"
-          class="flex gap-2"
-        >
+        <div v-for="(field, iy) in table.fields" class="flex gap-2">
           <button
             class="hover:cursor-pointer"
             @click="skipField(table.fields, iy)"
