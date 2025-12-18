@@ -32,8 +32,10 @@ const selectData = ref({
 
 watchEffect(() => {
   const fieldNames = new Set();
-  for (const table of selectData.value.tables) {
-    for (const field of table.fields) {
+  const tablesNotSkipped = selectData.value.tables.filter((x) => !x.skipThis);
+  for (const table of tablesNotSkipped) {
+    const fieldsNotSkipped = table.fields.filter((x) => !x.skipThis);
+    for (const field of fieldsNotSkipped) {
       // const name = field.alias?.length > 0 ? field.alias : field.name;
       const name = field.alias ?? field.name;
       if (field.fillable || field.outputted) {
@@ -287,9 +289,13 @@ function matchTitle(field) {
   }
 }
 
-function skipField(fields, iy) {
+function toggleSkipField(fields, iy) {
   // fields.splice(iy, 1);
-  fields[iy].skipThis = true;
+  fields[iy].skipThis = !fields[iy].skipThis;
+}
+
+function toggleSkipTable(table) {
+  table.skipThis = !table.skipThis;
 }
 </script>
 
@@ -363,16 +369,23 @@ function skipField(fields, iy) {
           >(Primary)</span
         >
       </h5>
-      <FormInput
-        title="Table Name"
-        :id="`table-name-${ix}`"
-        v-model="table.name"
-      />
-      <div class="mt-8 space-y-8">
+      <div class="relative flex gap-2">
+        <button class="hover:cursor-pointer" @click="toggleSkipTable(table)">
+          <TrashIcon v-show="!table.skipThis" class="size-4" />
+          <ArrowUturnLeftIcon v-show="table.skipThis" class="size-4" />
+        </button>
+        <FormInput
+          title="Table Name"
+          :id="`table-name-${ix}`"
+          v-model="table.name"
+          :class="{ 'opacity-30': table.skipThis }"
+        />
+      </div>
+      <div class="mt-8 space-y-8" :class="{ 'opacity-30': table.skipThis }">
         <div v-for="(field, iy) in table.fields" class="flex gap-2">
           <button
             class="hover:cursor-pointer"
-            @click="skipField(table.fields, iy)"
+            @click="toggleSkipField(table.fields, iy)"
           >
             <TrashIcon v-show="!field.skipThis" class="size-4" />
             <ArrowUturnLeftIcon v-show="field.skipThis" class="size-4" />

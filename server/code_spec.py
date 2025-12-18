@@ -53,12 +53,12 @@ _primary_key = None
 
 def _save_fields(fields, output: io.StringIO):
     # global _primary_key
-    for field in fields:
+    for field in filter(lambda f: not f["skipThis"], fields):
         _save_field(field, output)
 
 
 def _save_tables(tables, output: io.StringIO):
-    for table in tables:
+    for table in filter(lambda t: not t["skipThis"], tables):
         print(f"\n** {table['name']} **", file=output)
         _save_fields(table["fields"], output)
 
