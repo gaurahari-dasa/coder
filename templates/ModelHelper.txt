@@ -3,6 +3,8 @@
 namespace App\Helpers;
 
 use App\Models\@@@ model @@@;
+use Illuminate\Support\Str;
+
 @@@ declare_cntxt_trait @@@
 class @@@ model_helper @@@
 {@@@ use_cntxt_trait @@@
@@ -25,13 +27,12 @@ class @@@ model_helper @@@
 
     private static function applyFilter($items, $fltr)
     {
-        LogAccessHelper::log(Contact::class, $fltr);
+        LogAccessHelper::log(@@@ model @@@::class, $fltr);
         $filters = [];
         parse_str($fltr, $filters);
         foreach ($filters as $key => $value) {
             switch ($key) {
                 // add cases here, Haribol
-                break;
             }
         }
     }
@@ -43,7 +44,7 @@ class @@@ model_helper @@@
         $sortField = request('sort-field') ?? @@@ default_sort_field @@@;
         $sortDir = request('sort') ?? 'asc';
         $filters = request('filters');
-        $items = self::listAll(Utils::snakeCase($sortField), $sortDir)@@@ cntxt_filter @@@;
+        $items = self::listAll(Str::snake($sortField), $sortDir)@@@ cntxt_filter @@@;
 
         if ($searchKey) {
             self::applySearch($items, $searchKey);
