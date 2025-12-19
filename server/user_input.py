@@ -57,8 +57,8 @@ class UserInput:
             self.index = index
             self.name = name
             specs = [s.strip() for s in (specs.split(";") if specs else specs)]
-            self.type = utils.nullishIndex(specs, 0)
-            self.title = utils.nullishIndex(specs, 1)
+            self.type: str | None = utils.nullishIndex(specs, 0)
+            self.title: str | None = utils.nullishIndex(specs, 1)
             self.qualities = qualities
             self.sort_ordinal = (
                 (int(m.group(1)) if m.group(1) else 0)
@@ -226,7 +226,7 @@ class UserInput:
     def grid_headings(self):
         return (
             "["
-            + ", ".join([f"'{col.title}'" for col in self.grid_columns.values()])
+            + ", ".join([f"'{col.title or ''}'" for col in self.grid_columns.values()])
             + "]"
         )
 
@@ -238,13 +238,12 @@ class UserInput:
         )
 
     def grid_column_types(self):
+        col_types = []
         for col in self.grid_columns.values():
-            self.vue_imports.add(
-                f"import {col.type} from '../../components/{col.type}.vue';"
-            )
-        return (
-            "[" + ", ".join([f"{col.type}" for col in self.grid_columns.values()]) + "]"
-        )
+            ct = col.type or "DataColumn"
+            col_types.append(ct)
+            self.vue_imports.add(f"import {ct} from '../../components/{ct}.vue';")
+        return "[" + ", ".join([f"{ct}" for ct in col_types]) + "]"
 
     def grid_sortable_fields(self):
         return (

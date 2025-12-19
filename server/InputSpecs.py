@@ -13,4 +13,4 @@ class InputSpecs:
     def __repr__(self):
         focus = "@" if self.focus else ""
         required = "*" if self.required else ""
-        return f"i({self.type}; {self.title}; {self.options}; {self.matchValue or ''}){focus}{required}"
+        return f"i({self.type}; {self.title or ''}; {self.options or ''}; {self.matchValue or ''}){focus}{required}"
