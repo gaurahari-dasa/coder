@@ -47,6 +47,13 @@ Note that all the above facts hold if there's a specification following the abov
 language_id as mother_tongue_id
 language_name as mother_tongue_name
 
+This technique of aliasing a column is useful when the same table needs to be joined more than one time, e.g., what if there's another column communication_language in the guides table that also refers to the language_id column of the languages table? The language_id column of the guides table will be having the reference specification as shown above and we shall also have the following specification:
+
+communication_language: $(comm_lang_id)
+
+** languages as comm_languages **
+language_id as comm_lang_id
+language_name as comm_lang_name
 
 Where do I add the i-spec?
 --------------------------
@@ -61,3 +68,10 @@ But the latter practice is deprecated and bound to be removed in the future. The
 Which data will be selected for (sent to) the grid?
 ---------------------------------------------------
 All the data points (columns) mentioned in the SelectData section will be selected except for those that are references (foreign keys). This fact holds whether or not the output specs #() are applied. Apart from this, the primary key will be selected even without being explicitly mentioned in the SelectData section. However only those that have output specs (#()) will be displayed in the grid. The rest are hidden in JavaScript objects!
+
+
+Sort Ordinal
+------------
+In the future we can have data sorted by multiple columns. The sort ordinal value is the column order in which the data is sorted. For example, if the data is having 3 columns - name, age, mobile. And the data is sorted by name and age columns. The name column can have the sort ordinal value of 1 and the age column can have a sort ordinal value of 2. This means the data is sorted first by name and then by the age column.
+
+As of now data can be sorted only by one column and the sort ordinal for that column must be set as 1. This setting is essential; otherwise a warning is emitted.

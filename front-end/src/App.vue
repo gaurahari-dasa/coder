@@ -56,7 +56,8 @@ const attribTabs = [
 ];
 
 class Field {
-  constructor(name = null) {
+  constructor(key, name = null) {
+    this.key = key;
     this.name = name;
   }
   name = null;
@@ -80,7 +81,8 @@ class Field {
 }
 
 class Table {
-  constructor(name = null) {
+  constructor(key, name = null) {
+    this.key = key;
     this.name = name;
   }
   name = null;
@@ -94,8 +96,9 @@ class Table {
 }
 
 function addTable() {
-  selectData.value.tables.push(new Table());
+  tables.push(new Table(tables.length));
 }
+
 function makeInputtable(field, make) {
   if (make) {
     // field.inputSpecs = $event.checked ? {} : null; console.log('Haribol', field.inputSpecs)
@@ -109,6 +112,7 @@ function makeInputtable(field, make) {
     };
   }
 }
+
 function displayField(field, show) {
   if (show) {
     field.outputSpecs = {
@@ -130,6 +134,7 @@ function displayField(field, show) {
     }
   }
 }
+
 let tables = selectData.value.tables; // an alias, Haribol
 const cards = ref([]);
 
@@ -142,7 +147,7 @@ function loadSpec() {
       model.value = t.model;
       routes.value = t.routes;
       selectData.value = t.selectData;
-      tables = selectData.value.tables;
+      tables = selectData.value.tables; // reset the alias, Haribol
       tables.forEach((table) => {
         table.selectTabs = Table.prototype.selectTabs;
         table.fields.forEach((field) => {
@@ -178,22 +183,22 @@ async function reflectContextTable() {
 }
 
 function fillTables(fields) {
-  selectData.value.tables.length = 0; // clear array, Haribol
+  tables.length = 0; // clear array, Haribol
   const tableMap = new Map();
   for (const field of fields) {
-    const [key, value] = field.split(".");
-    if (key == selectData.value.cntxtTableName) {
+    const [tblname, fldname] = field.split(".");
+    if (tblname == selectData.value.cntxtTableName) {
       continue; // skip context table fields, Haribol
     }
     let table = null;
-    if (!tableMap.has(key)) {
-      table = new Table(key);
+    if (!tableMap.has(tblname)) {
+      table = new Table(tables.length, tblname);
       tables.push(table);
-      tableMap.set(key, table);
+      tableMap.set(tblname, table);
     } else {
-      table = tableMap.get(key);
+      table = tableMap.get(tblname);
     }
-    table.fields.push(new Field(value));
+    table.fields.push(new Field(table.fields.length, fldname));
   }
 }
 

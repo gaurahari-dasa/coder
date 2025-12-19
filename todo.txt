@@ -1,2 +1,6 @@
-maxLength prop for FormInput
-Last commit (KL DRM): f5f66bc5de59937e745217677f795b4123e63cf5
+1. Add textarea option
+2. Add SearchDown option
+3. Add MultiSelect option
+4. Add input type "time"
+5. If the underlying DB column is non-null, Required option must be checked by default
+6. Use select element in UI for selecting the morphing type - file, date-time, date-only

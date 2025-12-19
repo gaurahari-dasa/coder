@@ -108,7 +108,7 @@ class UserInput:
             print(
                 f"""
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
-                :backUrl="`${{baseUrl}}{self.routes.cntxt_url}`" />""",
+                :backUrl="`${{basePath}}{self.routes.cntxt_url}`" />""",
                 file=output,
             )
         return output
@@ -149,15 +149,21 @@ class UserInput:
         self.vue_imports.add(
             "import FormSelect from '../../components/FormSelect.vue';"
         )
-        if not sections.ix("SelectData").has_field(
+
+        # Haribol
+        # match value is needed only in the editForm
+        match_value = self.form_obj == "editForm" and field.match_value
+
+        if match_value and not sections.ix("SelectData").has_field(
             utils.uncamel_case(field.match_value)
         ):
-            utils.warn("No source column for match_value, Haribol")
-        no_match_var = utils.no_match_var(field.match_value)
-        self.no_match_vars.add(no_match_var)
-        no_match_attr = (
-            f' :noMatchValue="{no_match_var}"' if self.form_obj == "editForm" else ""
-        )
+            utils.warn("No source column for match_value, Haribol: " + field.base_name)
+        elif match_value:
+            no_match_var = utils.no_match_var(match_value)
+            self.no_match_vars.add(no_match_var)
+            no_match_attr = f' :noMatchValue="{no_match_var}"'
+        else:
+            no_match_attr = ""
         print(
             f"""<FormSelect class="mt-4" id="{field.name}" title="{field.title}" :options="{field.options}"{self.tackFocus(field) + self.tackRequired(field)}
               v-model="{self.form_obj}.{field.name}"{no_match_attr} :error="{self.form_obj}.errors.{field.name}" />""",
@@ -331,7 +337,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             source = self.grid_sources.get(field.name, field.name)
             print(f"editForm.{field.name} =", end=" ", file=output)
             print(f"datum.{source};", file=output)
-            if field.type == "select":
+            if field.type == "select" and field.match_value:
                 print(
                     f"{utils.no_match_var(field.match_value)} = datum.{field.match_value};",
                     file=output,
