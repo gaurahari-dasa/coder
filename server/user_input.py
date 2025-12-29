@@ -384,7 +384,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"'{field.base_name}' =>", end=" ", file=output)
-            if field.type == "date":
+            if field.type == "date" or field.type == "datetime-local":
                 print(f"Utils::parseDate($validated['{field.name}']),", file=output)
             else:
                 print(f"$validated['{field.name}'],", file=output)
@@ -406,7 +406,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=output)
-            if field.type == "date":
+            if field.type == "date" or field.type == "datetime-local":
                 print(f"Utils::parseDate($validated['{field.name}']);", file=output)
             else:
                 print(f"$validated['{field.name}'];", file=output)

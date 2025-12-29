@@ -553,10 +553,11 @@ function toggleSkipTable(table) {
                 v-show="field.tabs[3].current"
                 class="grid grid-cols-6 gap-4"
               >
-                <FormInput
+                <FormSelect
                   title="Morph Specs"
                   :id="`morph-specs-${ix}-${iy}`"
                   v-model="field.morphSpecs"
+                  :options="[null, 'file', 'date-only', 'date-time']"
                 />
               </div>
             </div>
