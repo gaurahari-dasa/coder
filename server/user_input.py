@@ -384,10 +384,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"'{field.base_name}' =>", end=" ", file=output)
-            if field.type == "date" or field.type == "datetime-local":
-                print(f"Utils::parseDate($validated['{field.name}']),", file=output)
-            else:
-                print(f"$validated['{field.name}'],", file=output)
+            print(f"$validated['{field.name}'],", file=output)
         if self.foreign_key:
             print(
                 f"'{self.foreign_key.base_name}' => ${self.foreign_key.name},",
@@ -406,10 +403,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             if field.type == "file":
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=output)
-            if field.type == "date" or field.type == "datetime-local":
-                print(f"Utils::parseDate($validated['{field.name}']);", file=output)
-            else:
-                print(f"$validated['{field.name}'];", file=output)
+            print(f"$validated['{field.name}'];", file=output)
         print(f"LogActivityHelper::save({varname});", file=output)
         # print(f"return {varname};", file=output)
         return output

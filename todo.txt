@@ -6,7 +6,7 @@ Jaya Sri Sri Nitai Gauranga!
 3. Add MultiSelect option
 4. Add input type "time"
 5. If the underlying DB column is non-null, Required option must be checked by default
-6. Use select element in UI for selecting the morphing type - file, date-time, date-only
+6. 
 7. When the UI has a file upload, the editForm must include a _method: "patch", entry and the method to send the data should be POST
 8. When one of the fields is a file, on the server-side - store the file in the filesystem and then use that path for the database column value
 9. Add date casts (see below for example) to Eloquent Model for date-only inputs. For these fields, you must also apply date-only morph when outputting (displaying in the grid) 
@@ -21,5 +21,7 @@ Note: Y-m-d format specification is applied when serializing these values in JSO
         ];
     }
 
-10. Also apply date-time morphs **automatically** for columns of datetime input datatypes. User has to choose DateTimeColumn for outputting (displaying in grid). Add datetime casts for the Eloquent model __might__ break existing code.
+10. Also apply date-time morphs **automatically** for columns of datetime input datatypes. User has to choose DateTimeColumn for outputting (displaying in grid). Adding datetime casts for the Eloquent model __might__ break existing code.
 11. Add set-focus attribute to Vue component tag (this has been missed out actually).
+12. Add DateTime column to UI (Index.txt template).
+13. Recursive table fetching is not apparently happening, Haribol.

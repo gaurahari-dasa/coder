@@ -150,12 +150,14 @@ function loadSpec() {
       tables = selectData.value.tables; // reset the alias, Haribol
       tables.forEach((table) => {
         table.selectTabs = Table.prototype.selectTabs;
+        table.skipThis = false;
         table.fields.forEach((field) => {
           if (field.outputted) {
             cards.value.push(field);
           }
           field.tabs = attribTabs;
           field.selectTab = Field.prototype.selectTab;
+          field.skipThis = false;
         });
         // cards.value.length = 0; // clear column display card array, Haribol
       });

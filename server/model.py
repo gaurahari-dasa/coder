@@ -34,22 +34,35 @@ class Model:
         output = io.StringIO()
         fields = sections.ix("SelectData").ui.fields
         bools = []
+        dates = []
+        datetimes = []
         for field in fields.values():
-            if field.type == "checkbox":
-                bools.append(field.base_name)
-        if bools:
-            bools_csv = "\n".join([f"'{b}' => 'boolean'," for b in bools])
-            print(
-                f"""
+            cast_type = None
+            match field.type:
+                case "checkbox":
+                    cast_type = bools
+                case "date":
+                    cast_type = dates
+                case "datetime-local":
+                    cast_type = datetimes
+            if cast_type != None:
+                cast_type.append(field.base_name)
+
+        bools_csv = "\n".join([f"'{b}' => 'boolean'," for b in bools])
+        dates_csv = "\n".join([f"'{d}' => 'date:Y-m-d'," for d in dates])
+        datetimes_csv = "\n".join([f"'{d}' => 'datetime'," for d in datetimes])
+
+        print(
+            f"""
 
     protected function casts(): array
     {{
         return [
-            {bools_csv}
+            {bools_csv}{dates_csv}{datetimes_csv}
         ];
     }}""",
-                file=output,
-            )
+            file=output,
+        )
         return output
 
     funcs = [
