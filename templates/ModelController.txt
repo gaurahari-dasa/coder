@@ -24,7 +24,7 @@ class @@@ model @@@Controller extends Controller
     public function store()
     {
         $validated = request()->validate([
-            @@@ validation_fields @@@
+            @@@ store_validation_fields @@@
         ]);
         @@@ model_helper @@@::addEntity($validated, @@@ cntxt_request @@@);
 
@@ -34,7 +34,7 @@ class @@@ model @@@Controller extends Controller
     public function update(@@@ model @@@ @@@ model_varname @@@)
     {
         $validated = request()->validate([
-            @@@ validation_fields @@@
+            @@@ update_validation_fields @@@
         ]);
         @@@ model_helper @@@::updateEntity(@@@ model_varname @@@, $validated);
 

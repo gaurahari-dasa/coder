@@ -372,10 +372,15 @@ import FormGuard from '../../components/FormGuard.vue';""",
         print(file=output)
         return output
 
-    def generate_controller_validation(self):
+    def generate_controller_validation(self, action: str):
         output = io.StringIO()
         for field in self.fields.values():
             print(f"'{field.name}' => '',", file=output)
+        if self.foreign_key and action == "store":
+            print(
+                f"'{self.foreign_key.name}' => 'numeric|required', // validate API call, Haribol",
+                file=output,
+            )
         return output
 
     def generate_store_data(self):

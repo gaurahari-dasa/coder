@@ -283,7 +283,7 @@ class SelectData:
             for field in self.tables[table]:
                 if self.ui.sort_ordinal(field.camelCasedNameForUi()) == 1:
                     return f"'{table}.{field.name}'"
-        utils.warn('No field has been made as the default sort field, Haribol')
+        utils.warn("No field has been made as the default sort field, Haribol")
         return f"'{self.model_table}.{self.primary_key}'"
 
     def generate_declare_cntxt(self):
@@ -436,7 +436,12 @@ class SelectData:
             "menu_route": f", '{self.menu_route_name()}'",
             "model_props": self.generate_model_props().getvalue(),
             "controller_props": self.ui.generate_controller_props().getvalue(),
-            "validation_fields": self.ui.generate_controller_validation().getvalue(),
+            "store_validation_fields": self.ui.generate_controller_validation(
+                "store"
+            ).getvalue(),
+            "update_validation_fields": self.ui.generate_controller_validation(
+                "update"
+            ).getvalue(),
             "model_varname": self.ui.model_varname(),
             "cntxt_request": (
                 f"request('{self.cntxt_id()}')" if self.foreign_key else ""
@@ -479,7 +484,9 @@ class SelectData:
                             ),
                             "outputted": field.outputted,
                             "outputSpecs": (
-                                self.ui.output_specs(field.camelCasedNameForUi(), field.searchable)
+                                self.ui.output_specs(
+                                    field.camelCasedNameForUi(), field.searchable
+                                )
                                 if field.outputted
                                 else None
                             ),
