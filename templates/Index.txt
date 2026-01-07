@@ -98,7 +98,7 @@ function addEntity() {
             ...x,
             queryParams,
         }))
-        .post(`${props.basePath}@@@ model_route @@@`, {
+        .post(`${props.basePath}/@@@ model_route @@@`, {
         onSuccess: () => {
             addForm.clearErrors();
             formSaved.value = true;
@@ -123,7 +123,7 @@ function updateEntity() {
             ...x,
             queryParams,
         }))
-        .patch(`${props.basePath}@@@ model_route @@@/${editId}`, {
+        .patch(`${props.basePath}/@@@ model_route @@@/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });
