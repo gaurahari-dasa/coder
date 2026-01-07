@@ -42,7 +42,7 @@ class @@@ model_helper @@@
         $rowCount = request('row-count') ?? 5;
         $searchKey = request('search-key');
         $sortField = request('sort-field') ?? @@@ default_sort_field @@@;
-        $sortDir = request('sort') ?? 'asc';
+        $sortDir = request('sort-dir') ?? 'asc';
         $filters = request('filters');
         $items = self::listAll(Str::snake($sortField), $sortDir)@@@ cntxt_filter @@@;
 

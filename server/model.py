@@ -49,7 +49,9 @@ class Model:
                 cast_type.append(field.base_name)
 
         bools_csv = "\n".join([f"'{b}' => 'boolean'," for b in bools])
-        dates_csv = "\n".join([f"'{d}' => 'date:Y-m-d'," for d in dates])
+        dates_csv = "\n".join(
+            [f"'{d}' => 'date:Y-m-d'," for d in dates]
+        )  # date format useful when model is serialized to JSON or an array, Haribol
         datetimes_csv = "\n".join([f"'{d}' => 'datetime'," for d in datetimes])
 
         print(

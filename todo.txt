@@ -14,3 +14,4 @@ Jaya Sri Sri Nitai Gauranga!
 11. Add set-focus attribute to Vue component tag (this has been missed out actually).
 12. Add DateTime column to UI (Index.txt template).
 13. Recursive table fetching is not apparently happening, Haribol.
+14. Skip context table's primary key column when enumerating in the UI

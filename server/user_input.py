@@ -158,6 +158,7 @@ class UserInput:
             utils.uncamel_case(field.match_value)
         ):
             utils.warn("No source column for match_value, Haribol: " + field.base_name)
+            no_match_attr = ""
         elif match_value:
             no_match_var = utils.no_match_var(match_value)
             self.no_match_vars.add(no_match_var)
