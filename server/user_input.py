@@ -410,7 +410,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
                 utils.note("File type inputs require to be saved to disk, Haribol!")
             print(f"{varname}->{field.base_name} =", end=" ", file=output)
             print(f"$validated['{field.name}'];", file=output)
-        print(f"LogActivityHelper::save({varname});", file=output)
+        print(f"return LogActivityHelper::save({varname});", file=output)
         # print(f"return {varname};", file=output)
         return output
 
