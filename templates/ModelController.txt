@@ -28,7 +28,8 @@ class @@@ model @@@Controller extends Controller
         ]);
         @@@ model_helper @@@::addEntity($validated, @@@ cntxt_request @@@);
 
-        return to_route(@@@ model_route @@@, @@@ cntxt_route_param_store @@@);
+        return redirect(route(@@@ model_route @@@, @@@ cntxt_route_param_store @@@)
+            . '?'. request('queryParams'));
     }
 
     public function update(@@@ model @@@ @@@ model_varname @@@)
@@ -38,6 +39,7 @@ class @@@ model @@@Controller extends Controller
         ]);
         @@@ model_helper @@@::updateEntity(@@@ model_varname @@@, $validated);
 
-        return to_route(@@@ model_route @@@, @@@ cntxt_route_param_update @@@);
+        return redirect(route(@@@ model_route @@@, @@@ cntxt_route_param_update @@@)
+            . '?'. request('queryParams'));
     }
 }
