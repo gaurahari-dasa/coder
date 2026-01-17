@@ -380,14 +380,14 @@ class SelectData:
         if not self.cntxt_table:
             return ""
         return f"""[
-            '{utils.first_char_lower(self.model.cntxt_name)}' => request('{self.cntxt_id()}')
+            '{self.cntxt_id()}' => request('{self.cntxt_id()}')
         ]"""
 
     def cntxt_route_param_update(self):
         if not self.cntxt_table:
             return ""
         return f"""[
-            '{utils.first_char_lower(self.model.cntxt_name)}' => {self.ui.model_varname()}->{self.foreign_key}
+            '{self.cntxt_id()}' => {self.ui.model_varname()}->{self.foreign_key}
         ]"""
 
     def hydrateHelper(self):
