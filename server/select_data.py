@@ -443,9 +443,6 @@ class SelectData:
                 "update"
             ).getvalue(),
             "model_varname": self.ui.model_varname(),
-            "cntxt_request": (
-                f"request('{self.cntxt_id()}')" if self.foreign_key else ""
-            ),
             "model_route": f"'{self.routes.name}'",
             "cntxt_route_param_store": self.cntxt_route_param_store(),
             "cntxt_route_param_update": self.cntxt_route_param_update(),

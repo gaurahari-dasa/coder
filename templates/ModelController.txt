@@ -26,7 +26,7 @@ class @@@ model @@@Controller extends Controller
         $validated = request()->validate([
             @@@ store_validation_fields @@@
         ]);
-        @@@ model_helper @@@::addEntity($validated, @@@ cntxt_request @@@);
+        @@@ model_helper @@@::addEntity($validated);
 
         return redirect(route(@@@ model_route @@@, @@@ cntxt_route_param_store @@@)
             . '?'. request('queryParams'));
