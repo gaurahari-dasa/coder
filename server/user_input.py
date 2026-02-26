@@ -108,7 +108,7 @@ class UserInput:
             print(
                 f"""
             <AvatarHeading class="-mt-4 sm:-mt-6 lg:-mt-8" :user="{self.foreign_key.prop}" backLabel="Back to what (parent) ???"
-                :backUrl="`${{basePath}}{self.routes.cntxt_url}`" />""",
+                :backUrl="contextUrl ?? `${{basePath}}{self.routes.cntxt_url}`" />""",
                 file=output,
             )
         return output
@@ -369,6 +369,8 @@ import FormGuard from '../../components/FormGuard.vue';""",
             )
         for lookup in self.lookup_props:
             print(f"'{lookup}' => HelperClass::list()->get(),", file=output)
+        if self.foreign_key:
+            print("'contextUrl' => request('contextUrl'),", file=output)
         print(file=output)
         return output
 
