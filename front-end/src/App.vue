@@ -110,6 +110,8 @@ function makeInputtable(field, make) {
       focus: null,
       required: null,
     };
+  } else {
+    field.inputSpecs = null;
   }
 }
 
