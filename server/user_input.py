@@ -496,7 +496,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             else None
         )
 
-    def refers(self, name: str):
+    def refersTo(self, name: str):
         return any((lambda x: x.match_value == name)(x) for x in self.fields.values())
 
     def input_specs(self, name: str):

@@ -129,7 +129,7 @@ function displayField(field, show) {
     cards.value.push(field);
   } else {
     field.outputSpecs = null;
-    let ix = cards.value.findIndex((v) => v.name == field.name);
+    let ix = cards.value.findIndex((v) => v.name === field.name);
     cards.value.splice(ix, 1);
     for (; ix < cards.value.length; ++ix) {
       --cards.value[ix].index;
@@ -191,7 +191,7 @@ function fillTables(fields) {
   const tableMap = new Map();
   for (const field of fields) {
     const [tblname, fldname] = field.split(".");
-    if (tblname == selectData.value.cntxtTableName) {
+    if (tblname === selectData.value.cntxtTableName) {
       continue; // skip context table fields, Haribol
     }
     let table = null;
@@ -234,7 +234,7 @@ async function reflectTable() {
 
 function setError(error) {
   for (var table of tables) {
-    if (table.name == error.table_name) {
+    if (table.name === error.table_name) {
       for (var field of table.fields) {
         field.error = field.name === error.back_name ? error.message : "";
       }
@@ -269,7 +269,7 @@ function generate() {
 }
 
 function isPrimaryTable(tblname) {
-  return tblname == selectData.value.entityTableName;
+  return tblname === selectData.value.entityTableName;
 }
 
 function optionTitle(field) {
@@ -471,6 +471,11 @@ function toggleSkipTable(table) {
                       'file',
                       'auto',
                     ]"
+                    :error="
+                      field.inputSpecs.type === 'select' && !field.foreign
+                        ? 'Set the \'Refers To\' field'
+                        : ''
+                    "
                   />
                   <FormInput
                     title="Title"

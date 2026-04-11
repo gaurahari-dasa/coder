@@ -259,7 +259,14 @@ class SelectData:
                 if (
                     field.fillable
                     or field.outputted
-                    # or self.ui.refers(utils.camel_case(alias))
+                    # Haribol
+                    # the following condition is required because
+                    # if this field is being referred to by another
+                    # field that's being input then this field's value
+                    # should be available for being shown like it's
+                    # needed when that another field is being input
+                    # with the help of a dropdown (select) control
+                    or self.ui.refersTo(utils.camel_case(alias))
                 ):
                     print_field(utils.camel_case(alias))
         return output
