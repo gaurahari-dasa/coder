@@ -429,7 +429,16 @@ import FormGuard from '../../components/FormGuard.vue';""",
         ("*** noMatchValue variables ***", generate_no_match_vars),
         ("*** editRow ***", generate_edit_row),
         ("*** Controller props ***", generate_controller_props),
-        ("*** Controller: validation ***", generate_controller_validation),
+        (
+            "*** Controller: store validation ***",
+            generate_controller_validation,
+            "store",
+        ),
+        (
+            "*** Controller: update validation ***",
+            generate_controller_validation,
+            "update",
+        ),
         ("*** Store data ***", generate_store_data),
         ("*** Update data ***", generate_update_data),
     ]
