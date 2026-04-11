@@ -87,6 +87,7 @@ class Table {
   }
   name = null;
   fields = [];
+  alias = null;
   skipThis = false;
   selectTabs(tabName) {
     for (const field of this.fields) {
@@ -97,6 +98,10 @@ class Table {
 
 function addTable() {
   tables.push(new Table(tables.length));
+}
+
+function addField(table) {
+  table.fields.push(new Field(table.fields.length));
 }
 
 function makeInputtable(field, make) {
@@ -383,202 +388,215 @@ function toggleSkipTable(table) {
           <TrashIcon v-show="!table.skipThis" class="size-4" />
           <ArrowUturnLeftIcon v-show="table.skipThis" class="size-4" />
         </button>
-        <FormInput
-          title="Table Name"
-          :id="`table-name-${ix}`"
-          v-model="table.name"
-          :class="{ 'opacity-30': table.skipThis }"
-        />
+        <div class="flex gap-2 w-80">
+          <FormInput
+            title="Table Name"
+            :id="`table-name-${ix}`"
+            v-model="table.name"
+            :class="{ 'opacity-30': table.skipThis }"
+          />
+          <FormInput
+            title="Table Alias"
+            :id="`table-alias-${ix}`"
+            v-model="table.alias"
+            :class="{ 'opacity-30': table.skipThis }"
+          />
+        </div>
       </div>
       <div class="mt-8 space-y-8" :class="{ 'opacity-30': table.skipThis }">
-        <div v-for="(field, iy) in table.fields" class="flex gap-2">
-          <button
-            class="hover:cursor-pointer"
-            @click="toggleSkipField(table.fields, iy)"
-          >
-            <TrashIcon v-show="!field.skipThis" class="size-4" />
-            <ArrowUturnLeftIcon v-show="field.skipThis" class="size-4" />
-          </button>
-          <div
-            class="relative grid grid-cols-8 gap-x-4"
-            :class="{ 'opacity-20': field.skipThis }"
-          >
-            <FormInput
-              title="Field Name"
-              :id="`field-name-${ix}-${iy}`"
-              v-model="field.name"
-            />
-            <FormInput
-              title="Field Alias"
-              :id="`field-alias-${ix}-${iy}`"
-              v-model="field.alias"
-            />
-            <div class="col-start-3 col-end-9">
-              <FormTabs
-                :tabs="field.tabs"
-                @tabbed="table.selectTabs($event.tab.name)"
-                class="mb-1"
+        <template v-for="(field, iy) in table.fields">
+          <div class="flex gap-2">
+            <button
+              class="hover:cursor-pointer"
+              @click="toggleSkipField(table.fields, iy)"
+            >
+              <TrashIcon v-show="!field.skipThis" class="size-4" />
+              <ArrowUturnLeftIcon v-show="field.skipThis" class="size-4" />
+            </button>
+            <div
+              class="relative grid grid-cols-8 gap-x-4"
+              :class="{ 'opacity-20': field.skipThis }"
+            >
+              <FormInput
+                title="Field Name"
+                :id="`field-name-${ix}-${iy}`"
+                v-model="field.name"
               />
-              <div
-                v-show="field.tabs[0].current"
-                class="grid grid-cols-6 gap-4"
-              >
-                <FormInput
-                  title="Uniqe Key (or its alias)"
-                  :id="`foreign-${ix}-${iy}`"
-                  v-model="field.foreign"
+              <FormInput
+                title="Field Alias"
+                :id="`field-alias-${ix}-${iy}`"
+                v-model="field.alias"
+              />
+              <div class="col-start-3 col-end-9">
+                <FormTabs
+                  :tabs="field.tabs"
+                  @tabbed="table.selectTabs($event.tab.name)"
+                  class="mb-1"
                 />
-              </div>
-              <div
-                v-show="field.tabs[1].current"
-                class="grid grid-cols-6 gap-4"
-              >
-                <div class="grid grid-cols-3">
-                  <FormCheckbox
-                    title="Fill"
-                    :id="`fillable-${ix}-${iy}`"
-                    :disabled="!isPrimaryTable(table.name)"
-                    v-model="field.fillable"
-                    @changed="makeInputtable(field, $event.checked)"
+                <div
+                  v-show="field.tabs[0].current"
+                  class="grid grid-cols-6 gap-4"
+                >
+                  <FormInput
+                    title="Uniqe Key (or its alias)"
+                    :id="`foreign-${ix}-${iy}`"
+                    v-model="field.foreign"
                   />
-                  <template v-if="field.inputSpecs">
+                </div>
+                <div
+                  v-show="field.tabs[1].current"
+                  class="grid grid-cols-6 gap-4"
+                >
+                  <div class="grid grid-cols-3">
                     <FormCheckbox
-                      title="Reqd"
-                      :id="`inputspecs-required-${ix}-${iy}`"
-                      v-model="field.inputSpecs.required"
+                      title="Fill"
+                      :id="`fillable-${ix}-${iy}`"
+                      :disabled="!isPrimaryTable(table.name)"
+                      v-model="field.fillable"
+                      @changed="makeInputtable(field, $event.checked)"
                     />
-                    <FormRadio
-                      title="Focus"
-                      :id="`inputspecs-focus-${ix}-${iy}`"
-                      :name="`${table.name}-focus`"
-                      :checked="field.inputSpecs.focus"
+                    <template v-if="field.inputSpecs">
+                      <FormCheckbox
+                        title="Reqd"
+                        :id="`inputspecs-required-${ix}-${iy}`"
+                        v-model="field.inputSpecs.required"
+                      />
+                      <FormRadio
+                        title="Focus"
+                        :id="`inputspecs-focus-${ix}-${iy}`"
+                        :name="`${table.name}-focus`"
+                        :checked="field.inputSpecs.focus"
+                      />
+                    </template>
+                  </div>
+                  <template v-if="field.inputSpecs">
+                    <FormSelect
+                      title="Type"
+                      :id="`inputspecs-type-${ix}-${iy}`"
+                      v-model="field.inputSpecs.type"
+                      :options="[
+                        null,
+                        'text',
+                        'email',
+                        'date',
+                        'datetime-local',
+                        'select',
+                        'checkbox',
+                        'file',
+                        'auto',
+                      ]"
+                      :error="
+                        field.inputSpecs.type === 'select' && !field.foreign
+                          ? 'Set the \'Refers To\' field'
+                          : ''
+                      "
+                    />
+                    <FormInput
+                      title="Title"
+                      :id="`inputspecs-title-${ix}-${iy}`"
+                      v-model="field.inputSpecs.title"
+                    />
+                    <FormInput
+                      :title="optionTitle(field)"
+                      :id="`inputspecs-options-${ix}-${iy}`"
+                      v-model="field.inputSpecs.options"
+                    />
+                    <FormInput
+                      :title="matchTitle(field)"
+                      :id="`inputspecs-match-value-${ix}-${iy}`"
+                      v-model="field.inputSpecs.matchValue"
                     />
                   </template>
                 </div>
-                <template v-if="field.inputSpecs">
-                  <FormSelect
-                    title="Type"
-                    :id="`inputspecs-type-${ix}-${iy}`"
-                    v-model="field.inputSpecs.type"
-                    :options="[
-                      null,
-                      'text',
-                      'email',
-                      'date',
-                      'datetime-local',
-                      'select',
-                      'checkbox',
-                      'file',
-                      'auto',
-                    ]"
-                    :error="
-                      field.inputSpecs.type === 'select' && !field.foreign
-                        ? 'Set the \'Refers To\' field'
-                        : ''
-                    "
-                  />
-                  <FormInput
-                    title="Title"
-                    :id="`inputspecs-title-${ix}-${iy}`"
-                    v-model="field.inputSpecs.title"
-                  />
-                  <FormInput
-                    :title="optionTitle(field)"
-                    :id="`inputspecs-options-${ix}-${iy}`"
-                    v-model="field.inputSpecs.options"
-                  />
-                  <FormInput
-                    :title="matchTitle(field)"
-                    :id="`inputspecs-match-value-${ix}-${iy}`"
-                    v-model="field.inputSpecs.matchValue"
-                  />
-                </template>
-              </div>
-              <div
-                v-show="field.tabs[2].current"
-                class="grid grid-cols-5 gap-4"
-              >
-                <div class="grid grid-cols-3">
-                  <FormCheckbox
-                    title="Show"
-                    :id="`outputted-${ix}-${iy}`"
-                    v-model="field.outputted"
-                    @changed="displayField(field, $event.checked)"
-                  />
-                  <div
-                    class="grid grid-cols-2 col-span-2"
-                    v-if="field.outputSpecs"
-                  >
+                <div
+                  v-show="field.tabs[2].current"
+                  class="grid grid-cols-5 gap-4"
+                >
+                  <div class="grid grid-cols-3">
                     <FormCheckbox
-                      title="Search"
-                      :id="`outputSpecs-searchable-${ix}-${iy}`"
-                      :disabled="
-                        field.foreign?.length > 0 && isPrimaryTable(table.name)
-                      "
-                      v-model="field.outputSpecs.searchable"
+                      title="Show"
+                      :id="`outputted-${ix}-${iy}`"
+                      v-model="field.outputted"
+                      @changed="displayField(field, $event.checked)"
                     />
-                    <FormCheckbox
-                      title="Sort"
-                      :id="`outputSpecs-sortable-${ix}-${iy}`"
-                      :disabled="
-                        field.foreign?.length > 0 && isPrimaryTable(table.name)
-                      "
-                      v-model="field.outputSpecs.sortable"
-                    />
+                    <div
+                      class="grid grid-cols-2 col-span-2"
+                      v-if="field.outputSpecs"
+                    >
+                      <FormCheckbox
+                        title="Search"
+                        :id="`outputSpecs-searchable-${ix}-${iy}`"
+                        :disabled="
+                          field.foreign?.length > 0 &&
+                          isPrimaryTable(table.name)
+                        "
+                        v-model="field.outputSpecs.searchable"
+                      />
+                      <FormCheckbox
+                        title="Sort"
+                        :id="`outputSpecs-sortable-${ix}-${iy}`"
+                        :disabled="
+                          field.foreign?.length > 0 &&
+                          isPrimaryTable(table.name)
+                        "
+                        v-model="field.outputSpecs.sortable"
+                      />
+                    </div>
                   </div>
+                  <template v-if="field.outputSpecs">
+                    <FormInput
+                      inputType="number"
+                      :min="0"
+                      title="Sort Ordinal"
+                      :id="`outputSpecs-sort-ordinal-${ix}-${iy}`"
+                      :disabled="
+                        field.foreign?.length > 0 && isPrimaryTable(table.name)
+                      "
+                      v-model="field.outputSpecs.sortOrdinal"
+                    />
+                    <FormSelect
+                      title="Type"
+                      :id="`outputSpecs-type-${ix}-${iy}`"
+                      v-model="field.outputSpecs.type"
+                      :options="[
+                        null,
+                        'ActiveColumn',
+                        'CurrencyColumn',
+                        'DataColumn',
+                        'DateColumn',
+                        'ImageColumn',
+                      ]"
+                    />
+                    <FormInput
+                      title="Title"
+                      :id="`outputSpecs-title-${ix}-${iy}`"
+                      v-model="field.outputSpecs.title"
+                    />
+                  </template>
                 </div>
-                <template v-if="field.outputSpecs">
-                  <FormInput
-                    inputType="number"
-                    :min="0"
-                    title="Sort Ordinal"
-                    :id="`outputSpecs-sort-ordinal-${ix}-${iy}`"
-                    :disabled="
-                      field.foreign?.length > 0 && isPrimaryTable(table.name)
-                    "
-                    v-model="field.outputSpecs.sortOrdinal"
-                  />
+                <div
+                  v-show="field.tabs[3].current"
+                  class="grid grid-cols-6 gap-4"
+                >
                   <FormSelect
-                    title="Type"
-                    :id="`outputSpecs-type-${ix}-${iy}`"
-                    v-model="field.outputSpecs.type"
-                    :options="[
-                      null,
-                      'ActiveColumn',
-                      'CurrencyColumn',
-                      'DataColumn',
-                      'DateColumn',
-                      'ImageColumn',
-                    ]"
+                    title="Morph Specs"
+                    :id="`morph-specs-${ix}-${iy}`"
+                    v-model="field.morphSpecs"
+                    :options="[null, 'file', 'date-only', 'date-time']"
                   />
-                  <FormInput
-                    title="Title"
-                    :id="`outputSpecs-title-${ix}-${iy}`"
-                    v-model="field.outputSpecs.title"
-                  />
-                </template>
+                </div>
               </div>
-              <div
-                v-show="field.tabs[3].current"
-                class="grid grid-cols-6 gap-4"
+              <span
+                v-show="field.error"
+                class="col-span-2 bg-red-500 text-gray-100 p-0.5 text-xs absolute -bottom-1 left-0"
+                :id="`error-field-name-${ix}-${iy}`"
               >
-                <FormSelect
-                  title="Morph Specs"
-                  :id="`morph-specs-${ix}-${iy}`"
-                  v-model="field.morphSpecs"
-                  :options="[null, 'file', 'date-only', 'date-time']"
-                />
-              </div>
+                {{ field.error }}
+              </span>
             </div>
-            <span
-              v-show="field.error"
-              class="col-span-2 bg-red-500 text-gray-100 p-0.5 text-xs absolute -bottom-1 left-0"
-              :id="`error-field-name-${ix}-${iy}`"
-            >
-              {{ field.error }}
-            </span>
           </div>
-        </div>
+        </template>
+        <FormButton title="+" @click="addField(table)" />
       </div>
     </div>
     <h3 class="mt-8 font-bold text-lg">Display Column Ordering</h3>

@@ -59,7 +59,8 @@ def _save_fields(fields, output: io.StringIO):
 
 def _save_tables(tables, output: io.StringIO):
     for table in filter(lambda t: not t["skipThis"], tables):
-        print(f"\n** {table['name']} **", file=output)
+        alias_part = f" as {table['alias']}" if table["alias"] else ""
+        print(f"\n** {table['name']}{alias_part} **", file=output)
         _save_fields(table["fields"], output)
 
 
