@@ -221,22 +221,23 @@ class SelectData:
                 end=" ",
                 file=output,
             )
+            source_column = field.foreign if field.foreign else alias
             match field.specs:
                 case None:
-                    print(f"$item->{alias},", file=output)
+                    print(f"$item->{source_column},", file=output)
                 case "file":
                     print(
-                        f"Utils::asset($item->{alias}),",
+                        f"Utils::asset($item->{source_column}),",
                         file=output,
                     )
                 case "date-only":
                     print(
-                        f"Utils::formatDateJs($item->{alias}, DateFormatJs::OnlyDate),",
+                        f"Utils::formatDateJs($item->{source_column}, DateFormatJs::OnlyDate),",
                         file=output,
                     )
                 case "date-time":
                     print(
-                        f"Utils::formatDateJs($item->{alias}, DateFormatJs::DateTime),",
+                        f"Utils::formatDateJs($item->{source_column}, DateFormatJs::DateTime),",
                         file=output,
                     )
                 case _:
