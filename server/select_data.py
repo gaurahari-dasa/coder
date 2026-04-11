@@ -105,7 +105,7 @@ class SelectData:
                     case "~":
                         morph_specs = matched.group(2)
                     case "$":
-                        fillable = True
+                        # fillable = True
                         foreign = matched.group(2)
                         self.ui.append_grid_source(
                             utils.camel_case(field_name), utils.camel_case(foreign)
@@ -259,7 +259,7 @@ class SelectData:
                 if (
                     field.fillable
                     or field.outputted
-                    or self.ui.refers(utils.camel_case(alias))
+                    # or self.ui.refers(utils.camel_case(alias))
                 ):
                     print_field(utils.camel_case(alias))
         return output
