@@ -8,6 +8,22 @@ from model import Model
 from user_input import UserInput
 from routes import Routes
 from validation_error import ValidationError
+from typing import NamedTuple
+
+
+class Table(NamedTuple):
+    name: str
+    alias: str | None
+
+    def aliased_name(self):
+        return self.alias if self.alias else self.name
+
+
+def split_name_alias(na: str):
+    match = re.match(
+        r"(.*)\bas\b(.*)", na
+    )  # use raw string because \b is a valid Python escape sequence, Haribol
+    return [match.group(1).strip(), match.group(2).strip()] if match else [na, None]
 
 
 class SelectData:
@@ -56,21 +72,20 @@ class SelectData:
         specs = specs.split(",")
         native_specs = specs[0]
         foreign_specs = specs[1:]
-        self.model_table, self.primary_key = [
-            s.strip() for s in native_specs.split(";")
-        ]
-        if not self.model_table:
-            utils.error("Model table name is missing, Haribol!")
+        table_name, self.primary_key = [s.strip() for s in native_specs.split(";")]
+        if not table_name:
+            utils.error("Model table spec is missing, Haribol!")
         if not self.primary_key:
             utils.error("Primary key name is missing, Haribol!")
+        self.model_table = Table(*split_name_alias(table_name))
 
         self.model: Model = sections.ix("Model")
         self.model.primary_key = self.primary_key
-        self.ui = UserInput(self.model_table)
+        self.ui = UserInput(self.model_table.name)
         self.__parse_foreign_specs(foreign_specs)
         self.output = io.StringIO()
-        self.tables: dict[str, list[SelectData.Field]] = {}
-        self.cur_table: str = (
+        self.tables: dict[Table, list[SelectData.Field]] = {}
+        self.cur_table: Table = (
             None  # track the table whose fields are being read, Haribol
         )
         self.fields: list[SelectData.Field] = (
@@ -132,8 +147,8 @@ class SelectData:
             return
         matched = re.match("\\*{2}[ ]*(.*?)[ ]*\\*{2}", line)
         if matched:
-            self.cur_table = matched.group(1)
-            sql_utils.check_table(self.cur_table)
+            self.cur_table = Table(*split_name_alias(matched.group(1)))
+            sql_utils.check_table(self.cur_table.name)
             self.fields = self.tables.setdefault(self.cur_table, [])
         else:
             matched = re.match(
@@ -147,7 +162,7 @@ class SelectData:
                 utils.error("No table name in specs, Haribol!")
 
             name = matched.group(1)
-            sql_utils.check_column(self.cur_table, name)
+            sql_utils.check_column(self.cur_table.name, name)
             alias = matched.group(2)
             self.fields.append(
                 self.Field(
@@ -189,11 +204,15 @@ class SelectData:
                 if not foreign_table:  # equivalent to: not ref_key
                     raise ValidationError(
                         "Failed to find referred column, Haribol!",
-                        self.model_table,
+                        self.model_table.name,
                         field.name,
                     )
+                if foreign_table.alias:
+                    join_clause = f"{foreign_table.name} as {foreign_table.alias}"
+                else:
+                    join_clause = foreign_table.name
                 print(
-                    f"->join('{foreign_table}', '{self.model_table}.{field.name}', '=', '{foreign_table}.{ref_key}')",
+                    f"->join('{join_clause}', '{self.model_table.name}.{field.name}', '=', '{foreign_table.aliased_name()}.{ref_key}')",
                     file=output,
                 )
         print(file=output)
@@ -210,7 +229,7 @@ class SelectData:
             for field in self.tables[table]:
                 alias = f" as {field.alias}" if field.alias else ""
                 if not field.foreign:
-                    print(f"'{table}.{field.name}{alias}',", file=output)
+                    print(f"'{table.aliased_name()}.{field.name}{alias}',", file=output)
         return output
 
     def generate_pagination_data(self):
@@ -283,16 +302,16 @@ class SelectData:
         for table in self.tables.items():
             for field in table[1]:
                 if field.searchable:
-                    print(f"'{table[0]}.{field.name}',", file=output)
+                    print(f"'{table[0].aliased_name()}.{field.name}',", file=output)
         return output
 
     def default_sort_field(self):
         for table in self.tables:
             for field in self.tables[table]:
                 if self.ui.sort_ordinal(field.camelCasedNameForUi()) == 1:
-                    return f"'{table}.{field.name}'"
+                    return f"'{table.aliased_name()}.{field.name}'"
         utils.warn("No field has been made as the default sort field, Haribol")
-        return f"'{self.model_table}.{self.primary_key}'"
+        return f"'{self.model_table.name}.{self.primary_key}'"
 
     def generate_declare_cntxt(self):
         output = io.StringIO()
@@ -368,7 +387,7 @@ class SelectData:
     def cntxt_filter(self):
         if not self.cntxt_table:  # same as checking 'not self.foreign_key', Haribol
             return ""
-        return f"\n->where('{self.model_table}.{self.foreign_key}', ${self.cntxt_id()})"
+        return f"\n->where('{self.model_table.name}.{self.foreign_key}', ${self.cntxt_id()})"
 
     def menu_route_name(self):
         return self.routes.cntxt_name if self.routes.cntxt_name else self.routes.name
@@ -439,7 +458,7 @@ class SelectData:
             "model_helper": model_helper,
             "declare_cntxt_var": self.declare_cntxt_id_variable(),
             "model_view_folder": utils.first_char_upper(
-                utils.title_case(self.model_table)
+                utils.title_case(self.model_table.name)
             ),
             "menu_route": f", '{self.menu_route_name()}'",
             "model_props": self.generate_model_props().getvalue(),
@@ -468,13 +487,14 @@ class SelectData:
 
     def jsonify(self):
         return {
-            "entityTableName": self.model_table,
+            "entityTableName": self.model_table.name,  # no support for model table alias, Haribol
             "entityTablePrimaryKey": self.primary_key,
             "cntxtTableName": self.cntxt_table,
             "cntxtTablePrimaryKey": self.foreign_key,
             "tables": [
                 {
-                    "name": table,
+                    "name": table.name,
+                    "alias": table.alias,
                     "fields": [
                         {
                             "name": field.name,

@@ -86,8 +86,8 @@ class Table {
     this.name = name;
   }
   name = null;
-  fields = [];
   alias = null;
+  fields = [];
   skipThis = false;
   selectTabs(tabName) {
     for (const field of this.fields) {
