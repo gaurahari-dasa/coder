@@ -31,6 +31,7 @@ def build_section(line: str):
 
 
 def read_sections():
+    utils.clear_diagnostics()
     spec = open("input.spec")
     try:
         while line := spec.readline():

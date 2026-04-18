@@ -35,6 +35,10 @@ def diagnostics():
         print(mesg, end="")
 
 
+def clear_diagnostics():
+    mesg_board.clear()
+
+
 def nullishIndex(ar: list, ix: int):
     try:
         return ar[ix]

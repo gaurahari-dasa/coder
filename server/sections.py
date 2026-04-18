@@ -8,11 +8,15 @@ def set(sect, key: str = None):
 
 
 def get(key: str):
-    return __sections.get(key, None)
+    return __sections.get(key)
 
 
 def ix(key: str):
     return __sections[key]
+
+
+def clear():
+    __sections.clear()
 
 
 def last_set():
