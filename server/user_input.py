@@ -301,6 +301,13 @@ import FormGuard from '../../components/FormGuard.vue';""",
             print(f"{field.name}: {value},", file=output)
         return output
 
+    def has_file_upload(self):
+        for field in self.fields.values():
+            if field.type == "file":
+                return True
+
+        return False
+
     def generate_form(self, form_type: str):
         output = io.StringIO()
         if form_type == "add" and self.foreign_key:
@@ -314,6 +321,14 @@ import FormGuard from '../../components/FormGuard.vue';""",
                 file=output,
             )
             print("}", file=output)
+        elif form_type == "edit" and self.has_file_upload():
+            print(
+                """{
+                _method: "patch",
+                ...blanked,
+                }""",
+                file=output,
+            )
         else:
             print("blanked", file=output)
         return output
@@ -475,6 +490,7 @@ import FormGuard from '../../components/FormGuard.vue';""",
             "edit_form": self.generate_form("edit").getvalue(),
             "no_match_vars": self.generate_no_match_vars().getvalue(),
             "edit_row": self.generate_edit_row().getvalue(),
+            "edit_form_method": "post" if self.has_file_upload() else "patch",
             "model_route": self.routes.url,
             "privy_suffix": f"_{self.routes.name}" if self.foreign_key else "",
         }

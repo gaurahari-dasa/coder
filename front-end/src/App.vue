@@ -51,7 +51,13 @@ watchEffect(() => {
         fieldNames.add(name);
       }
       if (field.inputSpecs?.matchValue && field.foreign == "") {
-        field.error = appendLine(field.error, "Set the 'Refers To' field");
+        field.error = appendLine(field.error, "Set the 'Refers To' field.");
+      }
+      if (
+        field.inputSpecs?.type === "select" &&
+        field.inputSpecs?.options == ""
+      ) {
+        field.error = appendLine(field.error, "Set the input options field.");
       }
       if (field.error) {
         formHasErrors = true;

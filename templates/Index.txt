@@ -123,7 +123,7 @@ function updateEntity() {
             ...x,
             queryParams,
         }))
-        .patch(`${props.basePath}/@@@ model_route @@@/${editId}`, {
+        .@@@ edit_form_method @@@(`${props.basePath}/@@@ model_route @@@/${editId}`, {
         onSuccess: () => editForm.clearErrors(),
         preserveScroll: true,
     });
