@@ -30,19 +30,31 @@ const selectData = ref({
   tables: [],
 });
 
+function appendLine(errors, err) {
+  return errors ? errors + "<br>" + err : err;
+}
+
+let formHasErrors = false;
+
 watchEffect(() => {
+  formHasErrors = false;
   const fieldNames = new Set();
   const tablesNotSkipped = selectData.value.tables.filter((x) => !x.skipThis);
   for (const table of tablesNotSkipped) {
     const fieldsNotSkipped = table.fields.filter((x) => !x.skipThis);
     for (const field of fieldsNotSkipped) {
       // const name = field.alias?.length > 0 ? field.alias : field.name;
+      field.error = "";
       const name = field.alias ?? field.name;
       if (field.fillable || field.outputted) {
-        field.error = fieldNames.has(name) ? "Duplicated!" : null;
+        field.error = fieldNames.has(name) ? "Duplicated!" : "";
         fieldNames.add(name);
-      } else {
-        field.error = null;
+      }
+      if (field.inputSpecs?.matchValue && field.foreign == "") {
+        field.error = appendLine(field.error, "Set the 'Refers To' field");
+      }
+      if (field.error) {
+        formHasErrors = true;
       }
     }
   }
@@ -249,6 +261,11 @@ function setError(error) {
 }
 
 function generate() {
+  if (formHasErrors) {
+    alert("There are errors in the spec; please correct them, Haribol!");
+    return;
+  }
+
   fetch(`${baseUrl}/generate`, {
     method: "POST",
     body: JSON.stringify({
@@ -324,7 +341,6 @@ function toggleSkipTable(table) {
           (Leave blank if not applicable, Haribol!)
         </p>
       </div>
-      <FormButton title="Fetch" @click="reflectTable" />
     </div>
     <h3 class="mt-4 font-bold text-lg">Routes</h3>
     <div class="grid grid-cols-4 gap-4">
@@ -485,11 +501,6 @@ function toggleSkipTable(table) {
                         'file',
                         'auto',
                       ]"
-                      :error="
-                        field.inputSpecs.type === 'select' && !field.foreign
-                          ? 'Set the \'Refers To\' field'
-                          : ''
-                      "
                     />
                     <FormInput
                       title="Title"
@@ -588,15 +599,15 @@ function toggleSkipTable(table) {
               </div>
               <span
                 v-show="field.error"
-                class="col-span-2 bg-red-500 text-gray-100 p-0.5 text-xs absolute -bottom-1 left-0"
+                class="col-span-2 bg-red-500 text-gray-100 p-0.5 text-xs relative bottom-4 left-0"
                 :id="`error-field-name-${ix}-${iy}`"
+                v-html="field.error"
               >
-                {{ field.error }}
               </span>
             </div>
           </div>
         </template>
-        <FormButton title="+" @click="addField(table)" />
+        <FormButton title="Add Field" @click="addField(table)" />
       </div>
     </div>
     <h3 class="mt-8 font-bold text-lg">Display Column Ordering</h3>

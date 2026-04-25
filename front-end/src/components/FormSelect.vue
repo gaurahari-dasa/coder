@@ -18,21 +18,17 @@
         aria-hidden="true"
       />
     </div>
-    <FormError :error />
   </div>
 </template>
 
 <script setup>
 import { ChevronDownIcon } from "@heroicons/vue/16/solid";
 
-import FormError from "./FormError.vue";
-
 const props = defineProps({
   id: String,
   title: String,
   options: Array,
   disabled: Boolean,
-  error: String,
 });
 const opted = defineModel();
 </script>
